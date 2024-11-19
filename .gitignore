@@ -1,0 +1,42 @@
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de dependencias
+node_modules/
+vendor/
+*.lock
+
+# Entornos virtuales
+.env
+.env.local
+.env.*.backup
+
+# Archivos de construcción y caché
+dist/
+build/
+.cache/
+tmp/
+
+# Archivos de log
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs y editores
+.vscode/
+.idea/
+*.suo
+*.user
+*.workspace
+
+# Docker
+docker-compose.override.yml
+.env.docker
+
+# Configuración específica
+*.bak
+*.tmp
