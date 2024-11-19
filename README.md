@@ -1,57 +1,39 @@
 # Q-SYS-Public
 
-Este repositorio es una colección de recursos relacionados con el ecosistema Q-SYS. Incluye plugins, módulos de diseño, hojas de estilo (CSS), documentación y más, diseñados para facilitar el trabajo con sistemas Q-SYS.
+Este repositorio es una colección de recursos relacionados con el ecosistema Q-SYS. Incluye plugins, módulos de diseño, hojas de estilo (CSS), documentación y más, organizados para facilitar su uso y colaboración.
 
 ## 🚀 Propósito
-El objetivo de este repositorio es centralizar y compartir recursos útiles para la comunidad de usuarios de Q-SYS, incluyendo herramientas desarrolladas tanto por fabricantes como por la comunidad.
+El objetivo de este repositorio es centralizar recursos útiles para la comunidad de Q-SYS, desde plugins oficiales hasta herramientas personalizadas desarrolladas por la comunidad.
 
 ## 📂 Estructura del repositorio
 
-El repositorio está organizado en las siguientes carpetas:
-
-- **CSS:** Hojas de estilo diseñadas para personalizar interfaces en sistemas Q-SYS.
-- **DesignModules:** Módulos de diseño para interfaces y funcionalidades específicas.
-- **Documentation:** Documentación relacionada con plugins y módulos.
+- **CSS:** Hojas de estilo para personalizar interfaces en sistemas Q-SYS.
+- **DesignModules:** Módulos de diseño que incluyen funcionalidades específicas para interfaces y control.
+- **Documentation:** Archivos de documentación relacionados con hardware y software compatibles con Q-SYS.
 - **Plugins:**
-  - **QSC:** Plugins oficiales creados o aprobados por QSC.
-  - **Community:** Plugins desarrollados por la comunidad.
-  - **Users:** Plugins y herramientas específicas creadas por usuarios individuales.
+  - **Community:** Plugins creados por la comunidad para dispositivos y configuraciones específicas.
+  - **QSC:** Plugins oficiales desarrollados o aprobados por QSC.
+  - **Users:** Plugins creados por usuarios individuales con funcionalidades específicas.
 
 ## 📝 Cómo contribuir
 
 1. **Reportar problemas:**
-   - Usa la pestaña de [Issues](https://github.com/) para reportar errores o sugerir mejoras.
-2. **Enviar nuevos recursos:**
-   - Si tienes un plugin, módulo o recurso útil que quieras compartir, envíalo como un pull request siguiendo el formato de este repositorio.
-3. **Documentación:** 
-   - Asegúrate de incluir un archivo `README.md` en la carpeta de cada recurso con información básica (ver sección de documentación).
+   - Abre un [Issue](https://github.com/) describiendo el problema.
+2. **Añadir recursos:**
+   - Sigue la guía en `CONTRIBUTING.md` para enviar nuevos plugins, módulos o estilos.
+3. **Documentar recursos:**
+   - Asegúrate de incluir un `README.md` en la carpeta correspondiente a tu contribución.
 
 ## 📜 Licencias
 
-- Cada plugin, módulo o recurso tiene su propia licencia. Por favor, consulta la documentación individual antes de usar cualquier recurso.
-- Si no se incluye una licencia explícita, se asumirá un uso **restringido a evaluación y pruebas**.
+- Cada plugin o módulo tiene su propia licencia. Consulta la documentación de cada recurso antes de usarlo.
+- Si no hay una licencia explícita, se recomienda utilizar los recursos **solo para evaluación y pruebas**.
 
 ## 🛠️ Requisitos
 
-- **Q-SYS Designer Software** versión compatible con el recurso (especificado en cada plugin o módulo).
-- Algunos recursos pueden requerir hardware específico (ver documentación individual).
-
-## 🖼️ Ejemplos
-
-### **Ejemplo de diseño con CSS:**
-![Ejemplo CSS](./CSS/MicrosoftTeamsRoomCSS.1.0.0.0/content/uci1.png)
-
----
-
-### **Ejemplo de plugin:**
-**Nombre:** Extron-Matrix  
-**Versión:** 2.0.0.1  
-**Descripción:** Plugin para el control de matrices Extron mediante sistemas Q-SYS.
-
----
+- **Q-SYS Designer Software**: Revisa la versión mínima requerida para cada recurso.
+- Algunos plugins pueden requerir hardware compatible.
 
 ## ✉️ Contacto
 
-Si tienes preguntas o necesitas ayuda, puedes contactar a los administradores del repositorio mediante la sección de [Issues](https://github.com/).
-
-¡Gracias por contribuir a la comunidad de Q-SYS!
+Si tienes preguntas o sugerencias, usa la sección de [Issues](https://github.com/) para contactar con los administradores.
