@@ -1,0 +1,209 @@
+--[[
+
+  NAME: Game
+  DESCRIPTION: Script inicial del sistema
+  AUTHOR: Carlos Soto Pedreira
+  DATE: 26/09/2024
+
+]] --
+local ___ModuleName___ = "Game"
+local ___Production___ = not System.IsEmulating
+
+local libJson = require("json")
+local commandQueue = {}
+local TCPcommandQueue = {}
+local updateTimer = Timer.New()
+local UPDATE_INTERVAL = 1
+local MAX_QUEUE_SIZE = 300
+local MAX_COMMANDS_PER_UPDATE = 1
+local RESPONSE_MESSAGE_FORMAT = '{"ip": "%s", "port": %d, "command": "%s"}'
+local MODULE_LOG = "[%s]: "
+local ctrlRxDebug = Controls["inDbg"]
+local ctrlRxCommand = Controls["inCmd"]
+local ctrlRxTCP = Controls["inTcp"]
+local ctrlTxDebug = Controls["outDbg"]
+local ctrlTxCommand = Controls["outCmd"]
+local ctrlTxTCP = Controls["outTcp"]
+
+function log(message, ...)
+    if ___Production___ then
+        return
+    end
+    print(string.format(MODULE_LOG .. message, ___ModuleName___, ...))
+end
+
+function syslog(message, ...)
+    local formattedMessage = string.format(MODULE_LOG .. message, ___ModuleName___, ...)
+    local logData = {
+        LogText = formattedMessage
+    }
+    local jsonMessage = libJson.encode(logData)
+
+    if ___Production___ then
+        ctrlTxDebug.String = jsonMessage
+    else
+        print("[SYSLOG]: " .. formattedMessage)
+    end
+end
+
+function Add_CommandToQueue(commandString)
+    if #commandQueue >= MAX_QUEUE_SIZE then
+        syslog("ERROR: No se pueden procesar comandos. ¡Se alcanzó el tamaño máximo de la cola!")
+        return
+    end
+    table.insert(commandQueue, commandString)
+    log("Comando añadido a la cola: %s", commandString)
+end
+
+function Add_TCPCommandToQueue(TCPcommandString)
+    if #TCPcommandQueue >= MAX_QUEUE_SIZE then
+        syslog("ERROR: No se pueden procesar comandos. ¡Se alcanzó el tamaño máximo de la cola!")
+        return
+    end
+    table.insert(TCPcommandQueue, TCPcommandString)
+    log("Comando TCP añadido a la cola: %s", TCPcommandString)
+end
+
+function Process_CommandQueue()
+    log("Procesando la cola de comandos: %d comandos en cola", #commandQueue)
+    local commandsToProcess = math.min(#commandQueue, MAX_COMMANDS_PER_UPDATE)
+    for i = 1, commandsToProcess do
+        local commandToProcess = table.remove(commandQueue, 1)
+        ctrlTxCommand.String = commandToProcess
+        log("Procesando comando: %s", commandToProcess)
+    end
+end
+
+function Process_TCPCommandQueue()
+    log("Procesando la cola de comandos TCP: %d comandos en cola", #TCPcommandQueue)
+    local commandsToProcess = math.min(#TCPcommandQueue, MAX_COMMANDS_PER_UPDATE)
+    for i = 1, commandsToProcess do
+        local commandToProcess = table.remove(TCPcommandQueue, 1)
+        ctrlTxTCP.String = commandToProcess
+        log("Procesando comando TCP: %s", commandToProcess)
+    end
+end
+
+function Decode_JsonSafely(jsonString)
+    local success, decodedData = pcall(libJson.decode, jsonString)
+    if not success then
+        syslog("Error al parsear JSON. Mensaje: %s, JSON: %s", tostring(decodedData), jsonString)
+        return nil
+    end
+    return decodedData
+end
+
+function Construct_LogMessage(logText, logArgs)
+    local logData = {
+        log = logText
+    }
+    for i, arg in ipairs(logArgs) do
+        logData["arg" .. i] = arg
+    end
+    return libJson.encode(logData)
+end
+
+function SetupEventHandlers()
+    if ctrlRxDebug then
+        ctrlRxDebug.EventHandler = function(control)
+            Handle_DebugJson(control.String)
+        end
+    else
+        syslog("Advertencia: ctrlRxDebug no está definido.")
+    end
+
+    if ctrlRxCommand then
+        ctrlRxCommand.EventHandler = function(control)
+            Handle_CommandJson(control.String)
+        end
+    else
+        syslog("Advertencia: ctrlRxCommand no está definido.")
+    end
+
+    if ctrlRxTCP then
+        ctrlRxTCP.EventHandler = function(control)
+            Handle_TCPCommandJson(control.String)
+        end
+    else
+        syslog("Advertencia: ctrlRxTCP no está definido.")
+    end
+
+    updateTimer.EventHandler = Update
+end
+
+function Update()
+    if #commandQueue > 0 then
+        Process_CommandQueue()
+    end
+
+    if #TCPcommandQueue > 0 then
+        Process_TCPCommandQueue()
+    end
+end
+
+function Game.Start()
+    log("--[[ Inicializando el sistema del módulo: %s ]]--", ___ModuleName___)
+    syslog("--[[ Sistema de Control Iniciado ]]--")
+    SetupEventHandlers()
+    updateTimer:Start(UPDATE_INTERVAL)
+end
+
+function Handle_DebugJson(debugJson)
+    local decodedDebugData = Decode_JsonSafely(debugJson)
+    if decodedDebugData then
+        local logText = decodedDebugData.LogText or ""
+        local logArgs = decodedDebugData.LogArgs
+        if type(logArgs) ~= "table" then
+            logArgs = {}
+        end
+        local logTxMessage = Construct_LogMessage(logText, logArgs)
+        if ___Production___ then
+            ctrlTxDebug.String = logTxMessage
+        else
+            print("[DEBUG]: " .. logTxMessage)
+        end
+    end
+end
+
+function Process_JsonCommandData(decodedCommandData, addCommandFunction)
+    for _, commandEntry in ipairs(decodedCommandData) do
+        local ipAddresses = commandEntry.IP or {}
+        local port = commandEntry.Port
+        local commandStrings = commandEntry.String or {}
+
+        if type(port) ~= "number" then
+            syslog("Error: Intentando enviar un comando a un puerto no numérico.")
+        elseif type(ipAddresses) ~= "table" or type(commandStrings) ~= "table" then
+            syslog("Error: Estructura de datos inválida en CommandJson.")
+        else
+            for _, ip in ipairs(ipAddresses) do
+                for _, command in ipairs(commandStrings) do
+                    local jsonTx = string.format(RESPONSE_MESSAGE_FORMAT, ip, port, command)
+                    addCommandFunction(jsonTx)
+                end
+            end
+        end
+    end
+end
+
+function Handle_CommandJson(commandJson)
+    local decodedCommandData = Decode_JsonSafely(commandJson)
+    if decodedCommandData then
+        Process_JsonCommandData(decodedCommandData, Add_CommandToQueue)
+    end
+end
+
+function Handle_TCPCommandJson(TCPcommandJson)
+    local decodedCommandData = Decode_JsonSafely(TCPcommandJson)
+    if decodedCommandData then
+        Process_JsonCommandData(decodedCommandData, Add_TCPCommandToQueue)
+    end
+end
+
+Start()
+
+if not ___Production___ then
+    -- Aquí podemos ejecutar código de prueba
+end
+
+-- EOF -------------------------------------- TRISON ------------------------------------------------- Carlos Moshu

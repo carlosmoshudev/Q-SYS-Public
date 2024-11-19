@@ -1,0 +1,577 @@
+--Author: Clint Vigil, contact at gmail clint.vigil
+--This plugin distributed on the Facebook group: QSC Q-SYS Programming Super Group  
+--Tested with Q-SYS Designer 9.10.1 and a Crestron NVX D20 running firmware 7.1.5259.00030
+
+PluginInfo = {
+	Name = "Crestron~NVX Decoder (0.0.0.1)",
+	Version = "0.0.0.1-master",
+	Id = "qsysc.NVX.DEC.0.0.0.1-master",
+	Description = "Plugin for NVX Decoder",
+	ShowDebug = true
+}
+
+local Colors = {
+	White 	= {255, 255, 255},
+  	Gray 	= {55,59,65},
+	LtGray 	= {233,233,233},
+	Black 	= {0, 0, 0},
+	DkBlue 	= {0,153,255},
+	LtBlue 	= {150,220,246},
+	Green 	= {18,155,0},
+	Red 	= {124,0,0},
+	Yellow  = {230,225,0}
+}
+
+function GetColor(props)
+	return Colors.DkBlue
+end
+
+function GetProperties()
+	props = {
+		{Name = "Stream Count",Type = "integer",Value = 1,Min = 1,Max = 255},
+	}
+	return props
+end
+
+function RectifyProperties(props)
+	return props
+end
+
+function GetControls(props)
+	local stream_count = props["Stream Count"].Value
+	ctls = {
+		{Name = "Online",ControlType = "Indicator",IndicatorType = "Led",PinStyle = "Output",UserPin = true},
+		{Name = "IP Address",ControlType = "Text",PinStyle = "Input",UserPin = true},
+		{Name = "Username",	ControlType = "Text",PinStyle = "Input",UserPin = true},
+		{Name = "Password",	ControlType = "Text",PinStyle = "Input",UserPin = true},
+		{Name = "Status",ControlType = "Indicator",IndicatorType = "Status",PinStyle = "Output",UserPin = true},
+		{Name = "InfoModel",ControlType = "Indicator",IndicatorType = "Text",PinStyle = "Output",UserPin = true},
+		{Name = "InfoSerial",ControlType = "Indicator",	IndicatorType = "Text",	PinStyle = "Output",UserPin = true},
+		{Name = "InfoFirmware",	ControlType = "Indicator",IndicatorType = "Text",PinStyle = "Output",UserPin = true},
+		{Name = "InfoName",ControlType = "Indicator",IndicatorType = "Text",PinStyle = "Output",UserPin = true},
+		{Name = "InfoMAC",ControlType = "Indicator",IndicatorType = "Text",	PinStyle = "Output",UserPin = true},
+		{Name = "Stream Display",ControlType = "Indicator",IndicatorType = "Text",	PinStyle = "Output",UserPin = true},
+		{Name = "Stream Status",ControlType = "Indicator",IndicatorType = "Led",PinStyle = "Output",UserPin = true},
+		{Name = "Auto Initiation",ControlType = "Button",ButtonType = "Toggle",PinStyle = "Both",Icon = "Loop",UserPin = true},
+		{Name = "Stream Start",ControlType = "Button",ButtonType = "Momentary",PinStyle = "Both",Icon = "Play",UserPin = true},
+		{Name = "Stream Stop",ControlType = "Button",ButtonType = "Momentary",PinStyle = "Both",Icon = "Stop",UserPin = true},
+		{Name = "Stream Location",ControlType = "Text",PinStyle = "Both",Count = stream_count,UserPin = true},
+		{Name = "Stream Route",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Input",	Count = stream_count},
+		{Name = "Stream Feedback",ControlType = "Indicator",IndicatorType = "Led",PinStyle = "Output",UserPin = true,Count = stream_count},
+	}
+	return ctls
+end
+
+local pagenames = {"Status" , "Stream",}
+function GetPages(props)
+	pages = {}
+	for ix,name in ipairs(pagenames) do
+		table.insert(pages, {name = pagenames[ix]})
+	end
+	return pages
+end
+
+function GetControlLayout(props)
+	local CurrentPage = pagenames[props["page_index"].Value]
+	local stream_count = props["Stream Count"].Value
+	local layout = {}
+	local graphics = {}
+	if CurrentPage=="Status" then
+		graphics = {
+			{Type = "Header", Text = "Crestron NVX",HTextAlign = "Center",Color = Colors.Black,FontSize = 16,Position = {0, 0},Size = {400,30}},
+			{Type = "GroupBox", CornerRadius = 8,StrokeWidth = 1,Position = {0,30},Size = {400,80}},
+			{Type = "Text", Text = "IP Address",		Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,40},Size = {100,20}},
+			{Type = "Text",	Text = "Username",			Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,60},Size = {100,20}},
+			{Type = "Text",	Text = "Password",			Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,80},Size = {100,20}},
+			{Type = "GroupBox", CornerRadius = 8,StrokeWidth = 1,Position = {0,110},Size = {400,150}},
+			{Type = "Text", Text = "Status",			Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,120},Size = {100,20}},
+			{Type = "Text", Text = "Model",				Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,140},Size = {100,20}},
+			{Type = "Text",	Text = "Serial Number",		Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,160},Size = {100,20}},
+			{Type = "Text",	Text = "Firmware Version",	Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,180},Size = {100,20}},
+			{Type = "Text",	Text = "Device Name",		Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,200},Size = {100,20}},
+			{Type = "Text",	Text = "MAC Address",		Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Right",Color = Colors.Black,	Position = {5,220},Size = {100,20}},
+		}
+		layout["IP Address"] = {PrettyName = "IP Address",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,40},Size = {120,20}}
+		layout["Username"] = {PrettyName = "Username",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,60},Size = {120,20}}
+		layout["Password"] = {PrettyName = "Password",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,80},Size = {120,20}}
+		layout["Status"] = {PrettyName = "Status~Text",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,120},Size = {200,20}}
+		layout["Online"] = {PrettyName = "Status~LED",Style = "LED",Color = Colors.Green,OffColor = Colors.Red,UnlinkOffColor = true,Position = {315,120},Size = {20, 20}}
+		layout["InfoModel"] = {PrettyName = "Status~Model",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,140},Size = {200,20}}
+		layout["InfoSerial"] = {PrettyName = "Status~Serial Number",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,160},Size = {200,20}}
+		layout["InfoFirmware"] = {PrettyName = "Status~Firmware Version",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,180},Size = {200,20}}
+		layout["InfoName"] = {PrettyName = "Status~Device Name",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,200},Size = {200,20}}
+		layout["InfoMAC"] = {PrettyName = "Status~MAC Address",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {105,220},Size = {200,20}}
+	elseif CurrentPage=="Stream" then
+		graphics = {
+			{Type = "Header", Text = "Crestron NVX",HTextAlign = "Center",Color = Colors.Black,FontSize = 16,Position = {0, 0},Size = {400,30}},
+			{Type = "Text", Text = "Stream",Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Center",Color = Colors.Black, Position = {5,60},Size = {80,20}},
+			{Type = "Text", Text = "Auto Initiation",Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Center",Color = Colors.Black, Position = {5,80},Size = {100,20}},
+			{Type = "Text", Text = "Start",Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Center",Color = Colors.Black, Position = {145,80},Size = {50,20}},
+			{Type = "Text", Text = "Stop",Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Center",Color = Colors.Black, Position = {235,80},Size = {50,20}},
+		}
+		layout["Stream Display"] = {PrettyName = "Stream~Current",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {85,60},Size = {240,20}}
+		layout["Stream Status"] = {PrettyName = "Stream~Status",Style = "LED",Color = Colors.Green,OffColor = Colors.Yellow,UnlinkOffColor = true,Position = {340, 60},Size = {20, 20}}
+		layout["Auto Initiation"] = {PrettyName = "Stream~Auto Initiation",Style = "Button",Color = Colors.Green,OffColor = Colors.Gray,UnlinkOffColor = true,Position = {105,80},Size = {40,20}}
+		layout["Stream Start"] = {PrettyName = "Stream~Start",Style = "Button",Color = Colors.DkBlue,Position = {195,80},Size = {40,20}}
+		layout["Stream Stop"] = {PrettyName = "Stream~Stop",Style = "Button",Color = Colors.DkBlue,Position = {285,80},Size = {40,20}}
+		local rowStart = 100
+		if stream_count == 1 then
+			table.insert (graphics,{Type = "GroupBox", Text = "Stream Location",FontSize = 11, HTextAlign = "Left", CornerRadius = 8,StrokeWidth = 1,Position = {0,30},Size = {400,rowStart}})
+			table.insert (graphics,{Type = "Text", Text = "1",Font = "Roboto", FontSize = 11,FontStyle = "Bold",Color = Colors.Black,Position = {5,rowStart},Size = {40,20}})
+			layout["Stream Route"] = {PrettyName = "Stream~1~Route",Style = "Button",Position = {45,rowStart},Size = {40,20}}
+			layout["Stream Location"] = {PrettyName = "Stream~1~Address",Style = "Text",HTextAlign = "Left",Padding = 5,Position = {85,rowStart},Size = {240,20}}
+			layout["Stream Feedback"] = {PrettyName = "Stream~1~Feedback",Style = "LED",Color = Colors.Green,OffColor = Colors.LtGray,UnlinkOffColor = true,Position = {340, rowStart},Size = {20, 20}}
+		else
+			table.insert (graphics,{Type = "GroupBox", Text = "Stream Location",FontSize = 11, HTextAlign = "Left", CornerRadius = 8,StrokeWidth = 1,Position = {0,30},Size = {400,stream_count*20 + rowStart - 20}})
+			for i=1,stream_count do
+				table.insert (graphics,{Type = "Text", Text = tostring(i),Font = "Roboto", FontSize = 11,FontStyle = "Bold",Color = Colors.Black,Position = {5,i*20+rowStart - 20},Size = {40,20}})
+				layout["Stream Route " .. i] = {PrettyName = "Stream~"..i.."~Route" ,Style = "Button",Position = {45,i*20+rowStart - 20},Size = {40,20}}
+				layout["Stream Location " .. i] = {PrettyName = "Stream~"..i.."~Address" ,Style = "Text",HTextAlign = "Left",Padding = 5,Position = {85,i*20+rowStart - 20},Size = {240,20}}
+				layout["Stream Feedback " .. i] = {PrettyName = "Stream~"..i.."~Feedback" ,Style = "LED",Color = Colors.Green,OffColor = Colors.LtGray,UnlinkOffColor = true,Position = {340, i*20+rowStart - 20},Size = {20, 20}}
+			end
+		end
+	end
+	return layout, graphics
+end
+
+function GetComponents(props)
+	return {}
+end
+
+if Controls then
+	rapidjson = require("rapidjson")
+	COOKIES = {}
+    COOKIES['TRACKID'] = ' '
+    COOKIES['USERSTR'] = ' '
+    COOKIES['USERID'] = ' '
+    COOKIES['IV'] = ' '
+    COOKIES['TAG'] = ' '
+    COOKIES['AUTHBYPASSWD'] = ' '
+	stream_count = Properties["Stream Count"].Value
+	nContinueLogin = 0
+	nHaltCom = 0
+	sPre = '{\"Device\":{\"StreamReceive\":{\"Streams\":[{\"StreamLocation\":\"'
+	sAutoInit = '{\"Device\":{\"StreamReceive\":{\"Streams\":[{\"IsAutomaticInitiationEnabled\":'
+	sStreamStart = '{\"Device\":{\"StreamReceive\":{\"Streams\":[{\"Start\":'
+	sStreamStop = '{\"Device\":{\"StreamReceive\":{\"Streams\":[{\"Stop\":'
+	sPost = '\"}]}}}'
+	sPostBool = '}]}}}'
+	Controls["Online"].Boolean = false
+	Controls["Stream Status"].Boolean = false
+	Controls["Status"].Value = 5
+	Controls["Status"].String = "Plugin Startup"
+	pollShort = 1.500 
+	pollLong  = 30.000
+	timerGetInfo = Timer.New()
+
+	function done(tbl, code, data, err, headers)
+		print(string.format( "HTTP response from '%s': Return Code=%i; Error=%s", tbl.Url, code, err or "None" ) )
+		--print("Headers:")
+		if ((code == 200) and (nHaltCom == 0)) then
+			if ((timerGetInfo:IsRunning() == false) and (nContinueLogin == 0)) then
+				timerGetInfo:Start(pollLong)
+			end
+			Controls["Online"].Boolean = true
+			Controls["Status"].Value = 0
+			Controls["Status"].String = "Code " .. math.floor(code)
+		elseif code > 399 then
+			if code == 403 then --forbidden,
+				nHaltCom = 1
+				timerGetInfo:Stop()
+			end
+			Controls["Online"].Boolean = false
+			Controls["Status"].Value = 2
+			Controls["Status"].String = "Code " .. math.floor(code)
+			return
+		elseif code == 0 then
+			Controls["Online"].Boolean = false
+			Controls["Status"].Value = 5
+			Controls["Status"].String = "Host Unreachable"
+			nContinueLogin = 0
+			if timerGetInfo:IsRunning() == false then
+				timerGetInfo:Start(pollLong)
+			end
+		else
+			Controls["Online"].Boolean = true
+			Controls["Status"].Value = 0
+			Controls["Status"].String = "Code " .. math.floor(code)
+		end
+		for hName,Val in pairs(headers) do
+		  if type(Val) == "table" then
+			--print(string.format( "\t%s : ", hName )) 
+			for k,v in pairs(Val) do
+			  --print(string.format( "\t\t%s", v ) )
+			  fnParseCookies(v)
+			end
+		  else
+			--print(string.format( "\t%s = %s", hName, Val ) )
+			  if hName == 'Set-Cookie' then
+				fnParseCookies(Val)
+			  elseif ((hName == 'Location') and (Val == '/userlogin.html')) then --if at the login page, go ahead and login
+				fnLoginGet()
+			  end
+		  end 
+		end
+		--print( "\rHTML Data: "..data )
+		if string.find(data, 'DeviceInfo',1,plain) then
+			parseDevInfo( data )
+		elseif string.find(data, 'StreamLocation\":',1,plain) then
+			parseStream( data )
+		end
+	end
+
+	function fnParseCookies( Val )
+		local nStart,nEnd	  
+		if string.find(Val,'TRACKID') then
+		  nStart = string.find(Val,'TRACKID=',1,plain)
+		  nEnd = string.find(Val,';',nStart,plain)
+		  COOKIES['TRACKID'] = string.sub(Val, nStart, nEnd - 1)
+		end
+		if string.find(Val,'userstr') then
+		  nStart = string.find(Val,'userstr=',1,plain)
+		  nEnd = string.find(Val,';',nStart,plain)
+		  COOKIES['USERSTR'] = string.sub(Val, nStart, nEnd - 1)
+		end
+		if string.find(Val,'userid') then
+		  nStart = string.find(Val,'userid=',1,plain)
+		  nEnd = string.find(Val,';',nStart,plain)
+		  COOKIES['USERID'] = string.sub(Val, nStart, nEnd - 1)
+		end
+		if string.find(Val,'iv=') then
+		  nStart = string.find(Val,'iv=',1,plain)
+		  nEnd = string.find(Val,';',nStart,plain)
+		  COOKIES['IV'] = string.sub(Val, nStart, nEnd - 1)
+		end
+		if string.find(Val,'tag=') then
+		  nStart = string.find(Val,'tag=',1,plain)
+		  nEnd = string.find(Val,';',nStart,plain)
+		  COOKIES['TAG'] = string.sub(Val,nStart, nEnd - 1)
+		end
+		if string.find(Val,'AuthByPasswd') then
+		  nStart = string.find(Val,'AuthByPasswd=',1,plain)
+		  nEnd = string.find(Val,';',nStart,plain)
+		  COOKIES['AUTHBYPASSWD'] = string.sub(Val, nStart, nEnd - 1)
+		end
+		COOKIES['STRING'] = 
+		  COOKIES['USERSTR'] .. '; ' .. 
+		  COOKIES['USERID'] .. '; ' .. 
+		  COOKIES['IV'] .. '; ' .. 
+		  COOKIES['TAG']  .. '; ' .. 
+		  COOKIES['TRACKID'] .. '; ' .. 
+		  COOKIES['AUTHBYPASSWD']
+		if nContinueLogin == 1 then
+		  fnLoginPOST()
+		  nContinueLogin = 0
+		end
+	end
+
+	function parseDevInfo( data )
+		local nStart
+		nStart = string.find(data,'DeviceVersion',1,plain)
+		Controls["InfoFirmware"].String = string.sub(data, nStart + 16 , string.find(data,',',nStart,plain) - 2)
+		nStart = string.find(data,'Model',1,plain)
+		Controls["InfoModel"].String = string.sub(data, nStart + 8 , string.find(data,',',nStart,plain) - 2)
+		nStart = string.find(data,'SerialNumber',1,plain)
+		Controls["InfoSerial"].String = string.sub(data, nStart + 15 , string.find(data,',',nStart,plain) - 2)
+		nStart = string.find(data,'Name',1,plain)
+		Controls["InfoName"].String = string.sub(data, nStart + 7 , string.find(data,',',nStart,plain) - 2)
+		nStart = string.find(data,'MacAddress',1,plain)
+		Controls["InfoMAC"].String = string.upper(string.sub(data, nStart + 13 , string.find(data,',',nStart,plain) - 2))
+	end
+
+	function parseStream( data )
+		local nStart, sStream
+		nStart = string.find(data,',\"StreamLocation',1,plain)
+		sStream = string.sub(data, nStart + 19 , string.find(data,',',nStart+20,plain) - 2)
+		Controls["Stream Display"].String = sStream
+		if #sStream > 4 then
+			if stream_count == 1 then
+				if Controls["Stream Location"].String == sStream then
+					Controls["Stream Feedback"].Boolean = true
+				else	
+					Controls["Stream Feedback"].Boolean = false
+				end
+			else
+				for i=1,stream_count do
+					if Controls["Stream Location"][i].String == sStream then
+						Controls["Stream Feedback"][i].Boolean = true
+					else	
+						Controls["Stream Feedback"][i].Boolean = false
+					end
+				end
+			end
+		end
+		if string.find(data,"Status\":\"Stream started",1,plain) then
+			Controls["Stream Status"].Boolean = true
+		else
+			Controls["Stream Status"].Boolean = false
+		end
+		if string.find(data,"IsAutomaticInitiationEnabled\":true") then
+			Controls["Auto Initiation"].Value = 1
+			Controls["Stream Start"].IsDisabled = true
+			Controls["Stream Stop"].IsDisabled = true
+		else
+			Controls["Auto Initiation"].Value = 0
+			Controls["Stream Start"].IsDisabled = false
+			Controls["Stream Stop"].IsDisabled = false
+		end
+		if string.find(data,"Start\":false") then
+			Controls["Stream Start"].Value = 0
+		else
+			Controls["Stream Start"].Value = 1
+		end
+		if string.find(data,"Stop\":false") then
+			Controls["Stream Stop"].Value = 0
+		else
+			Controls["Stream Stop"].Value = 1
+		end
+	end
+
+	function fnLogin()
+		timerGetInfo:Stop()
+		if (#Controls["IP Address"].String < 7) then
+			Controls["Status"].Value = 2
+			Controls["Status"].String = "No IP Address"
+			return
+		end
+		if (#Controls["Username"].String < 1) then
+			Controls["Status"].Value = 2
+			Controls["Status"].String = "No Username"
+			return
+		end
+		if (#Controls["Password"].String < 1) then
+			Controls["Status"].Value = 2
+			Controls["Status"].String = "No Password"
+			return
+		end
+		Controls["Status"].Value = 5
+		Controls["Status"].String = "Attempting Connection ..."
+		ip = Controls["IP Address"].String
+		username = Controls["Username"].String
+		password = Controls["Password"].String
+		nHaltCom = 0
+		fnLoginGet()
+	end
+
+	function fnLoginGet()
+		if ((nHaltCom == 1) or (nContinueLogin == 1)) then
+			return
+		end
+		nContinueLogin = 1
+		print('Sending Login GET')
+		HttpClient.Get { Url = "https://" .. ip .."/userlogin.html", Headers = { ["Content-Type"] = "application/json" } , Timeout = 30, EventHandler = done }
+	end
+
+	function fnLoginPOST ()
+		nContinueLogin = 0
+		if nHaltCom == 1 then
+			return
+		end
+		local Cookie = 'TRACKID=' .. COOKIES['TRACKID']
+		local Origin = 'https://' .. ip
+		local Referer = 'https://' .. ip .. '/userlogin.html'
+		local Login = HttpClient.EncodeString('login=' .. username .. '&&passwd=' .. password)
+		local LoginJSON = rapidjson.encode(Login)
+		local url = 'https://' .. ip .. '/userlogin.html'
+		print('Sending Login POST')
+		HttpClient.Post {
+		  Url = url,
+		  Headers = {
+			["Content-Type"] = "application/json",
+			["Cookie"] = Cookie,
+			["Referrer"] = Referer,
+		  },
+		  Data = Login, 
+		  EventHandler = done
+		}
+		Timer.CallAfter(sendGetInfo,pollShort)
+	end
+
+	function fnGetDevInfo ()
+		if nHaltCom == 1 then
+			return
+		end
+		local url = 'https://' .. ip .. '/Device/DeviceInfo/'
+		HttpClient.Get { 
+			Url = url, 
+			Headers = { 
+				["Content-Type"] = "application/json",
+				["Cookie"] = COOKIES['STRING'], 
+			},
+			Timeout = 30,
+			EventHandler = done 
+		}
+	end
+
+	function fnStreamPost( nIndex )
+		local sStream
+		if nHaltCom == 1 then
+			print('Login Error: Command not sent')
+			return
+		end
+		if stream_count == 1 then
+			sStream = Controls["Stream Location"].String
+		else
+			sStream = Controls["Stream Location"][nIndex].String
+		end
+		local Referer = 'https://' .. ip
+		local url = 'https://' .. ip .. '/Device/StreamReceive/Streams/'
+		HttpClient.Post {
+		  Url = url,
+		  Headers = {
+			["Content-Type"] = "application/json",
+			["Cookie"] = COOKIES['STRING'],
+			["Referer"] = Referer
+		  },
+		  Data = sPre .. sStream .. sPost,
+		  EventHandler = done
+		}
+		Timer.CallAfter(sendGetStream,pollShort)
+	end
+
+	function fnAutoInitiation ()
+		if nHaltCom == 1 then
+			print('Login Error: Command not sent')
+			return
+		end
+		local sValue
+		local Referer = 'https://' .. ip
+		local url = 'https://' .. ip .. '/Device/StreamReceive/Streams/'
+		if Controls["Auto Initiation"].Value == 0 then
+			sValue = 'false'
+		else
+			sValue = 'true'
+		end
+		HttpClient.Post {
+		  Url = url,
+		  Headers = {
+			["Content-Type"] = "application/json",
+			["Cookie"] = COOKIES['STRING'],
+			["Referer"] = Referer
+		  },
+		  Data = sAutoInit .. sValue .. sPostBool,
+		  EventHandler = done
+		}
+		Timer.CallAfter(sendGetStream,pollShort)
+	end
+
+	function fnStreamStart ( key )
+		if nHaltCom == 1 then
+			print('Login Error: Command not sent')
+			return
+		end
+		if key.Value == 0 then
+			return
+		end
+		local sValue = 'true'
+		local Referer = 'https://' .. ip
+		local url = 'https://' .. ip .. '/Device/StreamReceive/Streams/'
+		HttpClient.Post {
+		  Url = url,
+		  Headers = {
+			["Content-Type"] = "application/json",
+			["Cookie"] = COOKIES['STRING'],
+			["Referer"] = Referer
+		  },
+		  Data = sStreamStart .. sValue .. sPostBool,
+		  EventHandler = done
+		}
+		Timer.CallAfter(sendGetStream,pollShort)
+	end
+
+	function fnStreamStop ( key )
+		if nHaltCom == 1 then
+			print('Login Error: Command not sent')
+			return
+		end
+		if key.Value == 0 then
+			return
+		end
+		local sValue = 'true'
+		local Referer = 'https://' .. ip
+		local url = 'https://' .. ip .. '/Device/StreamReceive/Streams/'
+		HttpClient.Post {
+		  Url = url,
+		  Headers = {
+			["Content-Type"] = "application/json",
+			["Cookie"] = COOKIES['STRING'],
+			["Referer"] = Referer
+		  },
+		  Data = sStreamStop .. sValue .. sPostBool,
+		  EventHandler = done
+		}
+		Timer.CallAfter(sendGetStream,pollShort)
+	end
+
+	function fnTogAutoInit( nIndex )
+		local sStream
+		if nHaltCom == 1 then
+			print('Login Error: Command not sent')
+			return
+		end
+		local Referer = 'https://' .. ip
+		local url = 'https://' .. ip .. '/Device/StreamReceive/Streams/'
+		HttpClient.Post {
+		  Url = url,
+		  Headers = {
+			["Content-Type"] = "application/json",
+			["Cookie"] = COOKIES['STRING'],
+			["Referer"] = Referer
+		  },
+		  EventHandler = done
+		}
+		Timer.CallAfter(sendGetStream,pollShort)
+	end
+
+	function fnStreamRoute ( key )
+		fnStreamPost(1)
+	end
+
+	function fnStreamsRoute ( key )
+		fnStreamPost(key.Index - Controls["Stream Route"][1].Index + 1)
+	end
+
+	function sendGetInfo()
+		if nHaltCom == 1 then
+			return
+		end
+		fnGetDevInfo ()
+		Timer.CallAfter(sendGetStream,pollShort)
+	end
+
+	function sendGetStream()
+		if nHaltCom == 1 then
+			return
+		end
+		local url = 'https://' .. ip .. '/Device/StreamReceive/Streams/StreamLocation'
+		HttpClient.Get { 
+			Url = url, 
+			Headers = { 
+				["Content-Type"] = "application/json",
+				["Cookie"] = COOKIES['STRING'], 
+			},
+			Timeout = 30,
+			EventHandler = done 
+		}
+	end
+
+	timerGetInfo.EventHandler = sendGetInfo
+	
+	Controls["IP Address"].EventHandler = 	fnLogin
+	Controls["Username"].EventHandler 	= 	fnLogin
+	Controls["Password"].EventHandler 	= 	fnLogin
+	if stream_count == 1 then
+		Controls["Stream Location"].EventHandler = fnStreamRoute
+		Controls["Stream Route"].EventHandler = fnStreamRoute
+		Controls["Stream Feedback"].Boolean = false
+	else
+		for i=1,stream_count do
+			Controls["Stream Route"][i].EventHandler = fnStreamsRoute
+			Controls["Stream Feedback"][i].Boolean = false
+		end
+	end
+	Controls["Auto Initiation"].EventHandler = fnAutoInitiation 
+	Controls["Stream Start"].EventHandler = fnStreamStart
+	Controls["Stream Stop"].EventHandler = fnStreamStop
+	fnLogin()
+end
