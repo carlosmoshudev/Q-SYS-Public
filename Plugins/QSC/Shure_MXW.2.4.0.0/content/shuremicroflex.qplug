@@ -1,0 +1,644 @@
+--[[ BEGIN DIGITAL SIGNATURE
+vtQPWT4yDlr2o7IijGQiQkjFWlw4St5dO1LxUF7Sfz9OgkztrmCmaMgwsNikgIMEt14mxBhy7BUfVTd+MHp6eDpCnbX9DJkGJf13NWkcK+kh84vKMktlZTLJBgV1tUPpAIEKjkNeYRJ97gX9gKfSUmeFZaJWfUbNBszoiT09V1in313orbltLNEU9+88u/AptgDqM6TmTam2v1VQvaI08IGHjPSX6BG8cZUqomGlQlc3lLpcn1n++jclbCzb+nw3Sx5uVYTOOANghxUAXl2WsAGS1wqoGpISVTEqN2HRMRAXcy5puGg9A6j4t0M61YmnOCU3YT2ETVvh/JaK5nwlOA==
+END DIGITAL SIGNATURE ]]
+-- Shure Microflex Wireless Plugin for Q-Sys 5.3+
+-- by Joe Peavey / QSC Boulder
+-- December 2016
+
+PluginInfo = {
+    Name = "Enterprise Manager~Shure~Microflex Wireless v2.4",
+    Version = "2.4",
+    BuildVersion = "2.4.0.0",
+    Id = "c5331dde-a174-4d4e-a77a-7b5b4a35f1dd",
+    Author = "QSC",
+    Description = "Shure MX Wireless Plugin",
+    Type = Reflect and Reflect.Types.Microphone or 0,
+    Manufacturer = "Shure",
+    Model = "Microflex",
+    IsManaged = true
+}
+
+function GetColor(props)
+  return {102,102,102}
+end
+
+function GetPrettyName(props)
+  return "Shure\rMicroflex Wireless\rv".. PluginInfo.Version
+end
+
+function GetProperties()
+  props = {}
+  table.insert(props,{
+    Name    = "Debug Print",
+    Type    = "enum",
+    Choices = {"None", "Tx/Rx", "Tx", "Rx", "Function Calls", "All"},
+    Value   = "None"
+  })
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value == false then 
+    props["Debug Print"].IsHidden = true 
+  end
+  return props
+end
+
+function GetControls(props)
+  return
+  {
+    {Name = "IPAddress",ControlType = "Text",UserPin = true,PinStyle = "Both",Count = 1,},
+    {Name = "APTID",ControlType = "Button",ButtonType = "Toggle",Count = 1,UserPin = true,PinStyle = "Input"},
+    {Name = "Details",ControlType = "Text",Count = 1},
+    {Name = "Status",ControlType = "Indicator",IndicatorType = Reflect and "StatusGP" or "Status",Count = 1,UserPin = true,PinStyle = "Output"},
+    {Name = "ChannelName",ControlType = "Text",Count = 8,UserPin = true,--[[PinStyle = "Both" -- Restore "Both" when SET CHAN_NAME ]]PinStyle = "Output"},
+    {Name = "Identify",ControlType = "Button",ButtonType = "Toggle",UserPin = true,PinStyle = "Input",Count = 8},
+    {Name = "BatteryCharge",ControlType = "Knob",ControlUnit = "Integer",Min = 0,Max = 100,Count = 8,UserPin = true,PinStyle = "Output"},
+    {Name = "BatteryRunTime",ControlType = "Text",Count = 8,UserPin = true,PinStyle = "Output"},
+    {Name = "AudioLevel",ControlType = "Knob",ControlUnit = "Integer",Min = 0,Max = 98,Count = 8,UserPin = true,PinStyle = "Output"},
+    {Name = "RFMeter1",ControlType = "Indicator",IndicatorType = "Led",  Count = 8,},
+    {Name = "RFMeter2",ControlType = "Indicator",IndicatorType = "Led",Count = 8,},
+    {Name = "RFMeter3",ControlType = "Indicator",IndicatorType = "Led",Count = 8,},
+    {Name = "RFMeter4",ControlType = "Indicator",IndicatorType = "Led",Count = 8,},
+    {Name = "TXStatus",ControlType = "Text",Count = 8,UserPin = true,PinStyle = "Output"},
+    {Name = "Mute",ControlType = "Button",ButtonType = "Toggle",Count = 8,UserPin = true,PinStyle = "Both"},
+    {Name = "TransmitterType",ControlType = "Text",Count = 8,UserPin = true,PinStyle = "Output"},
+  }
+end
+
+function GetControlLayout(props)
+  local mg = { gx = {68,54,93},udx={26,0,39},udy={0,9} }
+  local Color = {
+    GlobalBG = { 102, 102, 102 },
+    TChBG = { 80, 81, 84 },
+    BChBG = { 70, 71, 73 },
+    ChStr = { 51, 51, 51 },
+    Combo = { 192, 192, 192 },
+    White = { 255, 255, 255 },
+    Black = { 0, 0, 0 },
+    BtnBlue = { 0, 181, 239 },
+    meterGrn = { 81, 177, 78 }, --{ 0, 238, 0 }
+    meterBg = { 59, 72 , 79 },
+    LtGray = { 223, 231, 234 },
+    LtBlue = { 31, 181, 251 },
+  }
+  
+  local WhiteLogo = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIxMTUuMDUzcHgiIGhlaWdodD0iMjAuMjI1cHgiIHZpZXdCb3g9IjAgMCAxMTUuMDUzIDIwLjIyNSIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTE1LjA1MyAyMC4yMjUiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxnIGlkPSJMYXllcl8zIiBkaXNwbGF5PSJub25lIj48cmVjdCB4PSI4Ni4xMjIiIHk9Ii00LjM3OSIgZGlzcGxheT0iaW5saW5lIiBmaWxsPSIjMjQwMDBFIiB3aWR0aD0iMzAuMDgxIiBoZWlnaHQ9IjEyLjY5MSIvPjwvZz48ZyBpZD0iQmxhY2tfMV8iIGRpc3BsYXk9Im5vbmUiPjxnIGlkPSJCbGFjayIgZGlzcGxheT0iaW5saW5lIj48cGF0aCBmaWxsPSIjMjMxRjIwIiBkPSJNNTYuODQyLDAuMTMxbC0xLjU0OSwxMi4wODVoLTIuMjU0bDEuNTA1LTEyLjA4NWgtOC41MjFsLTEuMTM4LDguMjE0YzAsMC0wLjU4NSwzLjE4OC0wLjExNCw0LjYyOWMxLjA3OSwzLjI2LDMuNzcxLDQuNDQ1LDMuNzcxLDQuNDQ1bDAuMzEyLDAuMTdjMS4wODEsMC41NTMsMi4yMjIsMC43OTUsMy43MDEsMC43OTVoMC44MDZjMi4xNDctMC4wMDYsMy44OTQtMC40ODQsNS4zMi0xLjE5NGMwLjAwMy0wLjAwOSwwLjA4OS0wLjA0MSwwLjA4OS0wLjA0MWMwLjQ2MS0wLjI3NCwzLjExLTEuNjM4LDQuNzUyLTQuODc3YzAuNjg2LTEuMzU1LDEuMDAyLTMuNDQ3LDEuMDAyLTMuNDQ3bDEuMDI0LTguNjkzIi8+PHBhdGggZmlsbD0iIzIzMUYyMCIgZD0iTTExNC40NzEsMC42NTRjMC4zNzksMC4zODcsMC41ODIsMC44OTUsMC41ODIsMS40NDJjMCwwLjU2Ni0wLjIxNiwxLjA3NS0wLjYwNCwxLjQ1M2MtMC40MDEsMC4zODktMC45MjMsMC41OTktMS40NTEsMC41OTljLTAuNTQ5LDAtMS4wNjQtMC4yMi0xLjQ2MS0wLjYyMmMtMC4zODYtMC4zOS0wLjU4OC0wLjg5OS0wLjU4OC0xLjQzYzAtMC4zNjksMC4wOTctMC43MjMsMC4zLTEuMDdjMC4zNjgtMC42MiwxLjAwNy0wLjk4NywxLjc0OS0wLjk4N0MxMTMuNTYxLDAuMDM4LDExNC4wNzMsMC4yNTMsMTE0LjQ3MSwwLjY1NCBNMTExLjgwNywwLjg2M2MtMC4zMzQsMC4zMzUtMC41MiwwLjc3NC0wLjUyLDEuMjI4czAuMTcsMC44NzcsMC40OTEsMS4yYzAuMzI4LDAuMzMyLDAuNzY1LDAuNTIsMS4yMTgsMC41MmMwLjQ0NCwwLDAuODc1LTAuMTgxLDEuMjE0LTAuNTAzYzAuMzIzLTAuMzExLDAuNTA0LTAuNzQxLDAuNTA0LTEuMTgyYzAtMC40OTItMC4xNjUtMC45MDQtMC40ODctMS4yMzNjLTAuMzMyLTAuMzM4LTAuNzUyLTAuNTEzLTEuMjI3LTAuNTEzQzExMi41MzcsMC4zNzgsMTEyLjEzLDAuNTQsMTExLjgwNywwLjg2MyBNMTEzLjAzOSwwLjkxNGMwLjY0OSwwLDAuOTczLDAuMjIyLDAuOTczLDAuNjU1YzAsMC4zMDEtMC4xODYsMC41MjYtMC40OTYsMC42MDZsMC41MDgsMS4wMTZoLTAuNjE2bC0wLjQzNS0wLjkzMmgtMC4yNzF2MC45MzJoLTAuNTU2VjAuOTE0SDExMy4wMzl6IE0xMTIuNzAxLDEuOTI2aDAuMjcxYzAuMzE1LDAsMC40NjktMC4wOTYsMC40NjktMC4zMjJjMC0wLjIzNy0wLjE2NC0wLjM0LTAuNDk4LTAuMzRoLTAuMjQxVjEuOTI2TDExMi43MDEsMS45MjZ6Ii8+PHBvbHlsaW5lIGZpbGw9IiMyMzFGMjAiIHBvaW50cz0iMzIuNDMxLDAuMTMxIDIzLjkzOCwwLjEzMSAyMS44MDEsMTcuNjIyIDMwLjI3NiwxNy42MjIgMzAuMjgzLDE3LjYyNyAzMC4yODMsMTcuNjIyIDMwLjI4NSwxNy42MjIgMzAuMjgzLDE3LjYyIDMxLjAzOCwxMS40OTQgMzMuNjQ2LDExLjQ5NCAzMy42OTcsMTEuNDY0IDMyLjk0MywxNy42MDQgNDEuNDI2LDE3LjYyNyA0My41NzIsMC4xMzYgNDMuNTcyLDAuMTQ3IDM1LjA4OCwwLjE0NyAzNC4zNDIsNi4xOTQgMzQuMzI4LDYuMTg0IDMxLjcwOSw2LjE4NCAzMS42ODMsNi4xOTYgMzIuNDI0LDAuMTM2ICIvPjxwYXRoIGZpbGw9IiMyMzFGMjAiIGQ9Ik05OC40MjEsNC4xNDNoMTAuMTQ2bDAuMzczLTQuMDIxSDkwLjIzTDg4LjYyNiwxMy4xOGwtNi40NDItMy4yODNjMCwwLDEuNzc3LTAuNTA0LDIuNzUtMS4xODNjMS4wMTUtMC43MSwxLjQzOS0xLjQxNSwxLjYyOS0xLjc0NGMwLjM2LTAuNjA0LDAuNzUtMS4zMDQsMC43OTUtMi42MjJjMC4wNDUtMS4zNjEtMC42Ny0yLjMzNy0xLjA1My0yLjc4MmMtMC4zODUtMC40NTctMS4zMy0xLjQ2LTMtMS40MzVjLTEuODU1LDAuMDI2LTE1LjQsMC0xNS40LDBsLTAuNDk2LDMuOTU1aDEyLjE5NWwtMC4yOSwyLjEzNEg2Ny4xNDhMNjUuNzksMTcuNDdoNy4zMzNsMC43NDktNS42NDFsMTMuOTEyLDguMzk1bDAuMzA4LTIuNTg2bDE4LjkyNi0wLjAxN2wwLjQ0MS00LjZsLTEwLjI1NS0wLjAwNmwwLjMxOC0yLjMxOGgxMC4yNDZsMC42MDMtNC40NjJsLTEwLjI0LDAuMDExTDk4LjQyMSw0LjE0M3oiLz48cGF0aCBmaWxsPSIjMjMxRjIwIiBkPSJNNi42NzUsMC4wMzRjLTEuMTQsMC4wMDUtMi4xNTEsMC4zOTctMi45NTcsMS4wMjlsLTAuMDQsMC4wMDdDMy42NzIsMS4wNjksMy42NzEsMS4wNjQsMy42NzEsMS4wNjRsMC4wMDEsMC4wMDdDMS4wODksMy4wODgsMC41MzEsNy41LDQuMTk0LDkuMzE0YzAuNDg4LDAuMjQyLDguNTkxLDMuNTI3LDguNTkxLDMuNTI3bDAuMDIsMC4wMDZMMC43ODIsMTIuODY1bC0wLjc2Nyw0LjczN0wwLDE3LjYxNWgwLjAxNUwwLjAxLDE3LjYyN2wwLjAxMS0wLjAxMmMwLjQ2MSwwLDEzLjg1MywwLjAxNiwxNC45NDUsMC4wMTZjMi4yNTcsMC4wMDIsMy44MDktMC44NjUsNC44ODgtMi4zODdjMC4zOTEtMC41MjEsMC42NS0xLjAzNiwwLjgyNS0xLjU2NGMwLjU2My0xLjY1NSwwLjQ1Ny0zLjU0Mi0wLjY2Ny00LjQ0NGMtMC4yMzktMC4xOTEtMC40NTEtMC4zNTktMC42NzEtMC40OTNjLTAuMTUtMC4wOTItMC40MDItMC4yNDUtMC42Mi0wLjM0N0MxNi43OTcsNy40OCw4LjU2Niw0LjAwMyw4LjU2Niw0LjAwM2wxMi43MDUtMC4wMDhsMC41MjQtMy45NWwtMC4zMTgsMC4yMzNsMC4zMTgtMC4yNDRINi42NzV6Ii8+PC9nPjwvZz48ZyBpZD0iV2hpdGVfMV8iPjxnIGlkPSJXaGl0ZSI+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTU2Ljg0MiwwLjEzMWwtMS41NDksMTIuMDg1aC0yLjI1NGwxLjUwNS0xMi4wODVoLTguNTIxbC0xLjEzOCw4LjIxNGMwLDAtMC41ODUsMy4xODgtMC4xMTQsNC42MjljMS4wNzksMy4yNiwzLjc3MSw0LjQ0NSwzLjc3MSw0LjQ0NWwwLjMxMiwwLjE3YzEuMDgxLDAuNTUzLDIuMjIyLDAuNzk1LDMuNzAxLDAuNzk1aDAuODA2YzIuMTQ3LTAuMDA2LDMuODk0LTAuNDg0LDUuMzItMS4xOTRjMC4wMDMtMC4wMDksMC4wODktMC4wNDEsMC4wODktMC4wNDFjMC40NjEtMC4yNzQsMy4xMS0xLjYzOCw0Ljc1Mi00Ljg3N2MwLjY4Ni0xLjM1NSwxLjAwMi0zLjQ0NywxLjAwMi0zLjQ0N2wxLjAyNC04LjY5MyIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0xMTQuNDcxLDAuNjU0YzAuMzc5LDAuMzg3LDAuNTgyLDAuODk1LDAuNTgyLDEuNDQyYzAsMC41NjYtMC4yMTYsMS4wNzUtMC42MDQsMS40NTNjLTAuNDAxLDAuMzg5LTAuOTIzLDAuNTk5LTEuNDUxLDAuNTk5Yy0wLjU0OSwwLTEuMDY0LTAuMjItMS40NjEtMC42MjJjLTAuMzg2LTAuMzktMC41ODgtMC44OTktMC41ODgtMS40M2MwLTAuMzY5LDAuMDk3LTAuNzIzLDAuMy0xLjA3YzAuMzY4LTAuNjIsMS4wMDctMC45ODcsMS43NDktMC45ODdDMTEzLjU2MSwwLjAzOCwxMTQuMDczLDAuMjUzLDExNC40NzEsMC42NTQgTTExMS44MDcsMC44NjNjLTAuMzM0LDAuMzM1LTAuNTIsMC43NzQtMC41MiwxLjIyOHMwLjE3LDAuODc3LDAuNDkxLDEuMmMwLjMyOCwwLjMzMiwwLjc2NSwwLjUyLDEuMjE4LDAuNTJjMC40NDQsMCwwLjg3NS0wLjE4MSwxLjIxNC0wLjUwM2MwLjMyMy0wLjMxMSwwLjUwNC0wLjc0MSwwLjUwNC0xLjE4MmMwLTAuNDkyLTAuMTY1LTAuOTA0LTAuNDg3LTEuMjMzYy0wLjMzMi0wLjMzOC0wLjc1Mi0wLjUxMy0xLjIyNy0wLjUxM0MxMTIuNTM3LDAuMzc4LDExMi4xMywwLjU0LDExMS44MDcsMC44NjMgTTExMy4wMzksMC45MTRjMC42NDksMCwwLjk3MywwLjIyMiwwLjk3MywwLjY1NWMwLDAuMzAxLTAuMTg2LDAuNTI2LTAuNDk2LDAuNjA2bDAuNTA4LDEuMDE2aC0wLjYxNmwtMC40MzUtMC45MzJoLTAuMjcxdjAuOTMyaC0wLjU1NlYwLjkxNEgxMTMuMDM5eiBNMTEyLjcwMSwxLjkyNmgwLjI3MWMwLjMxNSwwLDAuNDY5LTAuMDk2LDAuNDY5LTAuMzIyYzAtMC4yMzctMC4xNjQtMC4zNC0wLjQ5OC0wLjM0aC0wLjI0MVYxLjkyNkwxMTIuNzAxLDEuOTI2eiIvPjxwb2x5bGluZSBmaWxsPSIjRkZGRkZGIiBwb2ludHM9IjMyLjQzMSwwLjEzMSAyMy45MzgsMC4xMzEgMjEuODAxLDE3LjYyMiAzMC4yNzYsMTcuNjIyIDMwLjI4MywxNy42MjcgMzAuMjgzLDE3LjYyMiAzMC4yODUsMTcuNjIyIDMwLjI4MywxNy42MiAzMS4wMzgsMTEuNDk0IDMzLjY0NiwxMS40OTQgMzMuNjk3LDExLjQ2NCAzMi45NDMsMTcuNjA0IDQxLjQyNiwxNy42MjcgNDMuNTcyLDAuMTM2IDQzLjU3MiwwLjE0NyAzNS4wODgsMC4xNDcgMzQuMzQyLDYuMTk0IDM0LjMyOCw2LjE4NCAzMS43MDksNi4xODQgMzEuNjgzLDYuMTk2IDMyLjQyNCwwLjEzNiAiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNOTguNDIxLDQuMTQzaDEwLjE0NmwwLjM3My00LjAyMUg5MC4yM0w4OC42MjYsMTMuMThsLTYuNDQyLTMuMjgzYzAsMCwxLjc3Ny0wLjUwNCwyLjc1LTEuMTgzYzEuMDE1LTAuNzEsMS40MzktMS40MTUsMS42MjktMS43NDRjMC4zNi0wLjYwNCwwLjc1LTEuMzA0LDAuNzk1LTIuNjIyYzAuMDQ1LTEuMzYxLTAuNjctMi4zMzctMS4wNTMtMi43ODJjLTAuMzg1LTAuNDU3LTEuMzMtMS40Ni0zLTEuNDM1Yy0xLjg1NSwwLjAyNi0xNS40LDAtMTUuNCwwbC0wLjQ5NiwzLjk1NWgxMi4xOTVsLTAuMjksMi4xMzRINjcuMTQ4TDY1Ljc5LDE3LjQ3aDcuMzMzbDAuNzQ5LTUuNjQxbDEzLjkxMiw4LjM5NWwwLjMwOC0yLjU4NmwxOC45MjYtMC4wMTdsMC40NDEtNC42bC0xMC4yNTUtMC4wMDZsMC4zMTgtMi4zMThoMTAuMjQ2bDAuNjAzLTQuNDYybC0xMC4yNCwwLjAxMUw5OC40MjEsNC4xNDN6Ii8+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTYuNjc1LDAuMDM0Yy0xLjE0LDAuMDA1LTIuMTUxLDAuMzk3LTIuOTU3LDEuMDI5bC0wLjA0LDAuMDA3QzMuNjcyLDEuMDY5LDMuNjcxLDEuMDY0LDMuNjcxLDEuMDY0bDAuMDAxLDAuMDA3QzEuMDg5LDMuMDg4LDAuNTMxLDcuNSw0LjE5NCw5LjMxNGMwLjQ4OCwwLjI0Miw4LjU5MSwzLjUyNyw4LjU5MSwzLjUyN2wwLjAyLDAuMDA2TDAuNzgyLDEyLjg2NWwtMC43NjcsNC43MzdMMCwxNy42MTVoMC4wMTVMMC4wMSwxNy42MjdsMC4wMTEtMC4wMTJjMC40NjEsMCwxMy44NTMsMC4wMTYsMTQuOTQ1LDAuMDE2YzIuMjU3LDAuMDAyLDMuODA5LTAuODY1LDQuODg4LTIuMzg3YzAuMzkxLTAuNTIxLDAuNjUtMS4wMzYsMC44MjUtMS41NjRjMC41NjMtMS42NTUsMC40NTctMy41NDItMC42NjctNC40NDRjLTAuMjM5LTAuMTkxLTAuNDUxLTAuMzU5LTAuNjcxLTAuNDkzYy0wLjE1LTAuMDkyLTAuNDAyLTAuMjQ1LTAuNjItMC4zNDdDMTYuNzk3LDcuNDgsOC41NjYsNC4wMDMsOC41NjYsNC4wMDNsMTIuNzA1LTAuMDA4bDAuNTI0LTMuOTVsLTAuMzE4LDAuMjMzbDAuMzE4LTAuMjQ0SDYuNjc1eiIvPjwvZz48L2c+PC9zdmc+"
+  local MXWHeader = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIxNTAuMzAycHgiIGhlaWdodD0iMTIuNDIzcHgiIHZpZXdCb3g9IjAgMCAxNTAuMzAyIDEyLjQyMyIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTUwLjMwMiAxMi40MjMiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxnPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0zLjEsMy41MjdIMy4wN3Y4LjEzM0gxLjIxVjAuOTNoMi44MTlMNy4zOCw4Ljg4NWwzLjQxLTcuOTU2aDIuNzZ2MTAuNzNoLTEuODZWMy41MjdIMTEuNjZMOC4yMjIsMTEuNjZINi41NTRMMy4xLDMuNTI3eiIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0xNS42MTYsMC42NjRoMS44M3YxLjYyNGgtMS44M1YwLjY2NHogTTE1LjYxNiwzLjczNGgxLjgzdjcuOTI2aC0xLjgzVjMuNzM0eiIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0yNy42Niw4LjgyNmMtMC4wNTksMC4yNzYtMC4xOCwwLjU5My0wLjM2MSwwLjk1MnMtMC40NCwwLjY5Ni0wLjc3NCwxLjAxMWMtMC4zMzUsMC4zMTUtMC43NTgsMC41ODMtMS4yNywwLjgwNHMtMS4xMzIsMC4zMzItMS44NiwwLjMzMmMtMC42NCwwLTEuMjM3LTAuMDgxLTEuNzkzLTAuMjQ0Yy0wLjU1Ni0wLjE2Mi0xLjA0Ni0wLjQyLTEuNDY5LTAuNzc1Yy0wLjQyMy0wLjM1NC0wLjc1NS0wLjgxMi0wLjk5Ni0xLjM3M3MtMC4zNjEtMS4yNC0wLjM2MS0yLjAzN2MwLTAuNTIxLDAuMTAxLTEuMDIzLDAuMzAyLTEuNTA2YzAuMjAyLTAuNDgyLDAuNDkyLTAuOTEsMC44NzEtMS4yODRjMC4zNzktMC4zNzQsMC44NDQtMC42NzQsMS4zOTYtMC45YzAuNTUxLTAuMjI2LDEuMTgxLTAuMzM5LDEuODg5LTAuMzM5YzAuNzI5LDAsMS4zNTMsMC4wOTEsMS44NzUsMC4yNzNjMC41MjEsMC4xODMsMC45NTYsMC40MjEsMS4zMDYsMC43MTZjMC4zNSwwLjI5NSwwLjYxMywwLjYyLDAuNzksMC45NzRjMC4xNzcsMC4zNTQsMC4yOCwwLjY5OSwwLjMxLDEuMDMzaC0xLjgzYy0wLjA0OS0wLjE1OC0wLjEzMy0wLjMyLTAuMjUxLTAuNDg3Yy0wLjExOC0wLjE2Ny0wLjI3Mi0wLjMyMi0wLjQ2NS0wLjQ2NWMtMC4xOTEtMC4xNDMtMC40MjMtMC4yNTgtMC42OTMtMC4zNDdjLTAuMjcxLTAuMDg4LTAuNTc4LTAuMTMzLTAuOTIzLTAuMTMzYy0wLjQzMywwLTAuODE2LDAuMDc0LTEuMTUxLDAuMjIycy0wLjYxNywwLjMzOS0wLjg0OSwwLjU3NmMtMC4yMzEsMC4yMzYtMC40MDgsMC41MDctMC41MzEsMC44MTJjLTAuMTIzLDAuMzA1LTAuMTg1LDAuNjE1LTAuMTg1LDAuOTNjMCwwLjM4NCwwLjA1MiwwLjc0MywwLjE1NSwxLjA3N2MwLjEwNCwwLjMzNSwwLjI2MSwwLjYzLDAuNDcyLDAuODg2YzAuMjEyLDAuMjU2LDAuNDc4LDAuNDU4LDAuNzk4LDAuNjA1YzAuMzE5LDAuMTQ4LDAuNzAxLDAuMjIyLDEuMTQ0LDAuMjIyYzAuMzk0LDAsMC43NC0wLjA0NywxLjA0LTAuMTRjMC4zMDEtMC4wOTQsMC41NTQtMC4yMTQsMC43NjEtMC4zNjJjMC4yMDYtMC4xNDcsMC4zNzEtMC4zMTIsMC40OTQtMC40OTVjMC4xMjMtMC4xODIsMC4yMDQtMC4zNjEsMC4yNDQtMC41MzlIMjcuNjZ6Ii8+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTI4Ljg0MSwzLjczNGgxLjgzdjEuMTgxaDAuMDQ0YzAuMDk5LTAuMTU4LDAuMjI0LTAuMzIyLDAuMzc3LTAuNDk1YzAuMTUyLTAuMTcyLDAuMzQyLTAuMzMsMC41NjctMC40NzJjMC4yMjctMC4xNDMsMC40OS0wLjI1OCwwLjc5LTAuMzQ3YzAuMy0wLjA4OCwwLjY0Ny0wLjEzMywxLjA0MS0wLjEzM2MwLjEzOCwwLDAuMjU2LDAsMC4zNTQsMGMwLjA5OSwwLDAuMTk3LDAuMDEsMC4yOTYsMC4wM3YxLjk3OGMtMC4wODktMC4wMi0wLjIyMi0wLjA0OS0wLjM5OC0wLjA4OGMtMC4xNzgtMC4wMzktMC40MTktMC4wNTktMC43MjQtMC4wNTljLTAuNTgxLDAtMS4wMjgsMC4wODYtMS4zNDMsMC4yNThjLTAuMzE1LDAuMTcyLTAuNTQ3LDAuMzcyLTAuNjk0LDAuNTk4Yy0wLjE0NywwLjIyNy0wLjIzNiwwLjQ2LTAuMjY2LDAuNzAxYy0wLjAyOSwwLjI0MS0wLjA0NCwwLjQzMS0wLjA0NCwwLjU2OHY0LjIwN2gtMS44M1YzLjczNHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMzkuMDQsMTEuOTI2Yy0wLjU0MSwwLTEuMDc3LTAuMDcxLTEuNjA4LTAuMjE0Yy0wLjUzMi0wLjE0My0xLjAwNy0wLjM4MS0xLjQyNS0wLjcxNnMtMC43NTgtMC43NzItMS4wMTktMS4zMTRjLTAuMjYxLTAuNTQxLTAuMzkxLTEuMjA1LTAuMzkxLTEuOTkyYzAtMC41MzIsMC4wODMtMS4wNSwwLjI1MS0xLjU1OGMwLjE2Ny0wLjUwNiwwLjQzLTAuOTU3LDAuNzg5LTEuMzVzMC44MTktMC43MTEsMS4zOC0wLjk1MmMwLjU2Mi0wLjI0MSwxLjIzNS0wLjM2MiwyLjAyMi0wLjM2MnMxLjQ2MSwwLjEyMSwyLjAyMiwwLjM2MmMwLjU2MSwwLjI0MSwxLjAyMSwwLjU1OSwxLjM4LDAuOTUyczAuNjIyLDAuODQ0LDAuNzg5LDEuMzVjMC4xNjgsMC41MDcsMC4yNTEsMS4wMjYsMC4yNTEsMS41NThjMCwwLjc4Ny0wLjEzLDEuNDUxLTAuMzkxLDEuOTkyYy0wLjI2MSwwLjU0Mi0wLjYwMSwwLjk3OS0xLjAxOSwxLjMxNHMtMC44OTMsMC41NzMtMS40MjUsMC43MTZDNDAuMTE3LDExLjg1NCwzOS41ODEsMTEuOTI2LDM5LjA0LDExLjkyNnogTTM5LjA0LDEwLjM2MWMwLjgyNiwwLDEuNDY0LTAuMjM4LDEuOTExLTAuNzE2YzAuNDQ4LTAuNDc3LDAuNjcyLTEuMTM5LDAuNjcyLTEuOTg1YzAtMC40NjItMC4wNjktMC44NjEtMC4yMDctMS4xOTVzLTAuMzI0LTAuNjA4LTAuNTYxLTAuODE5cy0wLjUxMi0wLjM2Ny0wLjgyNi0wLjQ2NWMtMC4zMTUtMC4wOTktMC42NDUtMC4xNDgtMC45ODktMC4xNDhjLTAuMzU0LDAtMC42ODcsMC4wNDktMC45OTYsMC4xNDhjLTAuMzExLDAuMDk4LTAuNTgzLDAuMjUzLTAuODE5LDAuNDY1cy0wLjQyMywwLjQ4NS0wLjU2MSwwLjgxOWMtMC4xMzksMC4zMzQtMC4yMDcsMC43MzMtMC4yMDcsMS4xOTVjMCwwLjg0NiwwLjIyNCwxLjUwOCwwLjY3MiwxLjk4NUMzNy41NzYsMTAuMTIzLDM4LjIxNCwxMC4zNjEsMzkuMDQsMTAuMzYxeiIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik00NS42OTYsMTEuNjZWNS41NjRoLTEuNzU3VjRoMS43NTdWMy4wODRjMC0wLjQwMywwLjA2My0wLjc0NSwwLjE5MS0xLjAyNmMwLjEyOC0wLjI4LDAuMjktMC41MTEsMC40ODctMC42OTNjMC4xOTYtMC4xODIsMC40MTUtMC4zMiwwLjY1Ni0wLjQxNGMwLjI0MS0wLjA5MywwLjQ3OC0wLjE2MiwwLjcwOS0wLjIwN3MwLjQ0Mi0wLjA2OSwwLjYzNS0wLjA3NGMwLjE5MS0wLjAwNSwwLjMzNy0wLjAwNywwLjQzNi0wLjAwN2MwLjE3NywwLDAuMzQyLDAuMDA1LDAuNDk0LDAuMDE1czAuMzA1LDAuMDI1LDAuNDU4LDAuMDQ0YzAuMTUyLDAuMDIsMC4zMTIsMC4wNDQsMC40NzksMC4wNzRjMC4xNjcsMC4wMjksMC4zNDksMC4wNjQsMC41NDYsMC4xMDN2MS41NjVjLTAuMjM2LTAuMDU5LTAuNDM2LTAuMTA0LTAuNTk4LTAuMTMzYy0wLjE2Mi0wLjAzLTAuMzAxLTAuMDUyLTAuNDEzLTAuMDY2Yy0wLjExMy0wLjAxNS0wLjIxNy0wLjAyNC0wLjMxMS0wLjAzYy0wLjA5NC0wLjAwNS0wLjE4OS0wLjAwNy0wLjI4Ny0wLjAwN2MtMC4zNzQtMC4wMS0wLjY3LDAuMDI1LTAuODg2LDAuMTA0Yy0wLjIxNywwLjA3OS0wLjM4MiwwLjE4LTAuNDk1LDAuMzAyYy0wLjExMywwLjEyNC0wLjE4NywwLjI1OC0wLjIyMSwwLjQwNmMtMC4wMzUsMC4xNDctMC4wNTIsMC4yODUtMC4wNTIsMC40MTNWNGgyLjg0OXYxLjU2NWgtMi44NDl2Ni4wOTZINDUuNjk2eiIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik01Mi4xOSwwLjkzaDEuODN2MTAuNzNoLTEuODNWMC45M3oiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNjQuMDU4LDkuMjg0Yy0wLjAyOSwwLjE2Ny0wLjEyNSwwLjM5OC0wLjI4OCwwLjY5NGMtMC4xNjIsMC4yOTUtMC40MDUsMC41ODUtMC43MywwLjg3MWMtMC4zMjQsMC4yODYtMC43NCwwLjUzNy0xLjI0NywwLjc1M3MtMS4xMjksMC4zMjUtMS44NjcsMC4zMjVjLTAuNzA4LDAtMS4zNDMtMC4xMDYtMS45MDQtMC4zMTdjLTAuNTYxLTAuMjExLTEuMDM1LTAuNTA0LTEuNDI0LTAuODc4cy0wLjY4Ny0wLjgyMi0wLjg5NC0xLjM0M2MtMC4yMDYtMC41MjEtMC4zMS0xLjA5Mi0wLjMxLTEuNzEyYzAtMC41NjEsMC4wOTEtMS4wOTQsMC4yNzMtMS42MDFjMC4xODItMC41MDcsMC40NTctMC45NTUsMC44MjYtMS4zNDNzMC44MjktMC42OTYsMS4zOC0wLjkyM2MwLjU1MS0wLjIyNiwxLjE5LTAuMzM5LDEuOTE5LTAuMzM5YzAuNzQ4LDAuMDEsMS4zOTcsMC4xMjgsMS45NDgsMC4zNTRjMC41NTEsMC4yMjYsMS4wMDksMC41NDMsMS4zNzMsMC45NTJjMC4zNjMsMC40MDksMC42MzcsMC45MDMsMC44MTksMS40ODNjMC4xODIsMC41ODEsMC4yNzIsMS4yMywwLjI3MiwxLjk0OWgtNi45NTJjMC4wMiwwLjEyOCwwLjA2MiwwLjMxMywwLjEyNiwwLjU1M2MwLjA2MywwLjI0MSwwLjE4NSwwLjQ4MiwwLjM2MSwwLjcyM2MwLjE3OCwwLjI0MSwwLjQzNiwwLjQ1OCwwLjc3NSwwLjY0OWMwLjMzOSwwLjE5MiwwLjc4OSwwLjI5OCwxLjM1MSwwLjMxN2MwLjU4LDAsMS4wNTUtMC4xMTUsMS40MjQtMC4zNDdjMC4zNjktMC4yMzEsMC42MjItMC41MDQsMC43NjEtMC44MTlINjQuMDU4eiBNNjIuMjU3LDYuNzljLTAuMTM4LTAuNjY5LTAuNDI2LTEuMTQ0LTAuODYzLTEuNDI0Yy0wLjQzOC0wLjI4MS0wLjk4Ni0wLjQyMS0xLjY0Ni0wLjQyMWMtMC4yMzYsMC0wLjQ4LDAuMDI1LTAuNzMsMC4wNzRjLTAuMjUxLDAuMDQ5LTAuNDg3LDAuMTQzLTAuNzA5LDAuMjgxcy0wLjQyMSwwLjMyNS0wLjU5OCwwLjU2MWMtMC4xNzcsMC4yMzYtMC4zMSwwLjU0Ni0wLjM5OCwwLjkzSDYyLjI1N3oiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNzMuMjY4LDMuNzM0bC0zLjIwMiwzLjg2N2wzLjM4LDQuMDU5aC0yLjMwM2wtMi4yMTQtMi43NDVsLTIuMTcsMi43NDVoLTIuMzAzbDMuMzgtNC4wNTlsLTMuMjMyLTMuODY3aDIuMzAzbDIuMDIyLDIuNTY4bDIuMDIxLTIuNTY4SDczLjI2OHoiLz48L2c+PGc+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTc1LjI2OSwxLjg5Mkg3NC4zNlYxLjM3NWgyLjQ1djAuNTE3aC0wLjkwN3YyLjUyNGgtMC42MzVWMS44OTJ6IE04MC4zMDksMi4xMTNoLTAuMDE1bC0wLjg2MywyLjMwM2gtMC40NThsLTAuODYzLTIuMzAzaC0wLjAxNXYyLjMwM2gtMC42MDVWMS4zNzVoMC45MTZsMC44MDQsMi4wODhsMC43OS0yLjA4OGgwLjkxNXYzLjA0MWgtMC42MDVWMi4xMTN6Ii8+PC9nPjxnPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik04NC43MjIsMC45M2gyLjA5NmwyLjA2Niw3LjM4aDAuMDNsMi4wNTEtNy4zOGgyLjAwOGwyLjA4MSw3LjM2NWgwLjAyOWwyLjA1Mi03LjM2NWgyLjA1MmwtMy4xMjksMTAuNzNIOTQuMDVsLTIuMDM2LTcuNjE2aC0wLjAzbC0yLjA1Miw3LjYxNmgtMi4wNTFMODQuNzIyLDAuOTN6Ii8+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTEwMC4wNTgsMC42NjRoMS44M3YxLjYyNGgtMS44M1YwLjY2NHogTTEwMC4wNTgsMy43MzRoMS44M3Y3LjkyNmgtMS44M1YzLjczNHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTAzLjcxOCwzLjczNGgxLjgzdjEuMTgxaDAuMDQ0YzAuMDk5LTAuMTU4LDAuMjI0LTAuMzIyLDAuMzc3LTAuNDk1YzAuMTUyLTAuMTcyLDAuMzQyLTAuMzMsMC41NjctMC40NzJjMC4yMjctMC4xNDMsMC40OS0wLjI1OCwwLjc5LTAuMzQ3YzAuMy0wLjA4OCwwLjY0Ny0wLjEzMywxLjA0MS0wLjEzM2MwLjEzOCwwLDAuMjU2LDAsMC4zNTQsMGMwLjA5OSwwLDAuMTk3LDAuMDEsMC4yOTYsMC4wM3YxLjk3OGMtMC4wODktMC4wMi0wLjIyMi0wLjA0OS0wLjM5OC0wLjA4OGMtMC4xNzgtMC4wMzktMC40MTktMC4wNTktMC43MjQtMC4wNTljLTAuNTgxLDAtMS4wMjgsMC4wODYtMS4zNDMsMC4yNThjLTAuMzE1LDAuMTcyLTAuNTQ3LDAuMzcyLTAuNjk0LDAuNTk4Yy0wLjE0NywwLjIyNy0wLjIzNiwwLjQ2LTAuMjY2LDAuNzAxYy0wLjAyOSwwLjI0MS0wLjA0NCwwLjQzMS0wLjA0NCwwLjU2OHY0LjIwN2gtMS44M1YzLjczNHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTE4LjE4Myw5LjI4NGMtMC4wMjksMC4xNjctMC4xMjUsMC4zOTgtMC4yODgsMC42OTRjLTAuMTYyLDAuMjk1LTAuNDA1LDAuNTg1LTAuNzMsMC44NzFjLTAuMzI0LDAuMjg2LTAuNzQsMC41MzctMS4yNDcsMC43NTNzLTEuMTI5LDAuMzI1LTEuODY3LDAuMzI1Yy0wLjcwOCwwLTEuMzQzLTAuMTA2LTEuOTA0LTAuMzE3Yy0wLjU2MS0wLjIxMS0xLjAzNS0wLjUwNC0xLjQyNC0wLjg3OHMtMC42ODctMC44MjItMC44OTQtMS4zNDNjLTAuMjA2LTAuNTIxLTAuMzEtMS4wOTItMC4zMS0xLjcxMmMwLTAuNTYxLDAuMDkxLTEuMDk0LDAuMjczLTEuNjAxYzAuMTgyLTAuNTA3LDAuNDU3LTAuOTU1LDAuODI2LTEuMzQzczAuODI5LTAuNjk2LDEuMzgtMC45MjNjMC41NTEtMC4yMjYsMS4xOS0wLjMzOSwxLjkxOS0wLjMzOWMwLjc0OCwwLjAxLDEuMzk3LDAuMTI4LDEuOTQ4LDAuMzU0YzAuNTUxLDAuMjI2LDEuMDA5LDAuNTQzLDEuMzczLDAuOTUyYzAuMzYzLDAuNDA5LDAuNjM3LDAuOTAzLDAuODE5LDEuNDgzYzAuMTgyLDAuNTgxLDAuMjcyLDEuMjMsMC4yNzIsMS45NDloLTYuOTUyYzAuMDIsMC4xMjgsMC4wNjIsMC4zMTMsMC4xMjYsMC41NTNjMC4wNjMsMC4yNDEsMC4xODUsMC40ODIsMC4zNjEsMC43MjNjMC4xNzgsMC4yNDEsMC40MzYsMC40NTgsMC43NzUsMC42NDljMC4zMzksMC4xOTIsMC43ODksMC4yOTgsMS4zNTEsMC4zMTdjMC41OCwwLDEuMDU1LTAuMTE1LDEuNDI0LTAuMzQ3YzAuMzY5LTAuMjMxLDAuNjIyLTAuNTA0LDAuNzYxLTAuODE5SDExOC4xODN6IE0xMTYuMzgyLDYuNzljLTAuMTM4LTAuNjY5LTAuNDI2LTEuMTQ0LTAuODYzLTEuNDI0Yy0wLjQzOC0wLjI4MS0wLjk4Ni0wLjQyMS0xLjY0Ni0wLjQyMWMtMC4yMzYsMC0wLjQ4LDAuMDI1LTAuNzMsMC4wNzRjLTAuMjUxLDAuMDQ5LTAuNDg3LDAuMTQzLTAuNzA5LDAuMjgxcy0wLjQyMSwwLjMyNS0wLjU5OCwwLjU2MWMtMC4xNzcsMC4yMzYtMC4zMSwwLjU0Ni0wLjM5OCwwLjkzSDExNi4zODJ6Ii8+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTExOS43MDIsMC45M2gxLjgzdjEwLjczaC0xLjgzVjAuOTN6Ii8+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTEzMS41NjksOS4yODRjLTAuMDI5LDAuMTY3LTAuMTI1LDAuMzk4LTAuMjg4LDAuNjk0Yy0wLjE2MiwwLjI5NS0wLjQwNSwwLjU4NS0wLjczLDAuODcxYy0wLjMyNCwwLjI4Ni0wLjc0LDAuNTM3LTEuMjQ3LDAuNzUzcy0xLjEyOSwwLjMyNS0xLjg2NywwLjMyNWMtMC43MDgsMC0xLjM0My0wLjEwNi0xLjkwNC0wLjMxN2MtMC41NjEtMC4yMTEtMS4wMzUtMC41MDQtMS40MjQtMC44NzhzLTAuNjg3LTAuODIyLTAuODk0LTEuMzQzYy0wLjIwNi0wLjUyMS0wLjMxLTEuMDkyLTAuMzEtMS43MTJjMC0wLjU2MSwwLjA5MS0xLjA5NCwwLjI3My0xLjYwMWMwLjE4Mi0wLjUwNywwLjQ1Ny0wLjk1NSwwLjgyNi0xLjM0M3MwLjgyOS0wLjY5NiwxLjM4LTAuOTIzYzAuNTUxLTAuMjI2LDEuMTktMC4zMzksMS45MTktMC4zMzljMC43NDgsMC4wMSwxLjM5NywwLjEyOCwxLjk0OCwwLjM1NGMwLjU1MSwwLjIyNiwxLjAwOSwwLjU0MywxLjM3MywwLjk1MmMwLjM2MywwLjQwOSwwLjYzNywwLjkwMywwLjgxOSwxLjQ4M2MwLjE4MiwwLjU4MSwwLjI3MiwxLjIzLDAuMjcyLDEuOTQ5aC02Ljk1MmMwLjAyLDAuMTI4LDAuMDYyLDAuMzEzLDAuMTI2LDAuNTUzYzAuMDYzLDAuMjQxLDAuMTg1LDAuNDgyLDAuMzYxLDAuNzIzYzAuMTc4LDAuMjQxLDAuNDM2LDAuNDU4LDAuNzc1LDAuNjQ5YzAuMzM5LDAuMTkyLDAuNzg5LDAuMjk4LDEuMzUxLDAuMzE3YzAuNTgsMCwxLjA1NS0wLjExNSwxLjQyNC0wLjM0N2MwLjM2OS0wLjIzMSwwLjYyMi0wLjUwNCwwLjc2MS0wLjgxOUgxMzEuNTY5eiBNMTI5Ljc2OSw2Ljc5Yy0wLjEzOC0wLjY2OS0wLjQyNi0xLjE0NC0wLjg2My0xLjQyNGMtMC40MzgtMC4yODEtMC45ODYtMC40MjEtMS42NDYtMC40MjFjLTAuMjM2LDAtMC40OCwwLjAyNS0wLjczLDAuMDc0Yy0wLjI1MSwwLjA0OS0wLjQ4NywwLjE0My0wLjcwOSwwLjI4MXMtMC40MjEsMC4zMjUtMC41OTgsMC41NjFjLTAuMTc3LDAuMjM2LTAuMzEsMC41NDYtMC4zOTgsMC45M0gxMjkuNzY5eiIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0xMzguOTIsNi4xNjljLTAuMDY5LTAuMDg4LTAuMTY1LTAuMjA0LTAuMjg4LTAuMzQ3cy0wLjI4NS0wLjI4MS0wLjQ4Ny0wLjQxNGMtMC4yMDEtMC4xMzMtMC40NS0wLjI0Ni0wLjc0NS0wLjMzOWMtMC4yOTUtMC4wOTMtMC42NDktMC4xNC0xLjA2My0wLjE0Yy0wLjMzNSwwLTAuNjE1LDAuMDI5LTAuODQyLDAuMDg4Yy0wLjIyNiwwLjA1OS0wLjQwOCwwLjEzNS0wLjU0NiwwLjIyOWMtMC4xMzgsMC4wOTMtMC4yMzYsMC4xOTctMC4yOTUsMC4zMWMtMC4wNiwwLjExMy0wLjA4OSwwLjIyNC0wLjA4OSwwLjMzMmMwLDAuMTU3LDAuMDQ3LDAuMjgzLDAuMTQxLDAuMzc2YzAuMDkzLDAuMDk0LDAuMjIyLDAuMTcyLDAuMzg0LDAuMjM2czAuMzU2LDAuMTEzLDAuNTgzLDAuMTQ3YzAuMjI2LDAuMDM1LDAuNDc3LDAuMDcyLDAuNzUzLDAuMTExYzAuNTQxLDAuMDY5LDEuMDYzLDAuMTUsMS41NjQsMC4yNDRjMC41MDIsMC4wOTQsMC45NDQsMC4yMzEsMS4zMjgsMC40MTNjMC4zODQsMC4xODIsMC42ODgsMC40MjMsMC45MTUsMC43MjRjMC4yMjcsMC4zLDAuMzQsMC42OTYsMC4zNCwxLjE4OGMwLDAuMzg0LTAuMDY5LDAuNzE2LTAuMjA3LDAuOTk2Yy0wLjEzOCwwLjI4MS0wLjMxNywwLjUxNy0wLjUzOSwwLjcwOGMtMC4yMjEsMC4xOTItMC40NzIsMC4zNDctMC43NTIsMC40NjVjLTAuMjgxLDAuMTE4LTAuNTY4LDAuMjA5LTAuODY0LDAuMjczYy0wLjI5NSwwLjA2NC0wLjU4LDAuMTA1LTAuODU1LDAuMTI1Yy0wLjI3NSwwLjAyLTAuNTIxLDAuMDI5LTAuNzM4LDAuMDI5Yy0wLjY3OSwwLTEuMjUyLTAuMDYyLTEuNzItMC4xODVjLTAuNDY3LTAuMTIzLTAuODYxLTAuMjc4LTEuMTgxLTAuNDY1cy0wLjU4NS0wLjM5Ni0wLjc5Ny0wLjYyN2MtMC4yMTItMC4yMzEtMC40MDEtMC40NS0wLjU2OC0wLjY1N2wxLjU1LTAuOWMwLjE1NywwLjI1NiwwLjM0MiwwLjQ3MywwLjU1NCwwLjY0OWMwLjIxMSwwLjE3NywwLjQ0MiwwLjMxNywwLjY5MywwLjQyMWMwLjI1MSwwLjEwMywwLjUxNywwLjE3NywwLjc5NywwLjIyMWMwLjI4MSwwLjA0NCwwLjU2MywwLjA2NiwwLjg0OSwwLjA2NmMwLjI0NiwwLDAuNDgtMC4wMiwwLjcwMS0wLjA1OWMwLjIyMi0wLjAzOSwwLjQxOS0wLjA5OCwwLjU5MS0wLjE3N3MwLjMxLTAuMTgsMC40MTMtMC4zMDNzMC4xNTUtMC4yNzMsMC4xNTUtMC40NWMwLTAuMTQ3LTAuMDM1LTAuMjY4LTAuMTA0LTAuMzYyYy0wLjA2OS0wLjA5My0wLjE5MS0wLjE2OS0wLjM2OS0wLjIyOWMtMC4xNzctMC4wNTktMC40MjEtMC4xMTMtMC43My0wLjE2M2MtMC4zMS0wLjA0OS0wLjcwNi0wLjEwOC0xLjE4OC0wLjE3N2MtMC43NDgtMC4wOTktMS4zNTctMC4yMjktMS44My0wLjM5MWMtMC40NzItMC4xNjMtMC44NDEtMC4zNTQtMS4xMDYtMC41NzZjLTAuMjY2LTAuMjIyLTAuNDQ1LTAuNDY1LTAuNTM5LTAuNzMxcy0wLjE0MS0wLjU1MS0wLjE0MS0wLjg1NmMwLTAuMjA3LDAuMDUtMC40NTUsMC4xNDgtMC43NDZjMC4wOTgtMC4yOSwwLjI4NS0wLjU2NSwwLjU2MS0wLjgyNnMwLjY1Ni0wLjQ4NSwxLjE0NC0wLjY3MmMwLjQ4Ny0wLjE4NywxLjExNC0wLjI4LDEuODgyLTAuMjhjMC4yMjcsMCwwLjUxLDAuMDIsMC44NDksMC4wNTljMC4zNCwwLjA0LDAuNjk2LDAuMTIzLDEuMDcsMC4yNTFzMC43NSwwLjMxNywxLjEyOSwwLjU2OGMwLjM3OSwwLjI1LDAuNzE2LDAuNTgzLDEuMDEyLDAuOTk2TDEzOC45Miw2LjE2OXoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTQ3LjY1Nyw2LjE2OWMtMC4wNjktMC4wODgtMC4xNjUtMC4yMDQtMC4yODgtMC4zNDdzLTAuMjg1LTAuMjgxLTAuNDg3LTAuNDE0Yy0wLjIwMS0wLjEzMy0wLjQ1LTAuMjQ2LTAuNzQ1LTAuMzM5Yy0wLjI5NS0wLjA5My0wLjY0OS0wLjE0LTEuMDYzLTAuMTRjLTAuMzM1LDAtMC42MTUsMC4wMjktMC44NDIsMC4wODhjLTAuMjI2LDAuMDU5LTAuNDA4LDAuMTM1LTAuNTQ2LDAuMjI5Yy0wLjEzOCwwLjA5My0wLjIzNiwwLjE5Ny0wLjI5NSwwLjMxYy0wLjA2LDAuMTEzLTAuMDg5LDAuMjI0LTAuMDg5LDAuMzMyYzAsMC4xNTcsMC4wNDcsMC4yODMsMC4xNDEsMC4zNzZjMC4wOTMsMC4wOTQsMC4yMjIsMC4xNzIsMC4zODQsMC4yMzZzMC4zNTYsMC4xMTMsMC41ODMsMC4xNDdjMC4yMjYsMC4wMzUsMC40NzcsMC4wNzIsMC43NTMsMC4xMTFjMC41NDEsMC4wNjksMS4wNjMsMC4xNSwxLjU2NCwwLjI0NGMwLjUwMiwwLjA5NCwwLjk0NCwwLjIzMSwxLjMyOCwwLjQxM2MwLjM4NCwwLjE4MiwwLjY4OCwwLjQyMywwLjkxNSwwLjcyNGMwLjIyNywwLjMsMC4zNCwwLjY5NiwwLjM0LDEuMTg4YzAsMC4zODQtMC4wNjksMC43MTYtMC4yMDcsMC45OTZjLTAuMTM4LDAuMjgxLTAuMzE3LDAuNTE3LTAuNTM5LDAuNzA4Yy0wLjIyMSwwLjE5Mi0wLjQ3MiwwLjM0Ny0wLjc1MiwwLjQ2NWMtMC4yODEsMC4xMTgtMC41NjgsMC4yMDktMC44NjQsMC4yNzNjLTAuMjk1LDAuMDY0LTAuNTgsMC4xMDUtMC44NTUsMC4xMjVjLTAuMjc1LDAuMDItMC41MjEsMC4wMjktMC43MzgsMC4wMjljLTAuNjc5LDAtMS4yNTItMC4wNjItMS43Mi0wLjE4NWMtMC40NjctMC4xMjMtMC44NjEtMC4yNzgtMS4xODEtMC40NjVzLTAuNTg1LTAuMzk2LTAuNzk3LTAuNjI3Yy0wLjIxMi0wLjIzMS0wLjQwMS0wLjQ1LTAuNTY4LTAuNjU3bDEuNTUtMC45YzAuMTU3LDAuMjU2LDAuMzQyLDAuNDczLDAuNTU0LDAuNjQ5YzAuMjExLDAuMTc3LDAuNDQyLDAuMzE3LDAuNjkzLDAuNDIxYzAuMjUxLDAuMTAzLDAuNTE3LDAuMTc3LDAuNzk3LDAuMjIxYzAuMjgxLDAuMDQ0LDAuNTYzLDAuMDY2LDAuODQ5LDAuMDY2YzAuMjQ2LDAsMC40OC0wLjAyLDAuNzAxLTAuMDU5YzAuMjIyLTAuMDM5LDAuNDE5LTAuMDk4LDAuNTkxLTAuMTc3czAuMzEtMC4xOCwwLjQxMy0wLjMwM3MwLjE1NS0wLjI3MywwLjE1NS0wLjQ1YzAtMC4xNDctMC4wMzUtMC4yNjgtMC4xMDQtMC4zNjJjLTAuMDY5LTAuMDkzLTAuMTkxLTAuMTY5LTAuMzY5LTAuMjI5Yy0wLjE3Ny0wLjA1OS0wLjQyMS0wLjExMy0wLjczLTAuMTYzYy0wLjMxLTAuMDQ5LTAuNzA2LTAuMTA4LTEuMTg4LTAuMTc3Yy0wLjc0OC0wLjA5OS0xLjM1Ny0wLjIyOS0xLjgzLTAuMzkxYy0wLjQ3Mi0wLjE2My0wLjg0MS0wLjM1NC0xLjEwNi0wLjU3NmMtMC4yNjYtMC4yMjItMC40NDUtMC40NjUtMC41MzktMC43MzFzLTAuMTQxLTAuNTUxLTAuMTQxLTAuODU2YzAtMC4yMDcsMC4wNS0wLjQ1NSwwLjE0OC0wLjc0NmMwLjA5OC0wLjI5LDAuMjg1LTAuNTY1LDAuNTYxLTAuODI2czAuNjU2LTAuNDg1LDEuMTQ0LTAuNjcyYzAuNDg3LTAuMTg3LDEuMTE0LTAuMjgsMS44ODItMC4yOGMwLjIyNywwLDAuNTEsMC4wMiwwLjg0OSwwLjA1OWMwLjM0LDAuMDQsMC42OTYsMC4xMjMsMS4wNywwLjI1MXMwLjc1LDAuMzE3LDEuMTI5LDAuNTY4YzAuMzc5LDAuMjUsMC43MTYsMC41ODMsMS4wMTIsMC45OTZMMTQ3LjY1Nyw2LjE2OXoiLz48L2c+PC9zdmc+"
+  
+  layout = {
+    Status = {PrettyName = "Status~Access Point",Style = "Text",   TextFontSize = 10,HTextAlign = "Center",WordWrap = true,Position = { 3, 49 },Size = { 124, 24 },IsReadOnly = true},
+    IPAddress = {PrettyName = "Setup~IP Address",Style = "Text",Position = { 34, 87 },Size = { 72, 16 },TextFontSize = 10,},
+    APTID = {PrettyName = "ID~Access Point",Style = "Button",ButtonStyle = "Toggle",TextFontSize = 12,Legend = "ID",Color = Color.BtnBlue,OffColor = Color.LtGray,UnlinkOffColor = true,Position = { 106, 86 },Size = { 21, 18 },Radius = 2,Margin = 1,},
+    Details = {PrettyName = "Device Details",Style = "Text",WordWrap = true,HTextAlign = "Left",VTextAlign = "Top",TextFontSize = 7.5,TextBoxStyle = "NoBackground",Position = { 9, 134 },Size = { 113, 36 },},
+  }
+  
+  local BGColor = { 102, 102, 102 }
+  local TextColor = { 204, 204, 204 }
+  for i=1,8 do
+    layout["ChannelName "..i] = {PrettyName = "Channel~Name~"..i,Style = "Text",TextFontSize = 10,Position = { tonumber(i>4 and 53 or 52)+81*i, 47 },Size = { 78, 16 },IsReadOnly = true --[[ Remove this when SET x CHAN_NAME is fixed in the API]]}
+    layout["Identify "..i] = {PrettyName = "Identify~"..i,Style = "Button",ButtonStyle = "Toggle",Legend = "Identify",TextFontSize = 10,Legend = "Identify",Color = Color.BtnBlue,OffColor = Color.LtGray,UnlinkOffColor = true,Position = { tonumber(i>4 and 54 or 53)+81*i, 63 },Size = { 75, 20 },Radius = 2,Margin = 2,}
+    layout["BatteryCharge "..i] = {PrettyName = "Battery~Charge~"..i,Style = "Meter",MeterStyle = "Level",Color = { 0, 238, 0 },ShowTextBox = false,Position = { tonumber(i>4 and 59 or 58)+81*i, 84 },Size = { 65, 14 }}
+    layout["BatteryRunTime "..i] = {PrettyName = "Battery~Run Time~"..i,Style = "Text",TextBoxStyle = "NoBackground",TextFontSize = 9.5,IsBold = true,Color = TextColor,Position = { tonumber(i>4 and 53 or 52)+81*i, 98 },Size = { 78, 11 },IsReadOnly = true}
+    layout["AudioLevel "..i] = {PrettyName = "Audio Meter~"..i,Style = "Meter",MeterStyle = "Level",Color = { 0, 248, 0 },ShowTextBox = false,Position = { tonumber(i>4 and 74 or 73)+81*i, 116 },Size = { 10, 55 }}
+    for j=1,4 do
+      layout["RFMeter"..j.." "..i] = {Style = "Meter",MeterStyle = "Level",Color = { 0, 248, 0 },ShowTextBox = false,Position = { tonumber(i>4 and 90 or 89)+(81*i)+((j-1)*9), 159-(7*(j-1)) },Size = { 9, 11+(7*(j-1)) }}
+    end
+    layout["TXStatus "..i] = {PrettyName = "Transmitter~Status~"..i,Style = "Text",TextFontSize = 8,Color = TextColor,Position = { tonumber(i>4 and 63 or 62)+81*i, 193 },Size = { 59, 16 },IsReadOnly = true}
+    layout["Mute "..i] = {PrettyName = "Mute~"..i,Style = "Button",ButtonStyle = "Toggle",Legend = "MUTE",Color = { 255, 0, 0 },--[[OffColor = TextColor,--UnlinkOffColor = true,]]Position = { tonumber(i>4 and 59 or 58)+81*i, 209 },Size = { 67, 18 }}
+    layout["TransmitterType "..i] = {PrettyName = "Transmitter~Type~"..i,Style = "Text",TextBoxStyle = "NoBackground",TextFontSize = 11,Color = TextColor,Position = { tonumber(i>4 and 55 or 54)+81*i, 233 },Size = { 74, 16 },IsReadOnly = true}
+  end
+  
+  graphics = 
+  {
+    {Type = "GroupBox",Fill = Color.Black,StrokeWidth = 0,--[[CornerRadius = 0,]]Position = { 0, 0 },Size = { 781, 26 }},
+    {Type = "GroupBox",Fill = Color.Black,StrokeWidth = 0,--[[CornerRadius = 0,]]Position = { 0, 26 },Size = { 131, 1 }},
+    {Type = "Svg",Image = WhiteLogo,Position = { 24, 6 },Size = { 88, 15 }},
+    {Type = "Svg",Image = MXWHeader,Position = { 131, 7 },Size = { 145, 11 },},
+  }
+  --[[
+    {Type = "Label",Text = "Mode",TextSize = 10,HTextAlign = "Right",Color = LtGrayText,Position = { 8, 220 },Size = { 41, 16 },},
+    {Type = "Label",Text = "Unit/IP",TextSize = 10,HTextAlign = "Right",Color = LtGrayText,Position = { 8, 239 },Size = { 41, 16 },},
+    {Type = "Label",Text = "NIC",TextSize = 10,HTextAlign = "Right",Color = LtGrayText,Position = { 8, 258 },Size = { 41, 16 },},
+  ]]
+  
+  local mleg={t= {0,-9,-18,-30,-60},y={114,123,132,147,166}}
+  local SetupBoxes = {PY={27,77,126},SY={50,176,47},SW={0,0,1},R={0,0,3}}
+  local ChBoxes = {PY={26},SY={227}}
+  local SetupLabels = {
+    Pos={X={3,3,3,4,6,717},Y={27,38,76,87,126,8}},
+    Size={X={120,120,78,30,30,51},Y={11,11,11,16,9,10}},
+    Text={ "Status","Access Point","Connection Setup","Unit/IP","Details","Plugin v"..PluginInfo.Version },
+    FSize={10,9,10,9,9,9},Bold={true,false,true,false,true,true},
+    Just={"Left","Left","Left","Right","Left","Right"},}
+  
+  for i=1,#SetupBoxes.PY do
+    table.insert(graphics,{Type = "GroupBox",Fill = i==1 and Color.GlobalBG or Color.BChBG,StrokeColor = Color.LtGray,StrokeWidth = SetupBoxes.SW[i],CornerRadius = SetupBoxes.R[i],Position = { i==3 and 3 or 0,SetupBoxes.PY[i] },Size = { i==3 and 125 or 131, SetupBoxes.SY[i] }})
+  end
+  
+  for i=1,#SetupLabels.Pos.X do
+    table.insert(graphics,{Type = "Label",Text = SetupLabels.Text[i],TextSize = SetupLabels.FSize[i],HTextAlign = SetupLabels.Just[i],IsBold = SetupLabels.Bold[i],Color = Color.LtGray,Position = { SetupLabels.Pos.X[i], SetupLabels.Pos.Y[i] },Size = { SetupLabels.Size.X[i], SetupLabels.Size.Y[i] },})
+  end
+  for i=1,8 do
+    for k,PosY in pairs(ChBoxes.PY) do
+      table.insert(graphics,{Type = "GroupBox",Fill = k>4 and Color.BChBG or Color.TChBG,StrokeWidth = 1,StrokeColor = Color.ChStr,Position = { tonumber(i>4 and 51 or 50)+81*i, PosY },Size = { 82, ChBoxes.SY[k] }})
+    end
+    table.insert(graphics,{Type = "Label",Text = tostring(i),TextSize = 16,IsBold = true,Color = Color.LtGray,Position = { tonumber(i>4 and 52 or 51)+81*i, 29 },Size = { 79, 16 },})
+    table.insert(graphics, {Type = "Label",Text = "Audio",TextSize = 10,Color = TextColor,IsBold = true,Position = { tonumber(i>4 and 58 or 57)+82*i, 175 },Size = { 30, 9 }})
+    table.insert(graphics, {Type = "Label",Text = "RF",IsBold = true,Color = TextColor,Position = { tonumber(i>4 and 97 or 96)+82*i, 175 },Size = { 28, 9 }})
+    for j=1,5 do
+      table.insert(graphics, {Type = "Label",Text = tostring(mleg.t[j]),TextSize = 9.5,Color = Color.Combo,IsBold = true,HTextAlign = "Right",Position = { tonumber(i>4 and 53 or 52)+81*i, mleg.y[j] },Size = { 18, 8 }})
+    end
+  end
+  return layout, graphics
+end
+
+function GetComponents(props)
+  return {{Name = "nic_storage", Type = "scriptable_controls", Properties = {
+  ["config"] = '[{"Name":"Core","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"Emul","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"lastIP","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"lastname","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0}]'}}}
+end
+
+--Start event based logic
+if Controls and tonumber(string.match(_VERSION,"Lua (.+)"))<5.3 then
+    Controls.Status.Value = 2
+    Controls.Status.String = "Use Q-Sys 5.3+ !!"
+  elseif Controls then
+  -- Shure MXWAPT Control
+  -- Original code by John Britton
+  
+  -- Subtract 30 from any error line numbers for actual error line
+  APT = TcpSocket.New()
+  APT.ReadTimeout = 5
+  APT.WriteTimeout = 5
+  APT.ReconnectTimeout = 5
+  APTIDTimer = Timer.New()
+  IDTime = 10
+  PingTimer = Timer.New()
+  PingTime = 4
+  local TXOFFTimer = {}
+  local GainTimer = {}
+  local Discovered = {}
+  local IPLookup = {}
+  local resolvedIP = {}
+  local PresetNames-- = {}
+  local Waits = {}
+  local Faders = {}
+  local Details = {}
+  
+  -- Constants
+  local lastDev = { ip = nic_storage.lastIP, name = nic_storage.lastname }
+  local ippattern = "[012]?%d?%d+.[012]?%d?%d+.[012]?%d?%d+.[012]?%d?%d"
+  local mTypes = {["0"]= "",["1"]= "Bodypack",["2"]="Handheld",["6"]="Boundary",["8"]="Gooseneck"}
+  local Behavior = {"ON", "OFF", "FLASHING"}
+  local status_state = { OK = 0, COMPROMISED = 1, FAULT = 2, NOTPRESENT = 3, MISSING = 4, INITIALIZING = 5 }
+  
+  
+  -- Alias Tables
+  RespToCtl = {
+    TX_TYPE = "TransmitterType", 
+    TX_STATUS = "TXStatus",
+    BATT_CHARGE = "BatteryCharge",
+    BATT_TIME_TO_FULL = "BatteryRunTime",
+    BATT_RUN_TIME =     "BatteryRunTime",
+    AUDIO_LEVEL = "AudioLevel",
+    MUTE = "Mute",
+    BATT_TIME_TO_FULL = "",
+    METER_RATE = "",
+    FLASH = "Identify"
+  }
+  -- Control Aliases
+  status = Controls.Status
+  identify = Controls.Identify
+  channel_name = Controls.ChannelName
+  aptid = Controls.APTID
+  ip = Controls.IPAddress
+  details = Controls.Details
+  mute = Controls.Mute
+  
+  -- Debugging
+  -- A function to determine common print statement scenarios for troubleshooting
+  DebugTx       = false
+  DebugRx       = false
+  DebugFunction = false
+  DebugPrint    = Properties["Debug Print"].Value
+  
+  -- Helper Functions
+  function SetupDebugPrint()
+    if DebugPrint == "Tx/Rx" then
+      DebugTx,DebugRx = true,true
+    elseif DebugPrint == "Tx" then
+      DebugTx = true
+    elseif DebugPrint == "Rx" then
+      DebugRx = true
+    elseif DebugPrint == "Function Calls" then
+      DebugFunction = true
+    elseif DebugPrint == "All" then
+      DebugTx,DebugRx,DebugFunction = true,true,true
+    end
+  end
+  
+  function ParseChName(str) return string.match(str,"{(.-)%s+}") end
+  
+  function ReportStatus(state,msg)
+    status.Value = status_state[state]
+    status.String = msg
+  end
+  
+  -------------------------------------------------------------------
+  -- Connect Functions
+  
+  function Disconnected()
+    if DebugFunction then print("Disconnected") end
+    aptid.Boolean=false
+    aptid.IsDisabled = true
+    PingTimer:Stop()
+  end
+  
+  function AssembleDetails()
+    if DebugFunction then print("AssembleDetails() called") end
+    local detailstr = {}
+    if Details.Name ~= nil then table.insert(detailstr,"Name: "..Details.Name) end
+    if Details.Model ~= nil then table.insert(detailstr,"Model: "..Details.Model) end
+    if Details.IP ~= nil then table.insert(detailstr,"Control IP: "..Details.IP) end
+    if Details.AudIP ~= nil then table.insert(detailstr,"Audio IP: "..Details.AudIP) end
+    if Details.Service ~= nil then table.insert(detailstr,"Service Name: "..Details.Service) end  -- No longer in use (pulled from mdns response)
+    if Details.Serial ~= nil then table.insert(detailstr,"Serial Number: "..Details.Serial) end
+    if Details.FW ~= nil then table.insert(detailstr,"Firmware Version: "..Details.FW) end
+  
+    details.String = table.concat(detailstr,"\r")
+    lastDev.ip.String = Details.IP
+    lastDev.name.String = Details.Name
+  end
+  
+  -- End Connect Functions
+  
+  
+  --[[ Device Control 
+  ]]--------------------------------------------------------------
+  local CH_COUNT = 8
+  dvc_ch_available = {}
+  dvc_ch_controls = {
+    "TransmitterType", "TXStatus", "AudioLevel", "BatteryCharge", --"BatteryRunTime", 
+    "Mute", "Identify", "ChannelName", "RFMeter1", "RFMeter2", "RFMeter3", "RFMeter4"
+  }
+  
+  function StopTimers()
+    if DebugFunction then print("StopTimers() called") end
+    for i=1,#TXOFFTimer do 
+      TXOFFTimer[i].Timer:Stop() 
+    end
+    StopID()
+    PingTimer:Stop()
+  end
+  
+  PingTimer.EventHandler = function()
+    if DebugFunction then print("PingTimer.EventHandler() called") end
+    Send("< GET DEVICE_ID >")
+  end
+  
+  function dvc_ch_controls_disable( ch, b_disable )
+    if DebugFunction then print("dvc_ch_controls_disable() called") end
+    for i,v in ipairs( dvc_ch_controls ) do
+      Controls[v][ch].IsDisabled = b_disable
+    end
+    if b_disable then
+      for _,ctl in ipairs{"AudioLevel", "BatteryCharge","RFMeter1", "RFMeter2", "RFMeter3", "RFMeter4"} do
+        Controls[ctl][ch].Value = 0
+      end
+    end
+    Controls.TXStatus[ch].String = ""
+    Controls.ChannelName[ch].String = ""
+  end
+  
+  function DisableControls(all)
+    if DebugFunction then print("DisableControls() called") end
+    if all==nil then
+      if string.find(details.String,"MXWAPT4") then
+        for i=5,8 do 
+          dvc_ch_controls_disable(i,true)
+        end
+      end
+    else
+      for i=1,8 do 
+        dvc_ch_controls_disable(i,true)
+      end
+    end
+  end
+  
+  function Connect()
+    if DebugFunction then print("Connect() called") end
+    if APT.IsConnected then
+      APT:Disconnect()
+    end
+    Disconnected()
+    for ch=1,CH_COUNT do
+      dvc_ch_available[ch] = false
+      dvc_ch_controls_disable( ch, true )
+    end
+    StopTimers()
+    if not string.find(ip.String,ippattern) then
+      ReportStatus("MISSING","Check TCP connection properties")
+    elseif not APT.IsConnected then
+      APT:Connect(ip.String, 2202 )
+    end
+  end
+  
+  ip.EventHandler = Connect
+  
+  APT.EventHandler = function( sock, evt, err )
+    if DebugFunction then print("Socket EventHandler() called", evt) end
+    if evt == TcpSocket.Events.Connected then
+      ReportStatus("OK","")
+      aptid.IsDisabled = false
+      dvc_start()
+      DisableControls()
+    elseif evt == TcpSocket.Events.Reconnect then
+      ReportStatus("FAULT","TCP Socket Reconnecting")
+    elseif evt == TcpSocket.Events.Data then
+      local msg = APT:ReadLine( TcpSocket.EOL.Custom, ">" )
+      while msg do
+        if DebugRx then print("RX: "..msg) end
+        tokens = {}
+        for i in string.gmatch( msg, "%S+" ) do
+          table.insert( tokens, i )
+        end
+        dvc_decode( tokens, msg )
+        msg = APT:ReadLine( TcpSocket.EOL.Custom, ">" )
+      end
+    elseif evt == TcpSocket.Events.Closed then
+      ReportStatus("FAULT","TCP Socket Closed")
+      Disconnected()
+    elseif evt == TcpSocket.Events.Error then
+      if ip.String == "" then
+        ReportStatus("MISSING","No IP Address")
+      else
+        ReportStatus("FAULT",err)
+      end
+      Disconnected()
+    elseif evt == TcpSocket.Events.Timeout then
+      ReportStatus("FAULT","TCP Socket Timeout")
+      Disconnected()
+    end
+  end
+  
+  function StartInit()
+    if DebugFunction then print("StartInit() called") end
+    for ch=1,CH_COUNT do
+      table.insert(TXOFFTimer, {Timer = Timer.New(),index = ch } )
+      TXOFFTimer[ch].Timer.EventHandler = function()
+        dvc_get( ch, "BATT_TIME_TO_FULL" )
+        dvc_get( ch, "CHAN_NAME" )
+      end
+    end
+    aptid.Boolean = false
+    aptid.IsDisabled = true
+    SetupDebugPrint()
+    Connect()
+  end
+  
+  function Send (msg)
+    if DebugTx then print("TX: "..msg) end
+    APT:Write( msg )
+  end
+  
+  function dvc_get( ch, key ) 
+    if DebugFunction then print("dvc_get() called") end
+    if APT.IsConnected then 
+      Send("< GET "..ch.." "..key.." >")
+    end
+  end
+  
+  function dvc_set( ch, key, value )
+    if DebugFunction then print("dvc_set() called") end
+    if APT.IsConnected then 
+      Send("< SET "..ch.." "..key.." "..value.." >") 
+    end 
+  end
+  
+  function dvc_led_update( ch )
+    if DebugFunction then print("dvc_led_update() called") end
+    local ls
+    if Controls[RespToCtl.MUTE][ch].Boolean then ls = "ON OF" else ls = "OF ON" end
+    dvc_set( ch, "LED_STATUS", ls )
+  end
+  
+  RF_1, RF_2, RF_3, RF_4 = Controls.RFMeter1, Controls.RFMeter2, Controls.RFMeter3, Controls.RFMeter4
+  RFBars = { RF_1, RF_2, RF_3, RF_4 }
+  function RFBarUpdate(ch, value)
+    if DebugFunction then print("RFBarUpdate() called") end
+    local ranges = {51,54,58,64}
+    for k,bar in ipairs(RFBars) do
+      bar[ch].Boolean = tonumber(value) >= tonumber(ranges[k])
+    end
+  end
+  
+  function dvc_decode( msg, raw )
+    if DebugFunction then print("dvc_decode() called") end
+    if msg[2] == "REP" then
+      if msg[3] == "SEC" then
+        local msgtmp = {}
+        for i=1,#msg-1 do
+          table.insert(msgtmp,msg[i>2 and i+1 or i])
+        end
+        msg = msgtmp
+      end
+      local ch = tonumber( msg[3] )
+      -- channel message
+      if ch ~= nil then
+        local key = msg[4]
+        local value = msg[5]
+        -- Channel/Mic availability change
+        if key == "TX_AVAILABLE" then
+          dvc_ch_available[ch] = value == "YES"
+          
+          -- channel became available, initialize
+          if dvc_ch_available[ch] then
+            -- enable GUI controls
+            dvc_ch_controls_disable( ch, false ) -----------------------------------
+            TXOFFTimer[ch].Timer:Stop()
+            -- get current values
+            dvc_get( ch, "TX_TYPE" ) 
+            dvc_get( ch, "TX_STATUS" ) 
+            dvc_get( ch, "BATT_CHARGE" )
+            dvc_get( ch, "BATT_RUN_TIME" )
+            dvc_get( ch, "BATT_TIME_TO_FULL" )
+            dvc_get( ch, "CHAN_NAME" )
+            dvc_set( ch, "METER_RATE", "200" )
+            dvc_led_update( ch )
+          -- channel not available
+          else
+            TXOFFTimer[ch].Timer:Start(5)
+            dvc_set( ch, "METER_RATE", "0" ) -- necessary?
+            -- disable GUI controls
+            for i,v in ipairs( dvc_ch_controls ) do
+              if v~="ChannelName" then
+                Controls[v][ch].IsDisabled = true
+              end
+            end
+            for _,ctl in ipairs{"AudioLevel", "BatteryCharge","RFMeter1", "RFMeter2", "RFMeter3", "RFMeter4"} do
+              Controls[ctl][ch].Value = 0
+            end
+            Controls.TXStatus[ch].String = ""
+          end
+        -- Mic type update
+        elseif key == "TX_TYPE" then
+          wtypeid = value:match("MXW(%d)") or "0"
+          --wtypeid = wtypeid~=nil and wtypeid or "0"
+          Controls[RespToCtl[key]][ch].String = mTypes[wtypeid]
+        -- Mic status update
+        elseif key == "TX_STATUS" then
+          Controls[RespToCtl[key]][ch].String = value
+          if value ~= "ACTIVE" and value ~= "MUTE" then
+            Controls[RespToCtl.AUDIO_LEVEL][ch].IsDisabled = true
+            Controls[RespToCtl.AUDIO_LEVEL][ch].Value = 0
+            for k,bar in ipairs(RFBars) do bar[ch].IsDisabled = true end
+            RFBarUpdate(ch, 0)
+          else
+            Controls[RespToCtl.AUDIO_LEVEL][ch].IsDisabled = false
+          end
+        -- Mic battery update
+        elseif key == "BATT_CHARGE" then
+          local charge = tonumber( value )
+          local ctl = Controls[RespToCtl[key]][ch]
+          if charge <= 100 then
+            ctl.Value = charge -- 0-100 or 255
+            ctl.IsDisabled = false
+          else
+            ctl.Value = 0 -- ?
+            ctl.IsDisabled = true
+          end
+        elseif key == "BATT_RUN_TIME" then
+          local time = tonumber( value )
+          local ctl = Controls[RespToCtl[key]][ch]
+          local s = ""
+          if time == 65532 then     s = "Local Power"
+          elseif time == 65534 then s = "Calculating..."
+          elseif time ~= 65535 then s = string.format( "Time Left: %d:%02d", math.floor( time/60 ), math.fmod( time, 60 ) )
+          end
+          if #s>0 then ctl.String = s end
+        elseif key == "BATT_TIME_TO_FULL" then
+          local time,ctl = tonumber( value ), Controls.BatteryRunTime[ch]
+          if time == 65534 then ctl.String = "Fully Charged"
+          elseif time == 65535 then ctl.String = "On Charger"
+          end
+        -- Mic button press
+        elseif key == "BUTTON_STS" then
+          if value == "ON" then
+            -- toggle local mute button
+            Controls[RespToCtl.MUTE][ch].Boolean = not Controls[RespToCtl.MUTE][ch].Boolean
+            -- update LED on mic
+            dvc_led_update( ch )
+          end
+        -- Flash
+        elseif key == "FLASH" then
+          identify[ch].Boolean = value == "ON"
+        elseif key == "CHAN_NAME" then
+          channel_name[ch].IsDisabled = false
+          channel_name[ch].String = ParseChName(raw)
+        else
+          dvc_ch_available[ch] = value == "NO"
+        end
+      elseif msg[3] == "FLASH" then
+        aptid.Boolean = msg[4]=="ON"
+      elseif msg[3] == "DEVICE_ID" then
+        Details.Name = msg[4]:sub(2,-1)
+        for i = 5, #msg do
+          Details.Name = Details.Name.." "..msg[i]
+        end
+        Details.Name = Details.Name:sub(1,-2)
+        AssembleDetails()
+      -- these are not supported microflex, but are available on MXA920
+      elseif msg[3] == "MODEL" then
+        Details.Model = msg[4]
+      elseif msg[3] == "SERIAL_NUM" then
+        Details.Serial = msg[4]
+      elseif msg[3] == "IP_ADDR_NET_AUDIO_PRIMARY" then
+        Details.AudIP = msg[4]
+      elseif msg[3] == "FW_VER" then
+        Details.FW = msg[4]
+        
+      end
+    -- Metering
+    elseif msg[2] == "SAMPLE" then
+      local ch = tonumber( msg[3] )
+      Controls[RespToCtl.AUDIO_LEVEL][ch].Value = msg[5]
+      RFBarUpdate(ch, msg[4])
+    end
+  end
+  
+  function dvc_start()
+    if DebugFunction then print("dvc_start() called") end
+    dvc_get( 0, "TX_AVAILABLE" )
+    Send( "< GET FLASH >" )
+    Details= {
+      IP = ip.String
+    }
+    -- these may not be supported by microflex, but are available on MXA920
+    Send("< GET MODEL >")
+    Send("< GET SERIAL_NUM >")
+    Send("< GET IP_ADDR_NET_AUDIO_PRIMARY >")
+    Send("< GET DEVICE_ID >")
+    Send("< GET FW_VER >")
+    PingTimer:Start(PingTime)
+  end
+  
+  
+  -- GUI mute button handler
+  function mute_handler( ch, ctl )
+    dvc_led_update( ch )
+  end
+  
+  for i=1,CH_COUNT do 
+    mute[i].EventHandler = function( ctl )
+      if DebugFunction then print("mute["..i.."].EventHandler() called") end
+      mute_handler( i, ctl )
+    end
+    -- Channel Names (Does not work)
+    channel_name[i].EventHandler = function(ctl)
+      if DebugFunction then print("channel_name["..i.."].EventHandler() called") end
+      dvc_set( i, "CHAN_NAME", "{"..ctl.String.."}" )
+    end
+  end
+  
+  -- GUI flash button handler
+  function flash_handler( ch, ctl )
+    if ctl.Boolean then
+      dvc_set( ch, "FLASH", "ON" )
+      APTIDTimer:Stop(IDTime)
+    else
+      dvc_set( ch, "FLASH", "OFF" )
+    end
+  end
+  
+  for i=1,CH_COUNT do 
+    identify[i].EventHandler = function( ctl )
+      if DebugFunction then print("identify["..i.."].EventHandler() called") end
+      flash_handler( i, ctl )
+    end
+  end
+  
+  aptid.EventHandler = function( ctl )
+    if DebugFunction then print("aptid.EventHandler() called") end
+    if ctl.Boolean then
+      Send("< SET FLASH ON >")
+      APTIDTimer:Start(IDTime)
+    else
+      StopID()
+    end
+  end
+  
+  -- ID flash handler
+  function StopID()
+    if DebugFunction then print("StopID() called") end
+    APTIDTimer:Stop()
+    if APT.IsConnected then
+      Send("< SET FLASH OFF >")
+    end
+  end
+  
+  APTIDTimer.EventHandler = StopID
+  
+  
+  --[[ Initialization ]]--------------------------------------------------------------
+  StartInit()
+end

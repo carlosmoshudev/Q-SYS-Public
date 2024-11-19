@@ -1,0 +1,88 @@
+ ****************************************************************************************
+ *
+ *  Q-SYS CueCore3 PLUGIN HELP DOCUMENTATION
+ *
+ *  Copyright (c) 2021 Visual Productions BV - The Netherlands
+ *
+ ****************************************************************************************
+
+Use this plugin to control the CueCore3 using the TCP API. Product manual and the vManager software utility can be found at:
+https://www.visualproductions.nl/downloads/
+
+For support, contact support@visualproductions.nl
+
+For more information about the CueCore3, see https://www.visualproductions.nl/products/cuecore3
+
+The plugin is tested in Q-Sys designer 8.0, 8.4 and 9.4 using CueCore3 firmware from 1.26.
+
+****************************************************************************************
+*	Prerequisites
+****************************************************************************************
+
+Before configuring the plugin:
+    *  Use vManager to discover the CueCore3 and configure the network settings
+    *  Configure the tracks and playbacks, more info can be found in the CueCore3 manual. 
+
+****************************************************************************************
+*	Configuration Overview
+****************************************************************************************
+
+*  Drag the plugin into your schematic.
+*  (Optional) Set the control mode to "Advanced" for control over the full API, or use "Simple" for basic functionality. 
+*  Press F6 to emulate your design.
+*  In your schematic, double-click the plugin to open the component's control panel.
+*  In the Network tab, specify the CueCore3's API prefix, IP address and TCP port. Make sure these match the settings configured on the CueCore3.
+*  The status should indicate OK.
+*  Control can be done using the control pins after enabling them in the plugin properties. Every functionality in the UI has a corresponding control pin.
+     
+/****************************************************************************************
+*	Tabs in simple control mode
+*****************************************************************************************
+
+Playbacks
+    Full control of the master and the sixteen playbacks.
+    
+Network
+    * Prefix
+        API prefix, can be configured on the CueCore3 webinterface
+    * IP Address
+        IP address of the CueCore3 to control
+    * TCP Port
+        The target TCP port, can be configured on the CueCore3 webinterface
+    * Status
+        Connection status
+    * Identify
+        Blink the CueCore3 LED to identify the connected unit
+
+****************************************************************************************
+*	Extra tabs in advanced control mode
+****************************************************************************************
+
+Tracks
+    Trigger track recording or snapshot here. Be sure to first select the right track.
+    For dynamic recordings, the input used can be configured on the webinterface.
+    Snapshots can be done using the "Snapshot" buttons for DMX, ArtNet or sACN.
+    
+Timecode
+    CueCore3's internal timecode can be controlled from here. Set the timecode using the time field and trigger.
+    Start/Stop/Restart/Pause the timecode using the 4 buttons or their control pins.
+    Make sure that the timecode source is set to "Internal" on the CueCore3 webinterface.
+    
+Actionlist
+    Actionlists programmed in the CueCore3 can be enabled or disabled. 
+    Actions in enabled actionlists can be triggered by first setting the index of the action in the right actionlists, and then executing it.
+
+DMX control
+    DMX channels 1 thru 2048 can be set by selecting a channel and value, and then executing it.
+    
+Timer
+    Countdown timers of the CueCore3 can be started, stopped, paused, restarted and set here. The results can be used in ShowControl using the webinterface.
+
+Variable
+    CueCore3 variables can be set or refreshed here. The results can be used in ShowControl using the webinterface.
+
+****************************************************************************************
+*	Notes
+****************************************************************************************
+
+As of plugin version 1.02, API feedback is not supported yet.

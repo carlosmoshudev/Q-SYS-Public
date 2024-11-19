@@ -1,0 +1,2911 @@
+--[[ BEGIN DIGITAL SIGNATURE
+Ll0yOhMMTtEdda9WfubkL7HFJivb4vdkHfG5c/N/J65g6rEEOsF9xDas0S8TS182eeuzkeNRVyVTzrQJoifw1w1rKes82fIKrKc616iEraWjqkhmzzXKUF5a5vTJmLLteXlaMZyb54CKcTa+oLKamuMz1rET32ilGU/cZlZclwA9vikBwWRHW4Ar9XtW7HRBvXIlwmhE67CpFM/e23usEdscPhpKj5nToxFL+b25EFi341KGz8CbWRN8tKwyKbviBBlKjMd5EDeheEcO7Ft8p+QHX4dPUeaFlC9sGokxra0DHrT7HTwWwuwd+IwB5/U25YsZ5nKRd1Q4aydW8v5k4Q==
+END DIGITAL SIGNATURE ]]
+-- Pixel Flex
+-- by QSC
+-- October 2022
+
+PluginInfo = {
+  Name = "Enterprise Manager~PixelFLEX/NovaStar~H-Series v1.3",
+  Version = "1.3",
+  BuildVersion = "1.3.0.1",
+  Id = "56a16e07-d54b-4bb8-8da5-07c2c00db548",
+  Author = "QSC",
+  Description = "A plugin to control the Novastar H-Series Slicing Processor",
+  Manufacturer = "NovaStar",
+  IsManaged = true,
+  Type = Reflect and Reflect.Types.VideoDistribution or 0,
+}
+
+-- UI colors
+Clear      = {0,0,0,0}
+White      = {255,255,255}
+Black      = {0,0,0}
+Gray       = {194,194,194}
+StrokeGray = {105,105,105}
+LED        = {255,0,0}
+GBGray     = {230,230,230}
+BoldText   = {27,33,43}
+MainText   = {51,51,51}
+
+ModelIOCount = {
+  ["H2"] = {
+    input  = 4,
+    output = 2
+  },
+  ["H5"] = {
+    input  = 10,
+    output = 4
+  },
+  ["H9"] = {
+    input  = 15,
+    output = 6
+  },
+  ["H15"] = {
+    input  = 30,
+    output = 11
+  },
+  -- Possibly for future development?
+  -- ["H9 Enhanced"] = {
+  --   input  = 15,
+  --   output = 11
+  -- },
+  -- ["H15 Enhanced"] = {
+  --   input  = 30,
+  --   output = 17
+  -- }
+}
+
+function GetColor(props)
+  return { 21, 44, 82 }
+end
+
+function GetPrettyName(props)
+  return "PixelFLEX/NovaStar\nH-Series\nv" .. PluginInfo.Version
+end
+
+pagenames = {"Setup", "Input Status", "Output Status", "Screen Control", "Presets", "Layer Routing"}
+
+function GetPages(props)
+  local pages = {}
+  for ix,name in ipairs(pagenames) do
+    table.insert(pages,{name = pagenames[ix]})
+  end
+  return pages
+end
+
+function GetModel(props)
+  return props
+end
+
+function GetProperties()
+  local props = {}
+  table.insert(props,{
+    Name    = "Debug Print",
+    Type    = "enum",
+    Choices = {"None", "Tx/Rx", "Tx", "Rx", "Function Calls", "All"},
+    Value   = "None"
+  })
+  table.insert(props,{
+    Name    = "Control Mode",
+    Type    = "enum",
+    Choices = {"UDP", "RS-232"},
+    Value   = "UDP"
+  })
+  table.insert(props,{
+    Name    = "Model",
+    Type    = "enum",
+    Choices = {"H2", "H5", "H9", "H15"},
+    -- Choices = {"H2", "H5", "H9", "H9 Enhanced", "H15", "H15 Enhanced"}, -- possibly for future development?
+    Value   = "H2"
+  })
+  table.insert(props,{
+    Name     = "Number of Presets",
+    Type     = "integer",
+    Value    = 4,
+    Min      = 1,
+    Max      = 16
+  })
+  table.insert(props,{
+    Name     = "Number of Layers",
+    Type     = "integer",
+    Value    = 6,
+    Min      = 1,
+    Max      = 32
+  })
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value == false then 
+    props["Debug Print"].IsHidden = true 
+  end
+  return props
+end
+
+function GetControls(props)
+  local controls = {}
+  local model     = props["Model"].Value
+  
+  -- ======= Setup =======
+  table.insert(controls,{
+    Name          = "Status",
+    ControlType   = "Indicator",
+    IndicatorType = Reflect and "StatusGP" or "Status",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "IPAddress",
+    ControlType   = "Text",
+    Count         = 1,
+    UserPin       = true,
+    PinStyle      = "Both"
+  })
+  table.insert(controls,{
+    Name          = "NIC",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "BaudRate",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "DataBits",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "StopBits",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "Parity",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "DeviceName",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "DeviceID",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 1
+  })
+  -- LEDS
+  for ix, name in ipairs({"FanStatus", "VoltageStatus", "TemperatureStatus", "GenlockSignal"}) do
+    table.insert(controls,{
+      Name          = name,
+      ControlType   = "Indicator",
+      IndicatorType = "Led",
+      PinStyle      = "Output",
+      UserPin       = true,
+      Count         = 1
+    })
+  end
+  
+  -- ======= Input Status =======
+  table.insert(controls,{
+    Name          = "InputSlot",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = ModelIOCount[model].input
+  })
+  table.insert(controls,{
+    Name          = "InputConnectorType",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = ModelIOCount[model].input
+  })
+  table.insert(controls,{
+    Name          = "InputSignalStatus",
+    ControlType   = "Indicator",
+    IndicatorType = "Led",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = ModelIOCount[model].input * 4
+  })
+  
+  -- ======= Output Status =======
+  table.insert(controls,{
+    Name          = "OutputSlot",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = ModelIOCount[model].output
+  })
+  table.insert(controls,{
+    Name          = "OutputConnectorType",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = ModelIOCount[model].output
+  })
+  table.insert(controls,{
+    Name          = "OutputLinkStatus",
+    ControlType   = "Indicator",
+    IndicatorType = "Led",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = ModelIOCount[model].output * 20
+  })
+  
+  -- ======= Screen Controls =======
+  table.insert(controls,{
+    Name          = "ScreenSelection",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "RefreshScreenInfo",
+    ControlType   = "Button",
+    ButtonType    = "Trigger",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1,
+  })
+  table.insert(controls,{
+    Name          = "ScreenBlackout",
+    ControlType   = "Button",
+    ButtonType    = "StateTrigger",
+    Min           = 0,
+    Max           = 1,
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1,
+  })
+  table.insert(controls,{
+    Name          = "TestPatternEnable",
+    ControlType   = "Button",
+    ButtonType    = "StateTrigger",
+    Min           = 0,
+    Max           = 1,
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1,
+  })
+  table.insert(controls,{
+    Name          = "ScreenFreeze",
+    ControlType   = "Button",
+    ButtonType    = "StateTrigger",
+    Min           = 0,
+    Max           = 1,
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1,
+  })
+  table.insert(controls,{
+    Name          = "ScreenBrightness",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "TestPattern",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "ScreenClear",
+    ControlType   = "Button",
+    ButtonType    = "Trigger",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1,
+  })
+  table.insert(controls,{
+    Name          = "ImageMode",
+    ControlType   = "Text",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "EyeSaverMode",
+    ControlType   = "Button",
+    ButtonType    = "Toggle",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 1,
+  })
+  -- KNOBS
+  for ix, name in ipairs({"Contrast", "Brightness", "Saturation"}) do
+    table.insert(controls,{
+      Name          = name,
+      ControlType   = "Knob",
+      ControlUnit   = "Integer",
+      Min           = 0,
+      Max           = 100,
+      Count         = 1,
+      UserPin       = true,
+      PinStyle      = "Both"
+    })
+  end
+  table.insert(controls,{
+    Name          = "Hue",
+    ControlType   = "Knob",
+    ControlUnit   = "Integer",
+    Min           = -180,
+    Max           = 180,
+    Count         = 1,
+    UserPin       = true,
+    PinStyle      = "Both"
+  })
+  table.insert(controls,{
+    Name          = "ColorTemperature",
+    ControlType   = "Knob",
+    ControlUnit   = "Integer",
+    Min           = 2000,
+    Max           = 10000,
+    Count         = 1,
+    UserPin       = true,
+    PinStyle      = "Both"
+  })
+  
+  -- ======= Presets =======
+  table.insert(controls,{
+    Name          = "PresetCurrentScreen",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "PresetName",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 16
+  })
+  table.insert(controls,{
+    Name          = "PresetLoad",
+    ControlType   = "Button",
+    ButtonType    = "Trigger",
+    UserPin       = true,
+    PinStyle      = "Both",
+    Count         = 16,
+  })
+  
+  -- ======= Layer Routing =======
+  table.insert(controls,{
+    Name          = "LayerCurrentScreen",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 1
+  })
+  table.insert(controls,{
+    Name          = "LayerName",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 32
+  })
+  table.insert(controls,{
+    Name          = "LayerCurrentSource",
+    ControlType   = "Text",
+    PinStyle      = "Output",
+    UserPin       = true,
+    Count         = 32
+  })
+  table.insert(controls,{
+    Name          = "LayerSource",
+    ControlType   = "Text",
+    PinStyle      = "Both",
+    UserPin       = true,
+    Count         = 32
+  })
+  return controls
+end
+
+function GetControlLayout(props)
+  local layout   = {}
+  local graphics = {}
+  local currentPage = pagenames[props["page_index"].Value]
+  local logo        = "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"
+  local controlMode = props["Control Mode"].Value
+  local presets     = props["Number of Presets"].Value
+  local layers      = props["Number of Layers"].Value
+  local model       = props["Model"].Value
+  local inputIndex  = 0
+  local outputIndex = 0
+  
+  local function Scaler(x, y, n, scaler)
+    return {x, (y + (scaler * (n - 1)))}
+  end
+  
+  if currentPage == "Setup" then
+    -- ====== Graphics ======
+    -- Groupboxes
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = White,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {0,0},
+      Size             = {577,447}
+    })
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = GBGray,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {7,121},
+      Size             = {563,318}
+    })
+  
+    -- Headers
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Connect to Device",
+      Position         = {68,131},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Device Status",
+      Position         = {68,224},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Connection Status",
+      Position         = {68,340},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+  
+    -- Text
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Setup",
+      Position         = {8,99},
+      Size             = {209,22},
+      Color            = Black,
+      FontSize         = 18,
+      Font             = "Roboto",
+      FontStyle        = "Bold",
+      HTextAlign       = "Left"
+    })
+    if controlMode == "UDP" then
+      for i, label in ipairs({"NIC:", "IP Address:"}) do
+        table.insert(graphics,{
+          Type             = "Label",
+          Text             = label,
+          Position         = {182, 157 + 26 * (i - 1)},
+          Size             = {70,16},
+          Color            = Black,
+          FontSize         = 12,
+          Font             = "Roboto",
+          FontStyle        = "Medium",
+          HTextAlign       = "Right"
+        })
+      end
+    elseif controlMode == "RS-232" then
+      for i, label in ipairs({"Baud Rate:", "Data Bits:", "Stop Bits:", "Parity:"}) do
+        table.insert(graphics,{
+          Type             = "Label",
+          Text             = label,
+          Position         = {44 + 122 * (i - 1), 170},
+          Size             = {70,16},
+          Color            = Black,
+          FontSize         = 12,
+          Font             = "Roboto",
+          FontStyle        = "Medium",
+          HTextAlign       = "Right"
+        })
+      end
+    end
+    for i, label in ipairs({"Fan", "Voltage", "Temperature", "Genlock Signal"}) do
+      table.insert(graphics,{
+        Type             = "Label",
+        Text             = label,
+        Position         = {47 + 130 * (i - 1), 246},
+        Size             = {93,16},
+        Color            = Black,
+        FontSize         = 12,
+        Font             = "Roboto",
+        FontStyle        = "Medium",
+        HTextAlign       = "Center"
+      })
+    end
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Device Name:",
+      Position         = {44,302},
+      Size             = {93,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Device ID:",
+      Position         = {304,302},
+      Size             = {93,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Version "..PluginInfo.Version,
+      HTextAlign       = "Right",
+      Fill             = Clear,
+      FontSize         = 9,
+      FontColor        = MainText,
+      Position         = {497,427},
+      Size             = {73,12}}
+    )
+  
+    -- ====== CONTROLS ======
+    layout["Status"] = {
+      PrettyName       = "Setup~Status",
+      Style            = "Text",
+      TextBoxStyle     = "Normal",
+      IsReadOnly       = true,
+      FontSize         = 14,
+      Position         = {107,367},
+      Size             = {364,48}
+    }
+    if controlMode == "UDP" then
+      layout["NIC"] = {
+        PrettyName       = "Setup~NIC",
+        Style            = "ComboBox",
+        Position         = {263,157},
+        Size             = {132,16}
+      }
+      layout["IPAddress"] = {
+        PrettyName       = "Setup~IP Address",
+        Style            = "Text",
+        Position         = {263,183},
+        Size             = {132,16}
+      }
+    elseif controlMode == "RS-232" then
+      for i, name in ipairs({"BaudRate", "DataBits", "StopBits", "Parity"}) do
+        layout[name] = {
+          PrettyName       = string.format("Setup~%s", name:gsub("%f[%u]%f[%L]", " ")),
+          Style            = "ComboBox",
+          Position         = {114 + 122 * (i - 1), 170},
+          Size             = {52,16}
+        }
+      end
+    end
+    layout["FanStatus"] = {
+      PrettyName     = "Setup~Fan Status",
+      Style          = "Led",
+      IsReadOnly     = true,
+      Position       = {83,268},
+      Size           = {21,21}
+    }
+    layout["VoltageStatus"] = {
+      PrettyName     = "Setup~Voltage Status",
+      Style          = "Led",
+      IsReadOnly     = true,
+      Position       = {213,268},
+      Size           = {21,21}
+    }
+    layout["TemperatureStatus"] = {
+      PrettyName     = "Setup~Temperature Status",
+      Style          = "Led",
+      IsReadOnly     = true,
+      Position       = {343,268},
+      Size           = {21,21}
+    }
+    layout["GenlockSignal"] = {
+      PrettyName     = "Setup~Genlock Signal",
+      Style          = "Led",
+      IsReadOnly     = true,
+      Position       = {473,268},
+      Size           = {21,21}
+    }
+    layout["DeviceName"] = {
+      PrettyName       = "Setup~Device Name",
+      Style            = "Text",
+      IsReadOnly       = true,
+      Color            = Gray,
+      StrokeColor      = StrokeGray,
+      Padding          = 1,
+      Position         = {143,302},
+      Size             = {130,16}
+    }
+    layout["DeviceID"] = {
+      PrettyName       = "Setup~Device ID",
+      Style            = "Text",
+      IsReadOnly       = true,
+      Color            = Gray,
+      StrokeColor      = StrokeGray,
+      Padding          = 1,
+      Position         = {403,302},
+      Size             = {130,16}
+    }
+  
+  elseif currentPage == "Input Status" then
+    -- ====== Graphics ======
+    -- Groupboxes
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = White,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {0,0},
+      Size             = Scaler(577, 220, ModelIOCount[model].input, 20)
+    })
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = GBGray,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {7,121},
+      Size             = Scaler(563, 91, ModelIOCount[model].input, 20)
+    })
+  
+     -- Headers
+     table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Input Slot Information",
+      Position         = {68,131},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+  
+    -- Text
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Input Status",
+      Position         = {8,99},
+      Size             = {209,22},
+      Color            = Black,
+      FontSize         = 18,
+      Font             = "Roboto",
+      FontStyle        = "Bold",
+      HTextAlign       = "Left"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Slot",
+      Position         = {68,157},
+      Size             = {36,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Connector Type",
+      Position         = {138,157},
+      Size             = {215,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Video Signal Status",
+      Position         = {386,157},
+      Size             = {123,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Version "..PluginInfo.Version,
+      HTextAlign       = "Right",
+      Fill             = Clear,
+      FontSize         = 9,
+      FontColor        = MainText,
+      Position         = Scaler(497, 200, ModelIOCount[model].input, 20),
+      Size             = {73,12}
+    })
+  
+    -- ====== CONTROLS ======
+    for i = 1, ModelIOCount[model].input do
+      layout[string.format("InputSlot %i", i)] = {
+        PrettyName       = string.format("Input Status~Input %i~Slot", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(68, 185, i, 20),
+        Size             = {36,16}
+      }
+      layout[string.format("InputConnectorType %i", i)] = {
+        PrettyName       = string.format("Input Status~Input %i~Connector Type", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(138, 185, i, 20),
+        Size             = {215,16}
+      }
+      for j = 1, 4 do
+        inputIndex = inputIndex + 1
+        layout[string.format("InputSignalStatus %i", inputIndex)] = {
+          PrettyName     = string.format("Input Status~Input %i~Signal Status~%i", i, j),
+          Style          = "Led",
+          IsReadOnly     = true,
+          Margin         = 1,
+          Position       = {385 + 36 * (j - 1), 185 + 20 * (i - 1)},
+          Size           = {16, 16}
+        }
+      end
+    end
+    
+  elseif currentPage == "Output Status" then
+    -- ====== Graphics ======
+    -- Groupboxes
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = White,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {0,0},
+      Size             = Scaler(577, 220, ModelIOCount[model].output, 20)
+    })
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = GBGray,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {7,121},
+      Size             = Scaler(563, 91, ModelIOCount[model].output, 20)
+    })
+  
+    -- Headers
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Output Slot Information",
+      Position         = {68,131},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+  
+    -- Text
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Output Status",
+      Position         = {8,99},
+      Size             = {209,22},
+      Color            = Black,
+      FontSize         = 18,
+      Font             = "Roboto",
+      FontStyle        = "Bold",
+      HTextAlign       = "Left"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Slot",
+      Position         = {11,157},
+      Size             = {36,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Connector Type",
+      Position         = {54,157},
+      Size             = {190,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Video Signal Status",
+      Position         = {248,157},
+      Size             = {320,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Version "..PluginInfo.Version,
+      HTextAlign       = "Right",
+      Fill             = Clear,
+      FontSize         = 9,
+      FontColor        = MainText,
+      Position         = Scaler(497, 200, ModelIOCount[model].output, 20),
+      Size             = {73,12}
+    })
+  
+    -- ====== CONTROLS ======
+    for i = 1, ModelIOCount[model].input do
+      layout[string.format("OutputSlot %i", i)] = {
+        PrettyName       = string.format("Output Status~Output %i~Slot", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(11, 185, i, 20),
+        Size             = {36,16}
+      }
+      layout[string.format("OutputConnectorType %i", i)] = {
+        PrettyName       = string.format("Output Status~Output %i~Connector Type", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(54, 185, i, 20),
+        Size             = {190,16}
+      }
+      for j = 1, 20 do
+        outputIndex = outputIndex + 1
+        layout[string.format("OutputLinkStatus %i", outputIndex)] = {
+          PrettyName     = string.format("Output Status~Output %i~Link Status~%i", i, j),
+          Style          = "Led",
+          IsReadOnly     = true,
+          Margin         = 2,
+          Position       = {248 + 16 * (j - 1), 185 + 20 * (i - 1)},
+          Size           = {16, 16}
+        }
+      end
+    end
+  
+  elseif currentPage == "Screen Control" then
+    -- ====== Graphics ======
+    -- Groupboxes
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = White,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {0,0},
+      Size             = {577,577}
+    })
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = GBGray,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {7,121},
+      Size             = {563,448}
+    })
+  
+    -- Headers
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Screen Selection",
+      Position         = {68,131},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Controls",
+      Position         = {68,268},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+    table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Color Preset",
+      Position         = {68,384},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+  
+    -- Text
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Screen Controls",
+      Position         = {8,99},
+      Size             = {209,22},
+      Color            = Black,
+      FontSize         = 18,
+      Font             = "Roboto",
+      FontStyle        = "Bold",
+      HTextAlign       = "Left"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Screen Selection:",
+      Position         = {160,157},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Refresh Screen Info:",
+      Position         = {160,183},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "*Screen Selection Affects all Controls for Presets, Layer Routing, and Below Controls",
+      Position         = {139,213},
+      Size             = {299,42},
+      Color            = Black,
+      FontSize         = 14,
+      Font             = "Roboto",
+      FontStyle        = "Light Italic",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Screen Blackout:",
+      Position         = {68,295},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Test Pattern Enable:",
+      Position         = {68,321},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Screen Freeze:",
+      Position         = {68,347},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Screen Brightness:",
+      Position         = {294,295},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Test Pattern:",
+      Position         = {294,321},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Screen Clear:",
+      Position         = {294,347},
+      Size             = {114,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Contrast:",
+      Position         = {68,404},
+      Size             = {77,37},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Brightness:",
+      Position         = {68,456},
+      Size             = {77,37},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Saturation:",
+      Position         = {68,508},
+      Size             = {77,37},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Hue:",
+      Position         = {320,456},
+      Size             = {77,37},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Color Temperature:",
+      Position         = {320,508},
+      Size             = {77,37},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Image Mode:",
+      Position         = {314,408},
+      Size             = {94,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Eye Saver Mode:",
+      Position         = {314,431},
+      Size             = {94,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Version "..PluginInfo.Version,
+      HTextAlign       = "Right",
+      Fill             = Clear,
+      FontSize         = 9,
+      FontColor        = MainText,
+      Position         = {497,557},
+      Size             = {73,12}
+    })
+  
+    -- ====== CONTROLS ======
+    layout["ScreenSelection"] = {
+      PrettyName       = "Screen Control~Screen Selection",
+      Style            = "ComboBox",
+      Position         = {285,157},
+      Size             = {132,16}
+    }
+    layout["RefreshScreenInfo"] = {
+      PrettyName       = "Screen Control~Refresh Screen Info",
+      Style            = "Button",
+      Position         = {285,183},
+      Size             = {36,16}
+    }
+    layout["ScreenBlackout"] = {
+      PrettyName       = "Screen Control~Screen Blackout",
+      Style            = "Button",
+      Position         = {198,295},
+      Size             = {36,16}
+    }
+    layout["TestPatternEnable"] = {
+      PrettyName       = "Screen Control~Test Pattern Enable",
+      Style            = "Button",
+      Position         = {198,321},
+      Size             = {36,16}
+    }
+    layout["ScreenFreeze"] = {
+      PrettyName       = "Screen Control~Screen Freeze",
+      Style            = "Button",
+      Position         = {198,347},
+      Size             = {36,16}
+    }
+    layout["ScreenBrightness"] = {
+      PrettyName       = "Screen Control~Screen Brightness",
+      Style            = "ComboBox",
+      Position         = {417,295},
+      Size             = {92,16}
+    }
+    layout["TestPattern"] = {
+      PrettyName       = "Screen Control~Test Pattern",
+      Style            = "ComboBox",
+      Position         = {417,321},
+      Size             = {92,16}
+    }
+    layout["ScreenClear"] = {
+      PrettyName       = "Screen Control~Screen Clear",
+      Style            = "Button",
+      Position         = {417,347},
+      Size             = {36,16}
+    }
+    layout["Contrast"] = {
+      PrettyName       = "Screen Control~Color Preset~Contrast",
+      Style            = "Fader",
+      FaderStyle       = "Classic",
+      Position         = {145,404},
+      Size             = {112,37}
+    }
+    layout["Brightness"] = {
+      PrettyName       = "Screen Control~Color Preset~Brightness",
+      Style            = "Fader",
+      FaderStyle       = "Classic",
+      Position         = {145,456},
+      Size             = {112,37}
+    }
+    layout["Saturation"] = {
+      PrettyName       = "Screen Control~Color Preset~Saturation",
+      Style            = "Fader",
+      FaderStyle       = "Classic",
+      Position         = {145,508},
+      Size             = {112,37}
+    }
+    layout["Hue"] = {
+      PrettyName       = "Screen Control~Color Preset~Hue",
+      Style            = "Fader",
+      FaderStyle       = "Classic",
+      Position         = {397,456},
+      Size             = {112,37}
+    }
+    layout["ColorTemperature"] = {
+      PrettyName       = "Screen Control~Color Preset~Color Temperature",
+      Style            = "Fader",
+      FaderStyle       = "Classic",
+      Position         = {397,508},
+      Size             = {112,37}
+    }
+    layout["ImageMode"] = {
+      PrettyName       = "Screen Control~Color Preset~Image Mode",
+      Style            = "ComboBox",
+      Position         = {417,408},
+      Size             = {92,16}
+    }
+    layout["EyeSaverMode"] = {
+      PrettyName       = "Screen Control~Color Preset~Eye Saver Mode",
+      Style            = "Button",
+      Position         = {417,431},
+      Size             = {36,16}
+    }
+  
+  elseif currentPage == "Presets" then
+    -- ====== Graphics ======
+    -- Groupboxes
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = White,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {0,0},
+      Size             = Scaler(577, 207, presets, 20)
+    })
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = GBGray,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {7,121},
+      Size             = Scaler(563, 78, presets, 20)
+    })
+  
+     -- Headers
+     table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Load Presets",
+      Position         = {68,131},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+  
+    -- Text
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Presets",
+      Position         = {8,99},
+      Size             = {209,22},
+      Color            = Black,
+      FontSize         = 18,
+      Font             = "Roboto",
+      FontStyle        = "Bold",
+      HTextAlign       = "Left"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Current Screen Selection:",
+      Position         = {326,102},
+      Size             = {145,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Regular",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Name",
+      Position         = {146,152},
+      Size             = {285,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Load",
+      Position         = {456,152},
+      Size             = {36,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Version "..PluginInfo.Version,
+      HTextAlign       = "Right",
+      Fill             = Clear,
+      FontSize         = 9,
+      FontColor        = MainText,
+      Position         = Scaler(497, 187, presets, 20),
+      Size             = {73,12}
+    })
+    for i = 1, presets do
+      table.insert(graphics,{
+        Type             = "Label",
+        Text             = string.format("Preset %i:", i),
+        Position         = Scaler(76, 171, i, 20),
+        Size             = {60,16},
+        Color            = Black,
+        FontSize         = 12,
+        Font             = "Roboto",
+        FontStyle        = "Regular",
+        HTextAlign       = "Right"
+      })
+    end
+  
+    -- ====== CONTROLS ======
+    layout["PresetCurrentScreen"] = {
+      PrettyName       = "Presets~Current Screen Selection",
+      Style            = "Text",
+      IsReadOnly       = true,
+      Color            = Gray,
+      StrokeColor      = StrokeGray,
+      Padding          = 1,
+      Position         = {471,102},
+      Size             = {99,16}
+    }
+    for i = 1, presets do
+      layout[string.format("PresetName %i", i)] = {
+        PrettyName       = string.format("Presets~Preset %i~Name", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(146, 171, i, 20),
+        Size             = {285,16}
+      }
+      layout[string.format("PresetLoad %i", i)] = {
+        PrettyName       = string.format("Presets~Preset %i~Load", i),
+        Style            = "Button",
+        Position         = Scaler(456, 171, i, 20),
+        Size             = {36,16}
+      }
+    end
+  
+  elseif currentPage == "Layer Routing" then
+    -- ====== Graphics ======
+    -- Groupboxes
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = White,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {0,0},
+      Size             = Scaler(577, 207, layers, 20)
+    })
+    table.insert(graphics,{
+      Type             = "GroupBox",
+      Fill             = GBGray,
+      StrokeWidth      = 0,
+      CornerRadius     = 0,
+      Position         = {7,121},
+      Size             = Scaler(563, 78, layers, 20)
+    })
+  
+     -- Headers
+     table.insert(graphics,{
+      Type             = "Header",
+      Text             = "Layer Source Selection",
+      Position         = {68,131},
+      Size             = {441,6},
+      FontSize         = 16,
+      Font             = "Roboto",
+      FontStyle        = "Medium"
+    })
+  
+    -- Text
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Layer Routing",
+      Position         = {8,99},
+      Size             = {209,22},
+      Color            = Black,
+      FontSize         = 18,
+      Font             = "Roboto",
+      FontStyle        = "Bold",
+      HTextAlign       = "Left"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Current Screen Selection:",
+      Position         = {326,102},
+      Size             = {145,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Regular",
+      HTextAlign       = "Right"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Name",
+      Position         = {71,152},
+      Size             = {158,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Current Source",
+      Position         = {239,152},
+      Size             = {158,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Source",
+      Position         = {407,152},
+      Size             = {158,16},
+      Color            = Black,
+      FontSize         = 12,
+      Font             = "Roboto",
+      FontStyle        = "Medium",
+      HTextAlign       = "Center"
+    })
+    table.insert(graphics,{
+      Type             = "Label",
+      Text             = "Version "..PluginInfo.Version,
+      HTextAlign       = "Right",
+      Fill             = Clear,
+      FontSize         = 9,
+      FontColor        = MainText,
+      Position         = Scaler(497, 187, layers, 20),
+      Size             = {73,12}
+    })
+    for i = 1, layers do
+      table.insert(graphics,{
+        Type             = "Label",
+        Text             = string.format("Layer %i:", i),
+        Position         = Scaler(7, 168, i, 20),
+        Size             = {56,16},
+        Color            = Black,
+        FontSize         = 12,
+        Font             = "Roboto",
+        FontStyle        = "Regular",
+        HTextAlign       = "Right"
+      })
+    end
+  
+    -- ====== CONTROLS ======
+    layout["LayerCurrentScreen"] = {
+      PrettyName       = "Layer Routing~Current Screen Selection",
+      Style            = "Text",
+      IsReadOnly       = true,
+      Color            = Gray,
+      StrokeColor      = StrokeGray,
+      Padding          = 1,
+      Position         = {471,102},
+      Size             = {99,16}
+    }
+    for i = 1, layers do
+      layout[string.format("LayerName %i", i)] = {
+        PrettyName       = string.format("Layer Routing~Layer %i~Name", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(71, 171, i, 20),
+        Size             = {158,16}
+      }
+      layout[string.format("LayerCurrentSource %i", i)] = {
+        PrettyName       = string.format("Layer Routing~Layer %i~Current Source", i),
+        Style            = "Text",
+        IsReadOnly       = true,
+        Color            = Gray,
+        StrokeColor      = StrokeGray,
+        Padding          = 1,
+        Position         = Scaler(239, 171, i, 20),
+        Size             = {158,16}
+      }
+      layout[string.format("LayerSource %i", i)] = {
+        PrettyName       = string.format("Layer Routing~Layer %i~Source", i),
+        Style            = "ComboBox",
+        Position         = Scaler(407, 171, i, 20),
+        Size             = {158,16}
+      }
+    end
+  end
+  
+  -- Logo
+  table.insert(graphics,{
+    Type             = "GroupBox",
+    Fill             = GBGray,
+    StrokeWidth      = 0,
+    CornerRadius     = 0,
+    Position         = {0,0},
+    Size             = {577,99}
+  })
+  table.insert(graphics,{
+    Type             = "Image",
+    Image            = logo,
+    Position         = {107,12},
+    Size             = {364,74}
+  })
+  return layout, graphics
+end
+
+function GetPins(props)
+  local pins = {}
+  if props["Control Mode"].Value == "RS-232" then 
+    table.insert(pins, {
+      Name      = "Serial",
+      Direction = "input",
+      Domain    = "serial"
+    })
+  end
+  return pins
+end
+
+--Start event based logic
+if Controls then
+  --*** Required modules ***
+  JSON                = require("rapidjson")
+  
+  --*** Control Aliases ***
+  -- Setup Controls
+  Status              = Controls.Status
+  NIC                 = Controls.NIC
+  IPAddress           = Controls.IPAddress
+  BaudRate            = Controls.BaudRate
+  DataBits            = Controls.DataBits
+  StopBits            = Controls.StopBits
+  Parity              = Controls.Parity
+  FanStatus           = Controls.FanStatus
+  VoltageStatus       = Controls.VoltageStatus
+  TemperatureStatus   = Controls.TemperatureStatus
+  GenlockSignal       = Controls.GenlockSignal
+  DeviceName          = Controls.DeviceName
+  DeviceID            = Controls.DeviceID
+  
+  -- Input Status Controls
+  InputSlot           = Controls.InputSlot
+  InputConnectorType  = Controls.InputConnectorType
+  InputSignalStatus   = Controls.InputSignalStatus
+  
+  -- Output Status Controls
+  OutputSlot          = Controls.OutputSlot
+  OutputConnectorType = Controls.OutputConnectorType
+  OutputLinkStatus    = Controls.OutputLinkStatus
+  
+  -- Screen Control Controls
+  ScreenSelection     = Controls.ScreenSelection
+  RefreshScreenInfo   = Controls.RefreshScreenInfo
+  ScreenBlackout      = Controls.ScreenBlackout
+  TestPatternEnable   = Controls.TestPatternEnable
+  ScreenFreeze        = Controls.ScreenFreeze
+  ScreenBrightness    = Controls.ScreenBrightness
+  TestPattern         = Controls.TestPattern
+  ScreenClear         = Controls.ScreenClear
+  ImageMode           = Controls.ImageMode
+  EyeSaverMode        = Controls.EyeSaverMode
+  Contrast            = Controls.Contrast
+  Brightness          = Controls.Brightness
+  Saturation          = Controls.Saturation
+  Hue                 = Controls.Hue
+  ColorTemperature    = Controls.ColorTemperature
+  
+  -- Presets Controls
+  PresetCurrentScreen = Controls.PresetCurrentScreen
+  PresetName          = Controls.PresetName
+  PresetLoad          = Controls.PresetLoad
+  
+  -- Layer Routing Controls
+  LayerCurrentScreen  = Controls.LayerCurrentScreen
+  LayerName           = Controls.LayerName
+  LayerCurrentSource  = Controls.LayerCurrentSource
+  LayerSource         = Controls.LayerSource
+  
+  --Global storage for nic data
+  NicData = {}
+  
+  --A Simple Queue Class
+  Queue = {}
+  
+  function Queue:New()
+    list = { first = 1, last = 0 }
+    self.__index = self
+    setmetatable(list, self)
+    return list
+  end
+  
+  function Queue:Push(value)
+    self.last = self.last + 1 
+    self[self.last] = value
+  end
+  
+  function Queue:PushFirst(value)
+    self.first = self.first - 1 
+    self[self.first] = value
+  end
+  
+  function Queue:Pop()
+    if self.first > self.last then 
+      error("Queue is empty!") 
+    end
+    local value=self[self.first]
+    self[self.first] = nil
+    self.first = self.first + 1
+    return value
+  end
+  
+  function Queue:IndexOf(value)
+    for i=self.first,self.last do
+      if self[i] == value then
+        return i
+      end
+    end
+    return nil
+  end
+  
+  function Queue:Clear()
+    for i=self.first,self.last do
+      self[i] = nil
+    end
+    self.first = 1
+    self.last = 0
+  end
+  
+  function Queue:IsEmpty()
+    return self.first > self.last
+  end
+  
+  -- Variables and flags
+  DebugTx            = false
+  DebugRx            = false
+  DebugFunction      = false
+  DebugPrint         = Properties["Debug Print"].Value
+  ControlMode        = Properties["Control Mode"].Value
+  Model              = Properties["Model"].Value
+  InputCount         = ModelIOCount[Model].input
+  OutputCount        = ModelIOCount[Model].output 
+  Buffer             = ""
+  CorrectModel       = false
+  IsConnected        = false
+  ScreenID           = ScreenSelection.String ~= "" and JSON.decode(ScreenSelection.String).id or 0
+  OutputIDs          = {} 
+  PresetIDs          = {}
+  ScreenInputInfo    = {}
+  Layers             = {}
+  Inputs             = {}
+  Incrementer        = 0
+  DebounceOn         = true
+  
+  
+  -- Sockets and services
+  Novastar           = SerialPorts[1]
+  Udp                = UdpSocket.New()
+  UdpDiscover        = UdpSocket.New()
+  UdpPort            = 6000
+  
+  -- Timers, tables, and constants
+  StatusState        = { 
+    OK           = 0, 
+    COMPROMISED  = 1, 
+    FAULT        = 2, 
+    NOTPRESENT   = 3, 
+    MISSING      = 4, 
+    INITIALIZING = 5
+  } 
+  PollTimes          = {
+    ["2400"]   = 45,
+    ["4800"]   = 25,
+    ["9600"]   = 20,
+    ["19200"]  = 15,
+    ["38400"]  = 15,
+    ["57600"]  = 15,
+    ["115200"] = 15
+  }
+  PollTimer          = Timer.New()
+  PollTime           = 10
+  ConnectionTimer    = Timer.New()
+  BufferTimer        = Timer.New()
+  BufferTime         = 0.1
+  Debounce           = Timer.New()
+  DebounceTime       = 0.5
+  PollOffline        = Timer.New()
+  SetLayersTimer     = Timer.New()
+  SetLayersTime      = 0.5
+  KnobDebounce       = Timer.New()
+  KnobDebounceTime   = 0.5
+  CommandQueue       = Queue:New()
+  CommandInFlight    = false
+  InterfaceTypes     = {
+    "EXP",
+    "SL DVI",
+    "DL DVI", 
+    "HDMI 1.3", 
+    "HDMI 1.4",
+    "HDMI 2.0", 
+    "DP 1.1", 
+    "DP 1.2", 
+    "3G-SDI",
+    "VGA",
+    "CVBS",
+    "YPbPr",
+    "RJ45",
+    "USB",
+    "HDBaseT",
+    "HDBaseT-4K",
+    "Optical Fiber",
+    "12G-SDI"
+  }
+  LinkCount          = {
+    Input  = 4,
+    Output = 20
+  }
+  ModelTotalSlots    = {
+    [7]  = "H2",
+    [14] = "H5",
+    [21] = "H9",
+    [41] = "H15",
+    -- Possibly for future development?
+    -- [26] = "H9 Enhanced",
+    -- [47] = "H15 Enhanced"
+  }
+  BaudRateValues     = {
+    "2400",
+    "4800",
+    "9600",
+    "19200",
+    "38400",
+    "57600",
+    "115200"
+  }
+  DataBitsValues    = {
+    "7",
+    "8"
+  }
+  ParityValues       = {
+    "N",
+    "O",
+    "E"
+  }
+  StopBitsValues     = {
+    "1",
+    "2"
+  }
+  BrightnessChoices  = {
+    "0",
+    "20",
+    "40",
+    "60",
+    "80",
+    "100"
+  }
+  TestPatternChoices = {
+    {Text = "Black", Value = 0},
+    {Text = "Red", Value = 1},
+    {Text = "Green", Value = 2},
+    {Text = "Blue", Value = 3},
+    {Text = "White", Value = 4},
+    {Text = "Vertical Bars", Value = 5},
+    {Text = "Horizontal Bars", Value = 6},
+    {Text = "Chessboard", Value = 7},
+    {Text = "Horizontal Lines", Value = 512},
+    {Text = "Vertical Lines", Value = 513},
+    {Text = "Forward Slashes", Value = 514},
+    {Text = "Backward Slashes", Value = 515},
+    {Text = "Grid", Value = 516},
+    {Text = "Cross Hatch", Value = 517},
+    {Text = "Red Gradient (H)", Value = 260},
+    {Text = "Green Gradient (H)", Value = 261},
+    {Text = "Blue Gradient (H)", Value = 262},
+    {Text = "White Gradient (H)", Value = 263},
+    {Text = "Red Gradient (V)", Value = 256},
+    {Text = "Green Gradient (V)", Value = 257},
+    {Text = "Blue Gradient (V)", Value = 258},
+    {Text = "White Gradient (V)", Value = 259},
+  }
+  ImageModeChoices   = {
+    "Standard",
+    "Document",
+    "Conference",
+    "Video"
+  }
+  
+  -- Helper functions
+  -- A function to determine common print statement scenarios for troubleshooting
+  function SetupDebugPrint()
+    if DebugPrint == "Tx/Rx" then
+      DebugTx,DebugRx = true,true
+    elseif DebugPrint == "Tx" then
+      DebugTx = true
+    elseif DebugPrint == "Rx" then
+      DebugRx = true
+    elseif DebugPrint == "Function Calls" then
+      DebugFunction = true
+    elseif DebugPrint == "All" then
+      DebugTx,DebugRx,DebugFunction = true,true,true
+    end
+  end
+  
+  function GetIndexInTable(tbl, val)
+    if DebugFunction then print("GetIndexInTable() Called") end
+    for i, v in ipairs(tbl) do
+      if v == val then
+        return i
+      end
+    end
+    return nil
+  end
+  
+  -- Update the Status control
+  function ReportStatus(state, message)
+    if DebugFunction then print("ReportStatus() Called") end
+    local message = message or ""
+    Status.Value  = StatusState[state]
+    Status.String = message
+  end
+  
+  -- Disable Controls
+  function DisableControls(ctrls)
+    if DebugFunction then print("DisableControls() Called") end
+    for ix, ctrl in pairs(ctrls) do 
+      ctrl.IsDisabled = true
+    end
+  end
+  
+  -- Clear Strings
+  function ClearStrings(ctrls)
+    if DebugFunction then print("ClearStrings() Called") end
+    for ix, ctrl in pairs(ctrls) do 
+      ctrl.String = ""
+    end
+  end
+  
+  -- Clear Choices
+  function ClearChoices(ctrls)
+    if DebugFunction then print("ClearChoices() Called") end
+    for ix, ctrl in pairs(ctrls) do 
+      ctrl.Choices = {}
+    end
+  end
+  
+  -- Clear LEDs
+  function ClearLEDs(ctrls)
+    if DebugFunction then print("ClearLEDs() Called") end
+    for ix, ctrl in pairs(ctrls) do 
+      ctrl.Value = 0
+    end
+  end
+  
+  function DisableColorPresetCtls()
+    if DebugFunction then print("DisableColorPresetCtls() Called") end
+    local ctls = {Contrast, Brightness, Saturation, Hue, ColorTemperature}
+    if EyeSaverMode.Value == 1 then
+      for i, ctl in pairs(ctls) do
+        ctl.IsDisabled = true
+      end
+    else
+      for i, ctl in pairs(ctls) do
+        ctl.IsDisabled = false
+      end
+    end
+  end
+  
+  -- Get Table Length
+  function GetTableLength(tbl)
+    if DebugFunction then print("GetTableLength() Called") end
+    local length = 0
+    for i, v in pairs(tbl) do
+      length = length + 1
+    end
+    return length
+  end
+  
+  function DoesTableContain(tbl, el)
+    if DebugFunction then print("DoesTableContain() Called") end
+    for i, v in pairs(tbl) do
+      if v == el then
+        return true
+      end
+    end
+    return false
+  end
+  
+  function SortTblByKeys(tbl)
+    if DebugFunction then print("SortTblByKeys() Called") end
+    local keys = {}
+    local sortedTbl = {}
+    for k in pairs(tbl) do
+      table.insert(keys, k) 
+    end
+    local function tableSort(i, j) return tonumber(string.match(i, "%d+")) < tonumber(string.match(j, "%d+")) end
+    table.sort(keys, tableSort)
+    for _, k in ipairs(keys) do
+      table.insert(sortedTbl, tbl[k])
+    end
+    return sortedTbl
+  end
+  
+  function SetInitialValues()
+    if DebugFunction then print("SetInitialValues() Called") end
+    if ControlMode == "RS-232" then
+      Buffer = ""
+      BaudRate.Choices = BaudRateValues
+      if BaudRate.String == "" then BaudRate.String = "115200" end
+      DataBits.Choices = DataBitsValues
+      if DataBits.String == "" then DataBits.String = "8" end
+      StopBits.Choices = StopBitsValues
+      if StopBits.String == "" then StopBits.String = "1" end 
+      Parity.Choices   = ParityValues
+      if Parity.String == "" then Parity.String = "N" end
+    elseif ControlMode == "UDP" then
+      SetNicChoices()
+    end
+  end
+  
+  function SetValsOnConnect() 
+    if DebugFunction then print("SetValsOnConnect() Called") end
+    ScreenBrightness.Choices = BrightnessChoices
+    TestPattern.Choices      = TestPatternChoices
+    ImageMode.Choices        = ImageModeChoices
+  end
+  
+  -- Send data to device
+  function Send(cmd, discover)
+    if DebugFunction then print("Send() Called") end
+    local udpType = discover and UdpDiscover or Udp
+    local command = string.format("[%s]", JSON.encode(cmd))
+    if DebugTx then print("Tx: "..command) end
+    CommandQueue:Push(command)
+    if not CommandInFlight then
+      CommandInFlight = true
+      if ControlMode == "UDP" then 
+        local function udpSend(ip, port, cmd)
+          udpType:Send(ip, port, cmd)
+        end
+        local ok, udpsend = pcall(udpSend, IPAddress.String, UdpPort, CommandQueue:Pop()) -- This is required to make sure plugin doesn't crash on initialization if IP is not reachable
+        if not ok then print(udpsend) end 
+      elseif ControlMode == "RS-232" then
+        if Novastar.IsOpen then
+          Novastar:Write(CommandQueue:Pop())
+        end
+      end
+    end
+  end
+  
+  -- A function to clear controls/flags/variables and clears tables
+  function ClearVariables() 
+    if DebugFunction then print("ClearVariables() Called") end
+    Buffer                     = "" 
+    CommandQueue:Clear()
+    FanStatus.Value            = 0 
+    VoltageStatus.Value        = 0 
+    TemperatureStatus.Value    = 0
+    GenlockSignal.Value        = 0
+    EyeSaverMode.Value         = 0
+    TestPatternEnable.Value    = 0
+    ScreenBlackout.Value       = 0
+    ScreenFreeze.Value         = 0
+    DeviceName.String          = ""
+    DeviceID.String            = ""
+    PresetCurrentScreen.String = ""
+    LayerCurrentScreen.String  = ""
+    ScreenBrightness.String    = ""
+    ScreenBrightness.Choices   = {}
+    TestPattern.String         = ""
+    TestPattern.Choices        = {}
+    ImageMode.String           = ""
+    ImageMode.Choices          = {}
+    ClearStrings(InputSlot)
+    ClearStrings(InputConnectorType)
+    ClearStrings(OutputSlot)
+    ClearStrings(OutputConnectorType)
+    ClearStrings(PresetName)
+    ClearStrings(LayerName)
+    ClearStrings(LayerCurrentSource)
+    ClearStrings(LayerSource)
+    ClearChoices(LayerSource)
+    ClearLEDs(InputSignalStatus)
+    ClearLEDs(OutputLinkStatus)
+    DisableControls(InputSignalStatus)
+    DisableControls(OutputLinkStatus)
+  end
+  
+  -- A function to get available NICs
+  function SetNicChoices()
+    NIC.Choices      = {}
+    local nics       = Network.Interfaces()
+    local names      = {}
+    for ix, nic in ipairs(nics) do
+      NicData[nic.Interface] = nic.Address
+      table.insert(names, nic.Interface)
+    end
+    NIC.Choices = names
+    local name = NIC.String ~= nil and NIC.String or ""
+    if NIC.String == "" or not DoesTableContain(names, name) then
+      NIC.String = names[1]
+    end
+  end
+  
+  function SetPollTime()
+    if DebugFunction then print("SetPollTime() Called") end
+    if ControlMode == "UDP" then 
+      return PollTime
+    elseif ControlMode == "RS-232" then
+      return PollTimes[BaudRate.String]
+    end
+  end
+  
+  function Discover()
+    if DebugFunction then print("Discover() Called") end
+    UdpDiscover:Close()
+    CommandInFlight = false
+    local function udpOpen(ip, port)
+      UdpDiscover:Open(ip, port)
+    end
+    local ok, udpopen = pcall(udpOpen, NicData[NIC.String], nil)
+    if not ok then print(udpopen) end
+    if IPAddress.String ~= "" and IsIPValid(IPAddress.String) then
+      print("Attempting to Reconnect...")
+      GetInitialData(true)    
+    end
+    Timer.CallAfter(function()
+      if Status.Value ~= 0 then ReportStatus("MISSING", "Unable to Connect to Device") end
+      UdpDiscover:Close()
+    end, 5) 
+  end
+  
+  -- A function to trigger other functions or set flags if disconnected
+  function Disconnected(state, message, clearScreen) 
+    if DebugFunction then print("Disconnected() Called") end
+    ReportStatus(state, message) 
+    CommandInFlight = false
+    IsConnected     = false
+    if message ~= "No IP Address" and message ~= "Invalid IP Address" then
+      PollOffline:Start(SetPollTime())
+    end 
+    PollTimer:Stop()
+    ClearVariables()
+    if clearScreen then 
+      ScreenSelection.String     = ""
+      ScreenSelection.Choices    = {} 
+    end
+  end
+  
+  function Disconnect()
+    if DebugFunction then print("Disconnect() Called") end
+    if ControlMode == "UDP" then
+      Udp:Close()
+      UdpDiscover:Close()
+      PollTimer:Stop()
+    elseif ControlMode == "RS-232" then
+      Novastar:Close()
+    end
+  end
+  
+  function IsIPValid(ip)
+    if DebugFunction then print("IsIPValid() Called") end
+    local octets = {ip:match("^(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)$")}
+    if #octets ~= 4 then return false end
+    for i, octet in ipairs(octets) do 
+      if tonumber(octet) < 0 or tonumber(octet) > 255 then 
+        return false 
+      end
+    end
+    return true
+  end 
+  
+  function CheckIP()
+    if DebugFunction then print("CheckIP() Called") end
+    if IPAddress.String == "" then
+      Disconnected("MISSING", "No IP Address", true)
+    elseif not IsIPValid(IPAddress.String) then 
+      Disconnected("MISSING", "Invalid IP Address", true)
+    else
+      local function udpOpen(ip, port)
+        Udp:Open(ip, port)
+      end
+      local ok, udpopen = pcall(udpOpen, NicData[NIC.String], nil)
+      if not ok then print(udpopen) end
+      Disconnected("MISSING", "Unable to Connect to Device", false) 
+      GetInitialData()
+    end
+  end
+   
+  -- A function to handle connection
+  function Connect()
+    if DebugFunction then print("Connect() Called") end
+    ClearVariables() 
+    if ControlMode == "UDP" then
+      CheckIP() 
+    elseif ControlMode == "RS-232" then
+      if Novastar.IsOpen then  -- If already open, close and restart
+        Novastar:Close()
+      end
+      Disconnected("MISSING", "Connecting...", false)
+      Novastar:Open(tonumber(BaudRate.String), tonumber(DataBits.String), Parity.String)
+    end
+  end
+   
+  -- A function to trigger other functions once connected
+  function Connected()
+    if DebugFunction then print("Connected() Called") end
+    ReportStatus("OK")
+    SetValsOnConnect() 
+    PollTimer:Start(SetPollTime()) 
+  end
+  
+  function GetInitialData(discover)
+    if DebugFunction then print("GetInitialData() Called") end
+    IsConnected = false
+    GetDeviceInfo(discover) 
+    GetCurrentScreen(discover)  
+  end 
+  
+  function RefreshSelectedScreenInfo(id)
+    if DebugFunction then print("RefreshSelectedScreenInfo() Called") end
+    local screenid = type(id) == "userdata" and ScreenID or id
+    GetScreenInfo(screenid)
+    GetPresetEnum(screenid)
+    GetLayerEnum(screenid)
+  end
+  
+  -- Poll function for updates and state changes
+  function PollDevice()
+    if DebugFunction then print("PollDevice() Called") end
+    if not IsConnected then Disconnected("MISSING", "Unable to Connect to Device", true) end
+    GetInitialData()
+  end
+  
+  function SelectScreen()
+    if DebugFunction then print("SelectScreen() Called") end
+    PresetCurrentScreen.String = JSON.decode(ScreenSelection.String).Text
+    LayerCurrentScreen.String  = JSON.decode(ScreenSelection.String).Text
+    ScreenID = JSON.decode(ScreenSelection.String).id
+    RefreshSelectedScreenInfo(ScreenID) 
+  end
+  
+  function CheckConnectivity()
+    if DebugFunction then print("CheckConnectivity() Called") end
+    if not IsConnected then Disconnected("MISSING", "Unable to Connect to Device", true) end
+    if ControlMode == "UDP" then
+      Discover()
+    elseif ControlMode == "RS-232" then
+      print("Attempting to Reconnect...")
+      if Novastar.IsOpen then  -- If already open, close and restart
+        Novastar:Close()
+      end
+      CommandInFlight = false
+      Novastar:Open(tonumber(BaudRate.String), tonumber(DataBits.String), Parity.String)
+    end
+  end
+  
+  function SetLayersInfo()
+    if DebugFunction then print("SetLayersInfo() Called") end
+    SetLayersTimer:Stop()
+    for i, tbl in ipairs(Layers) do
+      tbl.input = Inputs[i]
+    end
+    local function tableSort(layer1, layer2) return layer1.layerId < layer2.layerId end -- Custom sort of layer data by layerId
+    table.sort(Layers, tableSort)
+    for i, layer in ipairs(Layers) do
+      if layer.input ~= nil and i < 33 then
+        LayerCurrentSource[i].String = layer.input
+        LayerName[i].String          = layer.name
+        LayerSource[i].Choices       = ScreenInputInfo
+        LayerSource[i].String        = layer.input
+      end
+    end
+  end
+  
+  function LookupInput(id)
+    if DebugFunction then print("LookupInput() Called") end
+    for i, input in ipairs(ScreenInputInfo) do
+      if id == input.id then
+        return input.Text
+      end
+    end
+  end
+  
+  function ParseFanStatusValue(fanList)
+    if DebugFunction then print("ParseFanStatusValue() Called") end
+    for ix, fan in ipairs(fanList) do 
+      if fan.status == 1 then return 1 end
+    end
+    return 0
+  end
+  
+  function CheckModel(slotList)
+    if DebugFunction then print("CheckModel() Called") end
+    local totalCards = ModelIOCount[Model].input + ModelIOCount[Model].output
+    if totalCards ~= #slotList then 
+      if ModelTotalSlots[#slotList] ~= nil then
+        ReportStatus("FAULT", string.format("Wrong Model Type. Select %s", ModelTotalSlots[#slotList]))
+      else
+        ReportStatus("FAULT", string.format("Unsupported Model"))
+      end
+      CorrectModel = false
+    else
+      Connected()
+      CorrectModel = true
+    end
+  end
+  
+  function GenerateTestPattern(ctl)
+    if DebugFunction then print("GenerateTestPattern() Called") end
+    if ctl.String:find("Value") then
+      return JSON.decode(TestPattern.String).Value
+    else
+      if TestPatternEnable.Value == 1 then
+        return 65535
+      elseif TestPatternEnable.Value == 0 then
+        if TestPattern.String == "" then
+          return 0
+        else   
+          return JSON.decode(TestPattern.String).Value
+        end
+      end
+    end
+    return
+  end
+  
+  function CreateCardTypeString(interfaces)
+    if DebugFunction then print("CreateCardTypeString() Called") end
+    local connectors    = ""
+    for ix, interface in ipairs(interfaces) do
+      local interfaceType = InterfaceTypes[interface.interfaceType] 
+      if interface.interfaceType == 6 then  -- Not documented in API. If interfaceType is HDMI 2.0 (6), then functionType denotes if it is HDMI 2.0 or DP 1.2.
+        if interface.functionType == 2 then
+          interfaceType = "HDMI 2.0"
+        elseif interface.functionType == 3 then
+          interfaceType = "DP 1.2"
+        end
+      end
+      connectors = connectors == "" and interfaceType or string.format("%s | %s", connectors, interfaceType)
+    end
+    return connectors
+  end
+  
+  function CreateOutputLinksTbl(cardInfo)
+    if DebugFunction then print("CreateOutputLinks() Called") end
+    local linkStatusTbl = SortTblByKeys(cardInfo.linkStatus)
+    local lightStatusTbl = SortTblByKeys(cardInfo.lightStatus)
+    local outputLinks = {}
+    for i, link in pairs(linkStatusTbl) do
+      table.insert(outputLinks, link)
+    end
+    for i, light in pairs(lightStatusTbl) do
+      table.insert(outputLinks, light)
+    end
+    return outputLinks
+  end
+   
+  function SetInputVideoSignalStatus(interfaces, index)
+    if DebugFunction then print("SetInputVideoSignalStatus() Called") end
+    local ix         = (LinkCount["Input"] * (index - 1))
+    local validCtrls = {}
+    for i = ix + 1, ix + #interfaces do 
+      InputSignalStatus[i].IsDisabled = false
+      table.insert(validCtrls, InputSignalStatus[i])
+    end
+    for i, interface in ipairs(interfaces) do
+      validCtrls[i].Value = interface.iSignal
+    end
+  end
+  
+  function SetOutputLinkStatus(cardInfo, index)
+    if DebugFunction then print("SetInputVideoSignalStatus() Called") end
+    local portCount  = GetTableLength(cardInfo.linkStatus) + GetTableLength(cardInfo.lightStatus)
+    local ix         = (LinkCount["Output"] * (index - 1))
+    local validCtrls = {}
+    if cardInfo.cardType == 2 then
+      for i = ix + 1, ix + portCount do
+        OutputLinkStatus[i].IsDisabled = false
+        table.insert(validCtrls, OutputLinkStatus[i])
+      end
+      for i, linkstatus in ipairs(CreateOutputLinksTbl(cardInfo)) do
+        validCtrls[i].Value = linkstatus
+      end
+    else
+      for i = ix + 1, ix + #cardInfo.interfaces do
+        OutputLinkStatus[i].IsDisabled = false
+        table.insert(validCtrls, OutputLinkStatus[i])
+      end
+      for i, interface in ipairs(cardInfo.interfaces) do
+        validCtrls[i].Value = interface.iSignal
+      end
+    end
+  end 
+  
+  function ParseCardSlotInfo(slotList)
+    if DebugFunction then print("ParseCardSlotInfo() Called") end
+    ScreenInputInfo = {}
+    for i = 1, InputCount do
+      InputSlot[i].String = slotList[i].slotId + 1
+      if slotList[i].cardType == 0 then
+        InputConnectorType[i].String = "No Card Inserted"
+      else
+        InputConnectorType[i].String = CreateCardTypeString(slotList[i].interfaces)
+        SetInputVideoSignalStatus(slotList[i].interfaces, i)
+        if slotList[i].cardType ~= 4 then                                            -- If card type is not the MVR (preview) card. Only applies to H2 (as slot 3 can be input card OR preview card).
+          for ix, interface in ipairs(slotList[i].interfaces) do
+            table.insert(ScreenInputInfo, {
+              Text = string.format("Slot %i - In %i %s", slotList[i].slotId + 1, interface.interfaceId + 1, InterfaceTypes[interface.interfaceType]),
+              id   = (slotList[i].slotId * 4) + interface.interfaceId
+            })
+          end
+        end
+      end
+    end
+    for i = #slotList - OutputCount + 1, #slotList do
+      OutputSlot[i-InputCount].String = slotList[i].slotId + 1
+      if slotList[i].cardType == 0 then 
+        OutputConnectorType[i - InputCount].String = "No Card Inserted"
+      else 
+        local linkLength  = slotList[i].linkstatus and GetTableLength(slotList[i].linkstatus) or 0
+        local lightLength = slotList[i].lightstatus and GetTableLength(slotList[i].lightstatus) or 0 
+        local cardInfo = {
+          cardType    = slotList[i].cardType,
+          interfaces  = slotList[i].interfaces,
+          linkStatus  = slotList[i].linkstatus and slotList[i].linkstatus or {},
+          lightStatus = slotList[i].lightstatus and slotList[i].lightstatus or {} 
+        }
+        if slotList[i].cardType == 2 then
+          OutputConnectorType[i - InputCount].String = string.format("RJ45 x %i | Optical Fiber x %i", linkLength, lightLength)
+        else
+          OutputConnectorType[i - InputCount].String = CreateCardTypeString(slotList[i].interfaces)
+        end
+        SetOutputLinkStatus(cardInfo, i - InputCount)
+      end
+    end
+  end
+  
+  function ParseDevInfo(rx)
+    if DebugFunction then print("ParseDevInfo() Called") end
+    DeviceName.String       = rx.name
+    DeviceID.String         = rx.deviceId
+    VoltageStatus.Value     = rx.volt
+    GenlockSignal.Value     = rx.genlock.extSignal
+    TemperatureStatus.Value = rx.temp
+    FanStatus.Value         = ParseFanStatusValue(rx.fanList)
+    ClearLEDs(InputSignalStatus)
+    ClearLEDs(OutputLinkStatus)
+    DisableControls(InputSignalStatus)
+    DisableControls(OutputLinkStatus)
+    ParseCardSlotInfo(rx.slotList)
+  end
+  
+  function ParseCurrentScreen(rx)
+    if DebugFunction then print("ParseCurrentScreen() Called") end
+    if #rx.screens ~= 0 then
+      local allScreens  = {}
+      local screenNames = {}
+      for ix, screen in ipairs(rx.screens) do
+        table.insert(allScreens, { 
+          Text = screen.name, 
+          id   = screen.screenId 
+        })
+        table.insert(screenNames, screen.name)
+      end
+      ScreenSelection.Choices = allScreens 
+      if ScreenSelection.String == "" or not DoesTableContain(screenNames, JSON.decode(ScreenSelection.String).Text) then
+        ScreenSelection.String = JSON.encode(allScreens[1]) 
+      end
+      PresetCurrentScreen.String = JSON.decode(ScreenSelection.String).Text
+      LayerCurrentScreen.String  = JSON.decode(ScreenSelection.String).Text
+      ScreenID                   = JSON.decode(ScreenSelection.String).id
+    else
+      ScreenID = nil
+    end
+    GetScreenInfo(ScreenID) 
+    GetPresetEnum(ScreenID)
+    GetLayerEnum(ScreenID)
+  end
+  
+  function ParseScreenInfo(rx)
+    if DebugFunction then print("ParseScreenInfo() Called") end
+    OutputIDs = {}
+    for i, interface in ipairs(rx.outputMode.screenInterfaces) do
+      if interface.outputId ~= 255 then       
+        table.insert(OutputIDs, interface.outputId)
+      end
+    end
+    ScreenBlackout.Value    = rx.Ftb.enable == 0 and 1 or 0
+    ScreenFreeze.Value      = rx.Freeze.enable
+    ScreenBrightness.String = rx.brightness
+    ImageMode.String        = ImageModeChoices[rx.usedImageQualityMode + 1]
+    EyeSaverMode.Value      = rx.usedEyeCare
+    DisableColorPresetCtls()
+    GetTestPattern(OutputIDs[1])
+  end
+  
+  function ParseTestPattern(rx)
+    if DebugFunction then print("ParseTestPattern() Called") end
+    if rx.testPattern.testPattern == 65535 then
+      TestPatternEnable.Value = 0
+      TestPattern.String      = ""
+    else
+      TestPatternEnable.Value = 1
+    end
+    for i, pattern in ipairs(TestPatternChoices) do
+      if pattern.Value == rx.testPattern.testPattern then
+        TestPattern.String = JSON.encode({Text=pattern.Text,Value=rx.testPattern.testPattern})
+      end
+    end
+    Contrast.Value         = rx.imageQuality.contrast.all
+    Brightness.Value       = rx.imageQuality.brightness.all
+    Saturation.Value       = rx.imageQuality.saturation
+    Hue.Value              = rx.imageQuality.hue
+    ColorTemperature.Value = rx.imageQuality.colorTemperature
+  end
+  
+  function ParsePresetEnum(rx)
+    if DebugFunction then print("ParsePresetEnum() Called") end
+    ClearStrings(PresetName)
+    PresetIDs     = {}
+    local presets = rx.presets
+    for i, preset in ipairs(presets) do
+      index = preset.presetId + 1               -- starts at 0, so index the value by one to ensure we always match the listing on the web ui based on the Id
+      if i <= #PresetName then                  -- This avoids an "attempt to index a nil value" error if the number of presets on the Novastar exceeds the max limit on the plugin
+        PresetName[index].String = preset.name
+        table.insert(PresetIDs, preset.presetId)
+      end
+    end
+  end
+  
+  function ParseLayerEnum(rx)
+    if DebugFunction then print("ParseLayerEnum() Called") end
+    Layers   = {}
+    Inputs   = {}
+    for i, layer in ipairs(rx.screenLayers) do
+      table.insert(Layers,{
+        name    = layer.name,
+        layerId = layer.layerId
+      })
+      GetCurrentSourceOnLayer(layer.layerId)
+    end
+    -- This clears the rest of the layer source selection controls
+    if #rx.screenLayers == 0 then
+      ClearStrings(LayerName)
+      ClearStrings(LayerCurrentSource)
+      ClearStrings(LayerSource)
+      ClearChoices(LayerSource)
+    elseif #rx.screenLayers > 31 then
+      return
+    else
+      for i = #Layers + 1, #LayerCurrentSource do
+        LayerName[i].String          = ""
+        LayerCurrentSource[i].String = ""
+        LayerSource[i].String        = ""
+        LayerSource[i].Choices       = {}
+      end
+    end
+  end
+  
+  function ParseCurrentLayerSource(rx)
+    if DebugFunction then print("ParseCurrentLayerSource() Called") end
+    table.insert(Inputs, LookupInput(rx.inputId))
+    SetLayersTimer:Start(SetLayersTime)
+  end
+  
+  -- *** GETTERS ***
+  -- Initial data grab from device
+  function GetDeviceInfo(discover)
+    if DebugFunction then print("GetDeviceInfo() Called") end
+    Send(
+      {
+        cmd = "R0100"
+      }, 
+      discover
+    )
+  end 
+  
+  function GetCurrentScreen(discover)
+    if DebugFunction then print("GetCurrentScreen() Called") end
+    Send(
+      {
+        cmd = "R0400"
+      }, 
+      discover
+    )
+  end
+  
+  function GetScreenInfo(id)
+    if DebugFunction then print("GetScreenInfo() Called") end
+    if id ~= nil then
+      Send(
+        {
+          cmd = "R0401", 
+          param0 = tonumber(DeviceID.String), 
+          param1 = id
+        }
+      )
+    end
+  end
+  
+  function GetTestPattern(id)
+    if DebugFunction then print("GetTestPattern() Called") end
+    if id ~= nil then
+      Send(
+        {
+          cmd    = "R0301", 
+          param0 = tonumber(DeviceID.String), 
+          param1 = id
+        }
+      )
+    else
+      TestPatternEnable.Value = 0
+      TestPattern.String      = ""
+    end
+  end
+  
+  function GetPresetEnum(id)
+    if DebugFunction then print("GetPresetEnum() Called") end
+    if id ~= nil then
+      Send(
+        {  
+          cmd    = "R0600", 
+          param0 = tonumber(DeviceID.String), 
+          param1 = id
+        }
+      )
+    end
+  end
+  
+  function GetLayerEnum(id)
+    if DebugFunction then print("GetLayerEnum() Called") end
+    if id ~= nil then
+      Send(
+        {
+          cmd    = "R0500", 
+          param0 = tonumber(DeviceID.String), 
+          param1 = id
+        }
+      )
+    end
+  end
+  
+  function GetCurrentSourceOnLayer(id)
+    if DebugFunction then print("GetCurrentSourceOnLayer() Called") end
+    Send(
+      {
+        cmd    = "R0506", 
+        param0 = tonumber(DeviceID.String), 
+        param1 = ScreenID,
+        param2 = id
+      }
+    )
+  end
+  
+  -- *** SETTERS ***
+  function SetFTB()
+    if DebugFunction then print("SetFTB() Called") end
+    local ftbVal = ScreenBlackout.Value
+    Send(
+      {
+        cmd      = "W0409", 
+        deviceId = tonumber(DeviceID.String), 
+        screenId = ScreenID,
+        type     = ftbVal
+      }
+    )
+    GetScreenInfo(ScreenID)
+  end
+  
+  function SetFreeze()
+    if DebugFunction then print("SetFreeze() Called") end
+    local freezeVal = ScreenFreeze.Value == 1 and 0 or 1
+    Send(
+      {
+        cmd      = "W040A",
+        screenId = ScreenID,
+        enable   = freezeVal
+      }
+    )
+    GetScreenInfo(ScreenID)
+  end
+  
+  function SetScreenBrightness()
+    if DebugFunction then print("SetScreenBrightness() Called") end
+    local brightnessVal = tonumber(ScreenBrightness.String)
+    Send(
+      {
+        cmd        = "W0410",
+        deviceId   = tonumber(DeviceID.String), 
+        screenId   = ScreenID,
+        brightness = brightnessVal
+      }
+    )
+    GetScreenInfo(ScreenID)
+  end
+   
+  function SetTestPattern(ctl)
+    if DebugFunction then print("SetTestPattern() Called") end
+    local testPattern = GenerateTestPattern(ctl)
+    for i, out in ipairs(OutputIDs) do 
+      Send(
+        {
+          cmd         = "W0303",
+          deviceId    = tonumber(DeviceID.String), 
+          outputId    = out,
+          testPattern = testPattern,
+          grid        = 3,
+          speed       = 2,
+          bright      = 2
+        }
+      )
+    end
+    GetTestPattern(OutputIDs[1])
+  end
+  
+  function SetClearScreen()
+    if DebugFunction then print("SetClearScreen() Called") end
+    Send(
+      {
+        cmd      = "W0411",
+        screenId = ScreenID
+      }
+    )
+  end
+  
+  function SetScreenColor(ctl)
+    if DebugFunction then print("SetScreenColor() Called") end
+    local command = {}
+    if ctl == ImageMode then
+      command = {
+        cmd              = "W040E",
+        deviceId         = tonumber(DeviceID.String),
+        screenId         = ScreenID,
+        imageQualityMode = GetIndexInTable(ImageModeChoices, ctl.String) - 1
+      }
+      Timer.CallAfter(function() GetTestPattern(OutputIDs[1]) end, 0.1)
+    elseif ctl == EyeSaverMode then
+      command = {
+        cmd      = "W040E",
+        deviceId = tonumber(DeviceID.String),
+        screenId = ScreenID,
+        eyeCare  = ctl.Value
+      }
+      Timer.CallAfter(function() GetTestPattern(OutputIDs[1]) end, 0.1)
+    else
+      command = {
+        cmd              = "W040E",
+        deviceId         = tonumber(DeviceID.String),
+        screenId         = ScreenID,
+        imageQualityMode = ImageMode.String ~= "" and GetIndexInTable(ImageModeChoices, ImageMode.String) - 1,
+        eyeCare          = EyeSaverMode.Value,
+        contrast         = {
+          all = Contrast.Value,
+          r   = Contrast.Value,
+          g   = Contrast.Value,
+          b   = Contrast.Value
+        },
+        brightness       = { 
+          all = Brightness.Value,
+          r   = Brightness.Value,
+          g   = Brightness.Value,
+          b   = Brightness.Value
+        },
+        hue              = Hue.Value,
+        saturation       = Saturation.Value,
+        colorTemperature = ColorTemperature.Value
+      }
+    end
+    DisableColorPresetCtls()
+    Send(command)
+  end
+  
+  function SetLoadPreset(ix)
+    if DebugFunction then print("SetLoadPreset() Called") end
+    if PresetIDs[ix] ~= nil then
+      Send(
+        {
+          cmd      = "W0605",
+          deviceId = tonumber(DeviceID.String),
+          screenId = ScreenID,
+          presetId = PresetIDs[ix]
+        }
+      )
+      GetLayerEnum(ScreenID)
+    end
+  end
+  
+  function SetLayerInputSrc(ctl, ix)
+    if DebugFunction then print("SetLayerInputSrc() Called") end
+    local id
+    for k,v in pairs(LayerSource[ix].Choices) do
+      local text = JSON.decode(v).Text
+      if ctl.String:find("{") then
+        ctl.String = JSON.decode(ctl.String).Text
+      end
+      if ctl.String == text then
+        id = JSON.decode(v).id
+      end
+    end
+    -- if we don't match, don't send the command
+    -- the Source will update on a poll cycle
+    if id ~= nil then
+      Send(
+        {
+          cmd      = "W0506",
+          deviceId = tonumber(DeviceID.String),
+          screenId = ScreenID,
+          layerId  = Layers[ix].layerId,
+          inputId  = id
+        }
+      )
+      GetLayerEnum(ScreenID)
+    end
+  end
+  
+  -- Buffer Management
+  function CreateBuffer()
+    local rx = Novastar:Read(Novastar.BufferLength)
+    Buffer   = Buffer .. rx
+    BufferTimer:Start(BufferTime) 
+  end
+  
+  function ParseResponse(data)
+    if DebugFunction then print("ParseResponse() Called") end
+    BufferTimer:Stop()
+    PollOffline:Stop() 
+    IsConnected = true
+    if CommandQueue:IsEmpty() then
+      CommandInFlight = false
+    else
+      if ControlMode == "UDP" then
+        Udp:Send(IPAddress.String, UdpPort, CommandQueue:Pop())
+      elseif ControlMode == "RS-232" then
+        Novastar:Write(CommandQueue:Pop())
+      end
+    end
+    local buffer    = ControlMode == "RS-232" and Buffer or data
+    local delimiter = "%]%["
+    for resp in (buffer.."]["):gmatch("(.-)"..delimiter) do
+      if resp:sub(1, 1) ~= "[" then resp = "[" .. resp end
+      if resp:sub(resp:len(), resp:len()) ~= "]" then resp = resp .. "]" end
+      if JSON.decode(resp) ~= nil then
+        local response = JSON.decode(resp)[1]
+        if response ~= nil then
+          if response.ack == "Ok" then 
+            if response.cmd == "R0100" then
+              CheckModel(response.slotList)
+              if CorrectModel then ParseDevInfo(response) end
+            elseif response.cmd == "R0400" then
+              if CorrectModel then ParseCurrentScreen(response) end
+            elseif response.cmd == "R0401" then
+              if CorrectModel then ParseScreenInfo(response) end
+            elseif response.cmd == "R0301" then
+              if CorrectModel then ParseTestPattern(response) end
+            elseif response.cmd == "R0600" then
+              if CorrectModel then ParsePresetEnum(response) end
+            elseif response.cmd == "R0500" then
+              if CorrectModel then ParseLayerEnum(response) end
+            elseif response.cmd == "R0506" then
+              if CorrectModel then ParseCurrentLayerSource(response) end
+            end
+          elseif response.ack == "Error" then
+            print(JSON.encode(response))
+            ReportStatus("FAULT", string.format("Command Fault: %s", response.cmd))
+          end 
+        end
+      end
+      Buffer = ""
+    end
+  end
+  
+  -- Other errors than timeout will return a message
+  function ConnectionError(port, message)
+    local msg = message or "Timeout"
+    print("Serial Port error: " .. msg)
+  end
+  
+  -- Socket Management
+  if ControlMode == "UDP" then
+    Udp.Data = function( udp, packet ) 
+      if packet.Data ~= nil and packet.Address == IPAddress.String then
+        ParseResponse(packet.Data)
+      end
+    end 
+    UdpDiscover.Data = function ( udp, packet )
+      if packet.Data ~= nil then
+        Udp:Close()
+        Udp:Open(NicData[NIC.String], nil)
+        ParseResponse(packet.Data)
+      end
+    end
+  elseif ControlMode == "RS-232" then
+    Novastar.Data      = CreateBuffer
+    Novastar.Connected = GetInitialData
+    Novastar.Error     = ConnectionError
+    Novastar.Closed    = ConnectionError
+    Novastar.Timeout   = ConnectionError
+    Novastar.Reconnect = function() print("Serial Port Reconnecting...") end
+  end
+  
+  -- EventHandlers
+  PollTimer.EventHandler         = PollDevice
+  PollOffline.EventHandler       = CheckConnectivity
+  BufferTimer.EventHandler       = ParseResponse
+  SetLayersTimer.EventHandler    = SetLayersInfo
+  IPAddress.EventHandler         = function()
+    Disconnect()
+    Connect()
+  end
+  NIC.EventHandler               = function()
+    Disconnect()
+    Connect()
+  end
+  BaudRate.EventHandler          = Connect
+  DataBits.EventHandler          = Connect
+  StopBits.EventHandler          = Connect
+  Parity.EventHandler            = Connect
+  ScreenSelection.EventHandler   = SelectScreen
+  ScreenBlackout.EventHandler    = SetFTB
+  ScreenFreeze.EventHandler      = SetFreeze
+  ScreenBrightness.EventHandler  = SetScreenBrightness
+  TestPattern.EventHandler       = SetTestPattern
+  TestPatternEnable.EventHandler = SetTestPattern
+  ScreenClear.EventHandler       = SetClearScreen
+  RefreshScreenInfo.EventHandler = function()
+    if DebounceOn then 
+      RefreshSelectedScreenInfo(ScreenID)
+      DebounceOn = false
+      Debounce:Start(DebounceTime) 
+    end  
+  end
+  for ix, ctl in pairs({Contrast, Brightness, Saturation, Hue, ColorTemperature, ImageMode, EyeSaverMode}) do  
+    ctl.EventHandler = function()
+      KnobDebounce:Stop()
+      KnobDebounce:Start(KnobDebounceTime)
+      KnobDebounce.EventHandler = function() 
+        KnobDebounce:Stop()
+        SetScreenColor(ctl)
+      end
+    end 
+  end
+  for ix, ctl in pairs(PresetLoad) do  
+    ctl.EventHandler = function() 
+      if DebounceOn then 
+        SetLoadPreset(ix)
+        DebounceOn = false
+        Debounce:Start(DebounceTime) 
+      end 
+    end 
+  end
+  for ix, ctl in pairs(LayerSource) do
+    ctl.EventHandler = function() SetLayerInputSrc(ctl, ix) end
+  end
+  Debounce.EventHandler = function()
+    Debounce:Stop()
+    DebounceOn = true
+  end
+  
+  -- Initialization Function
+  function Initialization()
+    if DebugFunction then print("Initialization() Called") end
+    SetupDebugPrint()
+    DisableControls(InputSignalStatus)
+    DisableControls(OutputLinkStatus)
+    SetInitialValues()
+    Connect()
+  end
+  
+  Initialization()
+end

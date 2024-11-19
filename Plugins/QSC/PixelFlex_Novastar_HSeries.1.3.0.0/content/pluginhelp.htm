@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="en-us" xml:lang="en-us" data-mc-search-type="Stem" data-mc-help-system-file-name="index.xml" data-mc-path-to-help-system="../" data-mc-toc-path="PixelFLEX" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic;Default" data-mc-preload-images="false" data-mc-in-preview-mode="false">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>PixelFLEX&#160;NovaStar H-Series</title>
+        <link href="../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Print.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="PluginStyles.css" rel="stylesheet" type="text/css" />
+        <link href="shaded_rows_plugin.css" rel="stylesheet" data-mc-stylesheet-type="table" />
+        <script src="../Resources/Scripts/jquery.min.js" type="text/javascript">
+        </script>
+        <script src="../Resources/Scripts/purify.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.config.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/foundation.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/plugins.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/MadCapAll.js" type="text/javascript" defer="defer">
+        </script>
+    </head>
+    <body>
+        <div role="main" id="mc-main-content">
+            <h1 data-mc-autonum=""><span class="autonumber"><span></span></span>PixelFLEX&#160;NovaStar H-Series</h1>
+            <p>Use this plugin to connect to, control, and view the status of a PixelFLEX&#160;NovaStar H-Series video splicing processor.</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>See the <a href="https://www.novastar.tech/products/processors/h-series/" target="_blank">NovaStar website</a> for product information and documentation.</p>
+            <ul style="list-style-type: square;">
+                <li><a href="#Compatib" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Compatibility</a>
+                </li>
+                <li><a href="#Prerequi" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Prerequisites</a>
+                </li>
+                <li><a href="#Configur" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Configuration Overview</a>
+                </li>
+                <li><a href="#Properti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Properties</a>
+                </li>
+                <li><a href="#Controls" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls</a>
+                </li>
+                <li><a href="#Control" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Control Pins</a>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Compatib"></a>Compatibility</h2>
+            <p>The plugin was developed and tested with Q-SYS Designer Software version 9.5.0 and the NovaStar H5 model. This plugin is incompatible with Q-SYS&#160;Designer Software versions below 9.4.0.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Prerequi"></a>Prerequisites</h2>
+            <p>Before using the plugin, you must set up the NovaStar H-Series processor. The plugin supports UDP or RS-232 connection. Manuals for the various NovaStar H-Series models can be found <a href="https://www.novastar.tech/products/processors/h-series/" target="_blank">here</a>.</p>
+            <ul>
+                <li>
+                    <p>If using UDP, ensure the processor is reachable on the network.</p>
+                </li>
+                <li>
+                    <p>If using RS-232, you can connect to any Q-SYS device that has an RS-232 connector. Serial settings for the NovaStar processor can be set in the web UI or from the front panel. Ensure that the Serial Port IN and the Serial Port OUT settings on the NovaStar processor match.</p>
+                </li>
+            </ul>
+            <p class="tip" data-mc-autonum="&lt;b&gt;Tip: &lt;/b&gt;"><span class="autonumber"><span><b>Tip: </b></span></span>For best performance, we recommend using a higher baud rate such as 115200 or 57600.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Configur"></a>Configuration Overview</h2>
+            <p>Drag the plugin into the schematic to begin using it.</p>
+            <ol>
+                <li value="1">
+                    <p> From the Properties pane:</p>
+                    <ul>
+                        <li>
+                            <p>Select either UDP or RS-232 for Control Mode. If RS-232, drag your Q-SYS device's Serial Port component into your schematic and wire it to the plugin's serial pin.</p>
+                        </li>
+                        <li>
+                            <p>Select which Model you are connecting to.</p>
+                        </li>
+                        <li>
+                            <p>Select the Number of Presets as well as the Number of Layers  to control from the plugin.</p>
+                        </li>
+                    </ul>
+                </li>
+                <li value="2">
+                    <p>Press F5 to save your design to the Core and run it. (Or, press F6 to emulate your design.)</p>
+                </li>
+                <li value="3">
+                    <p>In your schematic, double-click the plugin to open its control panel.</p>
+                    <ul>
+                        <li>
+                            <p>For UDP, on the Setup tab, select the local NIC&#160;to use for connection and input the IP&#160;address of the NovaStar processor  to connect to.</p>
+                        </li>
+                        <li>
+                            <p>For RS-232, on the Setup tab, set the Baud Rate, Data Bits, Stop Bits, and Parity to match what is set on the NovaStar processor. </p>
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+            <p>The plugin will automatically attempt a connection once the IP Address is entered for UDP and once any of the serial settings are changed for RS-232. If you see "OK" status, you are successfully connected. </p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Properti"></a>Properties</h2>
+            <h4 class="BridgeHead">Is Managed</h4>
+            <p>Select 'Yes' to add the plugin to your Inventory list, which makes the plugin's Status available for monitoring in Core Manager and Enterprise Manager. When enabled, you can then specify a <span class="GUI_Callout">Name</span> and <span class="GUI_Callout">Location</span> for the plugin, as with any other Inventory item.</p>
+            <p>For more information, refer to the Plugins topic in the Q-SYS&#160;Help.</p>
+            <h4 class="BridgeHead">Control Mode</h4>
+            <p>Select 'UDP' or 'RS-232' for the connection method the plugin will use to access the processor.</p>
+            <ul>
+                <li>
+                    <p>When set to UDP, the 'Connect to Device' section on the Setup tab of the plugin will have <span class="GUI_Callout">NIC</span> and <span class="GUI_Callout">IP&#160;Address</span> controls. </p>
+                </li>
+                <li>
+                    <p>When set to RS-232, the 'Connect to Device' section on the Setup tab of the plugin will have <span class="GUI_Callout">Baud Rate</span>, <span class="GUI_Callout">Data Bits</span>, <span class="GUI_Callout">Stop Bits</span>, and <span class="GUI_Callout">Parity</span> controls. This mode will also expose a serial input pin that must be wired to the serial output pin of the Q-SYS device's Serial Port component.</p>
+                </li>
+            </ul>
+            <h4 class="BridgeHead">Model</h4>
+            <p>Set this to the model of the NovaStar H-Series processor that you will be connecting to.</p>
+            <h4 class="BridgeHead">Number of Presets</h4>
+            <p>Set this to the number of presets you would like to control from the plugin, 1-16. This will affect the number of available controls on the Presets tab of the plugin.</p>
+            <h4 class="BridgeHead">Number of Layers</h4>
+            <p>Set this to the number of layers you would like to control from the plugin, 1-16. This will affect the number of available controls on the Layer Routing tab of the plugin.</p>
+            <h4 class="BridgeHead">Show Debug</h4>
+            <p>Select 'Yes' to show the Debug Output window. For details, see the Debug Output topic in the Q-SYS Help.</p>
+            <h4 class="BridgeHead">Debug Print</h4>
+            <p>Set the data printed to the Show Debug window.</p>
+            <ul>
+                <li>
+                    <p>None: (default) None of the below will be posted to the log debug output.</p>
+                </li>
+                <li>
+                    <p>Tx/Rx: Transmission and Received Data messages will be shown.</p>
+                </li>
+                <li>
+                    <p>Tx: Transmission Data messages will be shown.</p>
+                </li>
+                <li>
+                    <p>Rx: Received Data messages will be shown.</p>
+                </li>
+                <li>
+                    <p>Function Calls: Each function within the plugin will post a message when it is called.</p>
+                </li>
+                <li>
+                    <p>All: All of the above messages.</p>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls"></a>Controls</h2>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Setup</h3>
+            <h4 class="BridgeHead">NIC</h4>
+            <p>For UDP&#160;Control Mode only. Choose a network interface for the connection:</p>
+            <ul>
+                <li>If you are running your design on the Core, this defaults to the active LAN connection on the Core.</li>
+                <li>If you are emulating your design, choose a local network interface on your computer.</li>
+            </ul>
+            <h4 class="BridgeHead">IP&#160;Address</h4>
+            <p>For UDP&#160;Control Mode only. Enter the IP&#160;Address of the NovaStar H-Series processor. This will automatically initiate a connection attempt.</p>
+            <h4 class="BridgeHead">Baud Rate</h4>
+            <p>For RS-232&#160;Control Mode only. Select the Baud Rate of the NovaStar H-Series processor. This will automatically initiate a connection attempt.</p>
+            <h4 class="BridgeHead">Data Bits</h4>
+            <p>For RS-232&#160;Control Mode only. Select the Data Bits of the NovaStar H-Series processor. This will automatically initiate a connection attempt.</p>
+            <h4 class="BridgeHead">Stop Bits</h4>
+            <p>For RS-232&#160;Control Mode only. Select the Stop Bits of the&#160;NovaStar H-Series processor. This will automatically initiate a connection attempt.</p>
+            <h4 class="BridgeHead">Parity</h4>
+            <p>For RS-232&#160;Control Mode only. Select the Parity of the NovaStar H-Series processor. This will automatically initiate a connection attempt.</p>
+            <h4 class="BridgeHead">Fan</h4>
+            <p>Indicator LED is set high when any of the fans on the processor are in fault.</p>
+            <h4 class="BridgeHead">Voltage</h4>
+            <p>Indicator LED is set high when the processor reports a voltage fault.</p>
+            <h4 class="BridgeHead">Temperature</h4>
+            <p>Indicator LED is set high when the processor reports a temperature fault.</p>
+            <h4 class="BridgeHead">Genlock Signal</h4>
+            <p>Indicator LED is set high when the processor detects genlock signal.</p>
+            <h4 class="BridgeHead">Device Name</h4>
+            <p>Read only text that displays the processor's device name.</p>
+            <h4 class="BridgeHead">Device ID</h4>
+            <p>Read-only text that displays the processor's device ID.</p>
+            <h4 class="BridgeHead">Connection Status</h4>
+            <p>Displays the current connection status:</p>
+            <ul>
+                <li><span style="color: #228b22;">OK</span>: Plugin is connected to the unit.</li>
+                <li><span style="color: #ff0000;">FAULT</span>: Indicates a communication problem with the device, such as trying to connect to the wrong model.</li>
+                <li><span style="color: #ff0000;">MISSING</span>: No device is found at the specified IP address or with the specified serial settings.</li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Input Status</h3>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Available controls depend on the model selected in the Properties.</p>
+            <h4 class="BridgeHead">Slot</h4>
+            <p>Read-only text that displays the input slot number.</p>
+            <h4 class="BridgeHead">Connector Type</h4>
+            <p>Read-only text that displays the input slot's card interface configuration. This will display the interface configuration in the following form: "&lt;interface 1&gt;&#160;| &lt;interface 2&gt; | &lt;interface 3&gt; | ...". If no card is inserted, it should display "No Card Inserted".</p>
+            <h4 class="BridgeHead">Video Signal Status</h4>
+            <p>Indicator LEDs that display the current input signal status. Each slot has up to 4 LEDs to represent the 4 possible interfaces on the card. If the LED is high, this means the corresponding input exists and is currently connected. If the LED is low, this means the corresponding input exists but is not currently connected. If the LED is disabled, this means the corresponding input does not exist (for example, LED 3 on an input card with 2 interfaces).</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Output Status</h3>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Available controls depend on the model selected in the Properties.</p>
+            <h4 class="BridgeHead">Slot</h4>
+            <p>Read-only text that displays the output slot number.</p>
+            <h4 class="BridgeHead">Connector Type</h4>
+            <p>Read-only text that displays the output slot's card interface configuration.  If no card is inserted, it should display "No Card Inserted".</p>
+            <h4 class="BridgeHead">Video Signal Status</h4>
+            <p>Indicator LEDs that display the current output link status. Each slot has up to 20 LEDs to represent the 20 possible interfaces on the card. If the LED is high, this means the corresponding output exists and currently has link. If the LED is low, this means the corresponding output exists but currently does not have link. If the LED is disabled, this means the corresponding output does not exist.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Screen Control</h3>
+            <h4 class="BridgeHead">Screen Selection</h4>
+            <p>Combo box used to select which screen to control. Screen selection affects all control for presets, layer routing, and screen controls.</p>
+            <h4 class="BridgeHead">Refresh Screen Info</h4>
+            <p>Trigger button refreshes all screen info, including states of screen controls, presets, and layer routing.</p>
+            <h4 class="BridgeHead">Screen Blackout</h4>
+            <p>State Trigger button fades the currently selected screen to black.</p>
+            <h4 class="BridgeHead">Screen Freeze</h4>
+            <p>State Trigger button freezes the currently selected screen.</p>
+            <h4 class="BridgeHead">Screen Clear</h4>
+            <p>Trigger button clears the currently selected screen.</p>
+            <h4 class="BridgeHead">Test Pattern Enable</h4>
+            <p>State Trigger button enables a test pattern on the currently selected screen. If no test pattern is selected on the <span class="GUI_Callout">Test Pattern</span> control, the <span class="GUI_Callout">Test Pattern</span> control will default to "Black". </p>
+            <h4 class="BridgeHead">Test Pattern</h4>
+            <p>Combo box used to select a test pattern. When a test pattern is selected, the <span class="GUI_Callout">Test Pattern Enable</span> button should go high.</p>
+            <h4 class="BridgeHead">Screen Brightness</h4>
+            <p>Combo box used to set output image brightness. This can be set in intervals of 20 from 0 to 100 and will report the currently set output image brightness.</p>
+            <h4 class="BridgeHead">Contrast</h4>
+            <p>Fader to set the contrast of the currently selected screen. Allowed values are 0-100.</p>
+            <h4 class="BridgeHead">Brightness</h4>
+            <p>Fader to set the brightness of the currently selected screen. Allowed values are 0-100.</p>
+            <h4 class="BridgeHead">Saturation</h4>
+            <p>Fader to set the saturation of the currently selected screen. Allowed values are 0-100.</p>
+            <h4 class="BridgeHead">Hue</h4>
+            <p>Fader to set the hue of the currently selected screen. Allowed values are -180-180.</p>
+            <h4 class="BridgeHead">Color Temperature</h4>
+            <p>Fader to set the color temperature of the currently selected screen. Allowed values are 2000-10000.</p>
+            <h4 class="BridgeHead">Eye Save Mode</h4>
+            <p>Toggle button to turn Eye Save Mode on or off. Turning this on disables Contrast, Brightness, Saturation, Hue, and Color Temperature controls.</p>
+            <h4 class="BridgeHead">Image Mode</h4>
+            <p>Combo box used to set image mode. Choose between "Standard", "Document", "Conference", "Video".</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Any changes made to Contrast, Brightness, Saturation, Hue, and Color Temperature while on a particular Image Mode will "save" those settings for that Image Mode. For example, if Image&#160;Mode is set to "Standard", and Contrast is set to 25, the next time Image Mode is set to "Standard", Contrast will be 25.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Presets</h3>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Besides the <span class="GUI_Callout">Current Screen Selection</span>, the amount of these controls depends on the number of presets set in the properties.</p>
+            <h4 class="BridgeHead">Current Screen Selection</h4>
+            <p>Read-only text that displays the currently selected screen.</p>
+            <h4 class="BridgeHead">Name</h4>
+            <p>Read-only text that displays the preset name.</p>
+            <h4 class="BridgeHead">Load</h4>
+            <p>Trigger button to load the corresponding preset.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Layer Routing</h3>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Besides the <span class="GUI_Callout">Current Screen Selection</span>, the available controls depend on the number of layers set in the Properties.</p>
+            <h4 class="BridgeHead">Current Screen Selection</h4>
+            <p>Read-only text that displays the currently selected screen.</p>
+            <h4 class="BridgeHead">Name</h4>
+            <p>Read-only text that displays the layer name.</p>
+            <h4 class="BridgeHead">Current Source</h4>
+            <p>Read-only text that displays the currently selected source for the corresponding layer. It will be in the following format: "Slot &lt;slot number&gt; - In &lt;input number&gt; &lt;interface&gt;".</p>
+            <h4 class="BridgeHead">Source</h4>
+            <p>Combo box to select which source to assign to the corresponding layer. The items in the combo box will vary depending on which input cards are installed. Selections will be in the following format: "Slot &lt;slot number&gt; - In &lt;input number&gt; &lt;interface&gt;".</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Control"></a>Control Pins</h2>
+            <table style="mc-table-style: url('shaded_rows_plugin.css');margin-left: 0;margin-right: auto;caption-side: top;" class="TableStyle-shaded_rows_plugin" cellspacing="0">
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 154px;" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 60px;" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 160px;" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 85px;" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-shaded_rows_plugin-Head-Header1">
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1">Pin Name</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Value</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">String</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Position</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadD-Column1-Header1" style="text-align: center;">Pins Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Setup</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>NIC (UDP&#160;Only)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>IP&#160;Address (UDP&#160;Only)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Baud Rate</p>
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>(RS-232 Only)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>2400</p>
+                            <p>4800</p>
+                            <p>9600</p>
+                            <p>19200</p>
+                            <p>38400</p>
+                            <p>57600</p>
+                            <p>115200</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Data Bits</p>
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>(RS-232 Only)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>7</p>
+                            <p>8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Stop Bits</p>
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>(RS-232 Only)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>1</p>
+                            <p>2</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Parity</p>
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>(RS-232 Only)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>N</p>
+                            <p>O</p>
+                            <p>E</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Fan Status</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Voltage Status</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Temperature Status</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Genlock Signal</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Device Name</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Device ID</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Status</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                            <p>2</p>
+                            <p>3</p>
+                            <p>4</p>
+                            <p>5</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p>OK (Green)
+</p>
+                            <p>Compromised (Orange)</p>
+                            <p>
+Fault (Red)
+</p>
+                            <p>Not Present (Gray)
+</p>
+                            <p>Missing (Red)
+</p>
+                            <p>Initializing (Blue)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p style="text-align: center;">-</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Input Status</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Input&#160;<i>n</i></p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Slot</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Connector Type</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Signal Status 1-4</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Output Status</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Output <i>n</i></p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Slot</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Connector Type</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Link Status 1-20</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Screen Control</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Screen Selection</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Refresh Screen Info</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Screen Blackout</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(state trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Test Pattern Enable</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(state trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Screen Freeze</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(state trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Screen Clear</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Test Pattern</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>Black</p>
+                            <p>Red</p>
+                            <p>Green</p>
+                            <p>Blue</p>
+                            <p>White</p>
+                            <p>Vertical Bars</p>
+                            <p>Horizontal Bars</p>
+                            <p>Chessboard</p>
+                            <p>Horizontal Lines</p>
+                            <p>Vertical Lines</p>
+                            <p>Forward Slashes</p>
+                            <p>Backward Slashes</p>
+                            <p>Grid</p>
+                            <p>Cross Hatch</p>
+                            <p>Red Gradient (H)</p>
+                            <p>Green Gradient (H)</p>
+                            <p>Blue Gradient (H)</p>
+                            <p>White Gradient (H)</p>
+                            <p>Red Gradient (V)</p>
+                            <p>Green Gradient (V)</p>
+                            <p>Blue Gradient (V)</p>
+                            <p>White Gradient (V)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Screen Brightness</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>20</p>
+                            <p>40</p>
+                            <p>60</p>
+                            <p>80</p>
+                            <p>100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Color Preset</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Contrast</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Brightness</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0 to 1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Saturation</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Hue</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>-180 to 180</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>-180 to 180</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0 to 1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Color Temperature</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>2000 to 10000</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>2000 to 10000</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Eye Saver Mode</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Image Mode</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>Standard</p>
+                            <p>Document</p>
+                            <p>Conference</p>
+                            <p>Video</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>–</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Presets</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Current Screen Selection</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Preset <i>n</i></p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Name</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Load</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Layer Routing</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Current Screen Selection</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Layer <i>n</i></p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Name</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Current Source</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>Source</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body1">
+                            <p>Disable<a href="#Use" class="ParanumOnly MCXref xref xrefParanumOnly"><sup>1</sup></a></p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body1" style="text-align: center;">
+                            <p>disabled</p>
+                            <p>enabled</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyA-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h6 data-mc-autonum="1. "><span class="autonumber"><span>1. </span></span><a name="Use"></a>Use this control pin to enable or disable the plugin in your design. When Disabled is set to enabled (value of 1), the Connection Status changes to "Not Present - Disabled".</h6>
+        </div>
+        <MadCap:pageFooter class="">
+            <div style="width: 100%;position: relative; border-top: solid 1px #c2c2c2; margin-top: 15px; padding-top: 8px">
+                <p style="text-align: center;"><a href="https://www.qsc.com/resources/software-and-firmware/" target="_blank">Software&#160;and&#160;Firmware</a> | <a href="https://www.qsc.com/resources/" target="_blank">Resources</a> | <a href="https://qscprod.force.com/selfhelpportal/s/" target="_blank">QSC&#160;Self&#160;Help&#160;Portal</a> | <a href="https://q-syshelp.qsc.com/#Support.htm" target="_blank">Support</a></p>
+                <p class="legal">Copyright © 2022 QSC, LLC. Click <a href="https://q-syshelp.qsc.com/#Legal.htm" target="_blank">here</a> for trademark and other legal notices.</p>
+                <p style="text-align: center;"><a href="https://www.qsc.com/" target="_blank"><img src="qsclogogrey_40_reduced.png" /></a>
+                </p>
+            </div>
+        </MadCap:pageFooter>
+    </body>
+</html>

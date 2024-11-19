@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="en-us" xml:lang="en-us"
+    data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../"
+    data-mc-searchable="False" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic;Default"
+    data-mc-preload-images="true" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>K-Array Kommander</title>
+    <link href="../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" />
+    <link href="../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" />
+    <link href="../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" />
+    <link href="../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" />
+    <link href="../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" />
+    <link href="../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" />
+    <link href="qsc_styles_plugin.css" rel="stylesheet" />
+    <link href="shaded_rows_plugin.css" rel="stylesheet" />
+    <script src="../../Resources/Scripts/custom.modernizr.js">
+    </script>
+    <script src="../../Resources/Scripts/jquery.min.js">
+    </script>
+    <script src="../../Resources/Scripts/require.min.js">
+    </script>
+    <script src="../../Resources/Scripts/require.config.js">
+    </script>
+    <script src="../../Resources/Scripts/foundation.min.js">
+    </script>
+    <script src="../../Resources/Scripts/plugins.min.js">
+    </script>
+    <script src="../../Resources/Scripts/MadCapAll.js">
+    </script>
+</head>
+
+<body>
+    <h1 data-mc-autonum=""><span class="autonumber"><span></span></span>K-Array Kommander</h1>
+    <p>Use this plugin to control K-Array Kommander amplifiers.</p>
+    <p>The plugin has been tested with Q-SYS Designer version 9.4+. Earlier versions may work, but are not supported</p>
+    <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note:
+                </b></span></span>See the <a href="https://www.k-array.com/en/products/line/kommander" target="_blank">K-Array
+            website</a> for product information and documentation.</p>
+    <h2 data-mc-autonum=""><span class="autonumber"><span></span></span>Configuration Overview</h2>
+    <ol>
+        <li value="1">Drag the plugin into your design.</li>
+        <li value="2">Select your model of amplifier in the Properties pane.</li>
+        <li value="3">Run the design and enter the IP address of your device on the setup tab</li>
+    </ol>
+    <h2 data-mc-autonum=""><span class="autonumber"><span></span></span>Properties</h2>
+    <table
+        style="border-left-style: solid;border-left-width: 1px;border-left-color: #000000;border-right-style: solid;border-right-width: 1px;border-right-color: #000000;border-top-style: solid;border-top-width: 1px;border-top-color: #000000;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #000000;caption-side: top;mc-table-style: url('shaded_rows_plugin.css');"
+        class="TableStyle-Shaded_Rows" cellspacing="0">
+        <col class="Column-Column1" style="width: 127px;" />
+        <col class="Column-Column1" style="width: 640px;" />
+        <col class="Column-Column1" style="width: 163px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>Property</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Choices</p>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="Body-Body2">
+                <td class="BodyE-Column1-Body1">
+                    <p>Model</p>
+                </td>
+                <td class="BodyE-Column1-Body1">
+                    <p>Select which model amplifier to control.</p>
+                </td>
+                <td class="BodyE-Column1-Body1" style="text-align: center;">
+                    <p>KA02I</p>
+                    <p>KA18</p>
+                    <p>KA04</p>
+                    <p>KA14I</p>
+                    <p>KA28</p>
+                    <p>KA34</p>
+                    <p>KA68</p>
+                    <p>KA104</p>
+                    <p>KA208</p>
+                    <p>KS1I</p>
+                    <p>KS2I</p>
+                    <p>KS3I</p>
+                    <p>KS4I</p>
+                </td>
+            </tr>
+            <tr class="Body-Body1">
+                <td class="BodyE-Column1-Body2">
+                    <p>Number of Presets</p>
+                </td>
+                <td class="BodyE-Column1-Body2">
+                    <p>Select the number of presets available to recall.</p>
+                </td>
+                <td class="BodyE-Column1-Body2" style="text-align: center;">
+                    <p>Integer (1 - 20)</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h2 data-mc-autonum=""><span class="autonumber"><span></span></span>Controls</h2>
+    <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Setup</h3>
+
+    <table style="caption-side: top;mc-table-style: url('shaded_rows_plugin.css');" class="TableStyle-Shaded_Rows"
+        cellspacing="0">
+        <col class="Column-Column1" style="width: 175px;" />
+        <col class="Column-Column1" style="width: 675px;" />
+        <col class="Column-Column1" style="width: 150px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>&#160;Control</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Default / Range</p>
+                </th>
+            </tr>
+        </thead>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>IP Address</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Enter the IP address of the device here.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Serial Number</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Displays the serial number of the device.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Model</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the model of amplifier found at the specified IP Address.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Configuration</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Displays the channel configuration of the connected amplifier.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Amp Status</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the reported status of the amplifier.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Standby</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Toggles amplifier standby mode</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Standby LED</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Lights up when the connected amplifier is in standby mode.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>false</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Channel Temperature <i>x</i></p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Displays the temperature of amplifier channel <i>x</i>, where <i>x</i> represents the channel number.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Status</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the status of the plugin's connection with the device. Connection errors will be reported
+                    here.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+    </table>
+    <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Inputs</h3>
+    <p>Each input has the following controls. <i>x</i> represents the channel number of the input.</p>
+    <table style="caption-side: top;mc-table-style: url('shaded_rows_plugin.css');" class="TableStyle-Shaded_Rows"
+        cellspacing="0">
+        <col class="Column-Column1" style="width: 175px;" />
+        <col class="Column-Column1" style="width: 675px;" />
+        <col class="Column-Column1" style="width: 150px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>&#160;Control</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Default / Range</p>
+                </th>
+            </tr>
+        </thead>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Input <i>x</i> name</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the name of the input.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Input <i>x</i> Gain</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Controls the input gain of the channel.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Input Patching <i>y</i> -> <i>x</i></p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Input patching controls are only available on 4-channel amplifier models. Patches physical input <i>y</i> into channel input <i>x</i>.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p><i>N/A</i></p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>XLR 2 Mode</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>This control is only available on sub models (KSxI range). Toggles XLR2 between Analog mode and AES/EBU mode.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+    </table>
+
+    <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Outputs</h3>
+    <p>Each output has the following controls. <i>x</i> represents the channel number of the output.</p>
+    <table style="caption-side: top;mc-table-style: url('shaded_rows_plugin.css');" class="TableStyle-Shaded_Rows"
+        cellspacing="0">
+        <col class="Column-Column1" style="width: 175px;" />
+        <col class="Column-Column1" style="width: 675px;" />
+        <col class="Column-Column1" style="width: 150px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>&#160;Control</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Default / Range</p>
+                </th>
+            </tr>
+        </thead>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Output <i>x</i> name</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the name of the output.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Output <i>x</i> Gain</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Controls the output gain of the channel.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Output <i>x</i> Mute</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Toggles the output mute of the channel.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p><i>N/A</i></p>
+            </td>
+        </tr>
+    </table>
+
+    <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Routing</h3>
+    <p>Matrix routing controls, where <i>x</i> represents the name of the channel input and <i>y</i> represents the name of the channel output. Amplifier models with 8 channels have 2 additional outputs on this page for the Media Player.</p>
+    <table style="caption-side: top;mc-table-style: url('shaded_rows_plugin.css');" class="TableStyle-Shaded_Rows"
+        cellspacing="0">
+        <col class="Column-Column1" style="width: 175px;" />
+        <col class="Column-Column1" style="width: 675px;" />
+        <col class="Column-Column1" style="width: 150px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>&#160;Control</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Default / Range</p>
+                </th>
+            </tr>
+        </thead>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Routing <i>x</i> -> <i>y</i></p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Routes input <i>x</i> to output <i>y</i>.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p><i>N/A</i></p>
+            </td>
+        </tr>
+    </table>
+
+    <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Presets</h3>
+    <p>Preset controls, where <i>x</i> represents the preset number.</p>
+    <table style="caption-side: top;mc-table-style: url('shaded_rows_plugin.css');" class="TableStyle-Shaded_Rows"
+        cellspacing="0">
+        <col class="Column-Column1" style="width: 175px;" />
+        <col class="Column-Column1" style="width: 675px;" />
+        <col class="Column-Column1" style="width: 150px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>&#160;Control</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Default / Range</p>
+                </th>
+            </tr>
+        </thead>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Preset <i>x</i> name</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the name of the preset.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Preset <i>x</i> recall</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Recalls preset <i>x</i>. Note that this will recall all parameters of the preset, including network settings such as IP address.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Active Preset</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays the most recently selected global preset. Note that this will not display input patching presets as they are not global.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Refresh Presets</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Refreshes the list of available presets.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+    </table>
+
+    <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Media Player</h3>
+    <p>Controls for the amplifier's built-in media player. The Transport Controls only apply when the selected source is USB or Bluetooth.</p>
+    <table style="caption-side: top;mc-table-style: url('shaded_rows_plugin.css');" class="TableStyle-Shaded_Rows"
+        cellspacing="0">
+        <col class="Column-Column1" style="width: 175px;" />
+        <col class="Column-Column1" style="width: 675px;" />
+        <col class="Column-Column1" style="width: 150px;" />
+        <thead>
+            <tr class="Head-Header1">
+                <th class="HeadE-Column1-Header1">
+                    <p>&#160;Control</p>
+                </th>
+                <th class="HeadE-Column1-Header1">
+                    <p>Function</p>
+                </th>
+                <th class="HeadD-Column1-Header1">
+                    <p>Default / Range</p>
+                </th>
+            </tr>
+        </thead>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Source Select USB</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Sets the media player source to USB.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Source Select Bluetooth</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Sets the media player source to Bluetooth. This control is only available on KA02I and KA04 models.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Source Select Web Radio</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Sets the media player source to Web Radio. This control is only available on KA02I and KA04 models.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Source Select Dante Ready™</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Sets the media player source to Dante Ready™.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Transport Control Repeat</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Toggles the media player repeat option.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Transport Control Shuffle</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Toggles the media player shuffle option.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Transport Control Previous</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Selects the previous song in the media playlist.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Transport Control Next</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Selects the next song in the media playlist.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Transport Control Play</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Plays the currently selected media from the start.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Transport Control Stop</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Stops the media player.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Transport Control Pause</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>If media is playing, then this will pause the media. If media is paused, then this will resume playback.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Media Player Volume</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Controls the volume of the media player.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body1">
+            <td class="BodyE-Column1-Body1">
+                <p>Library</p>
+            </td>
+            <td class="BodyE-Column1-Body1">
+                <p>Displays a list of available media. Selecting an item from the list will make it the active file in the media player.</p>
+            </td>
+            <td class="BodyD-Column1-Body1" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+        <tr class="Body-Body2">
+            <td class="BodyE-Column1-Body2">
+                <p>Current File</p>
+            </td>
+            <td class="BodyE-Column1-Body2">
+                <p>Displays the currently active media player file.</p>
+            </td>
+            <td class="BodyD-Column1-Body2" style="text-align: center;">
+                <p>N/A</p>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

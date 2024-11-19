@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="en-us" xml:lang="en-us" data-mc-search-type="Stem" data-mc-help-system-file-name="index.xml" data-mc-path-to-help-system="../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic;Default" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-toc-path="Plugins|Tools">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>UCI QR Code Tool</title>
+        <link href="../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" />
+        <link href="../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" />
+        <link href="../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" />
+        <link href="../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" />
+        <link href="../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" />
+        <link href="../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" />
+        <link href="PluginStyles.css" rel="stylesheet" />
+        <link href="shaded rows_plugin.css" rel="stylesheet" />
+        <script src="../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../Resources/Scripts/require.min.js" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.config.js" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/foundation.min.js" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/plugins.min.js" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/MadCapAll.js" defer="defer">
+        </script>
+    </head>
+    <body>
+        <div role="main" id="mc-main-content">
+            <h1 data-mc-autonum=""><span class="autonumber"><span></span></span>UCI QR Code Tool</h1>
+            <p>Use this plugin to generate QR codes for up to 20 user control interfaces (UCIs) in a design. When a user scans a QR code from a UCI using a mobile device, the UCI&#160;then opens on the device – either the Q-SYS iOS App or the browser web interface in Q-SYS Core Manager. This eliminates the need to physically interact with a touch screen peripheral.</p>
+            <ul style="list-style-type: square;">
+                <li value="1"><a href="#Compatib" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Compatibility</a>
+                </li>
+                <li value="2"><a href="#Configur" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Configuration Overview</a>
+                </li>
+                <li value="3"><a href="#Properti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Properties</a>
+                </li>
+                <li value="4"><a href="#Controls" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls</a>
+                </li>
+                <li value="5"><a href="#Control" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Control Pins</a>
+                </li>
+                <li value="6"><a href="#Troubles" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Troubleshooting</a>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Compatib"></a>Compatibility</h2>
+            <p>The plugin is compatible with Q-SYS Designer version 8.3.1 and above.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Configur"></a>Configuration Overview</h2>
+            <ol>
+                <li value="1">Drag the plugin into the schematic.</li>
+                <li value="2">Configure the plugin properties. See <a href="#Properti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Properties</a>.</li>
+                <li value="3">Press F5 to save your design to the Core and run it. (Or, press F6 to emulate your design.)</li>
+                <li value="4">In the Setup tab, select the network interface and method for launching the UCI on the mobile device. See <a href="#Controls" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls</a>.</li>
+                <li value="5">In the QR&#160;Codes tab, you will see QR codes for each UCI in your design. (If the tab is blank, see the <a href="#Troubles" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Troubleshooting</a> section.)</li>
+                <li value="6">Press F7 to stop running or emulating the design.</li>
+                <li value="7">Copy a UCI's QR code control into its respective UCI. You can do this by either clicking and dragging the QR code box into the UCI's tab or selecting, copying, and pasting.</li>
+                <li value="8">Run or emulate your design again.</li>
+            </ol>
+            <p>The UCI now displays the generated QR code. Users can now scan this code to open the UCI within a mobile device.</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>The mobile device must be on the same network as the Q-SYS Core.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Properti"></a>Properties</h2>
+            <h4 class="BridgeHead">Debug Print</h4>
+            <p>When the 'Show Debug' property is enabled, select what information is displayed in the Debug Output window:</p>
+            <ul>
+                <li value="1"><span class="GUI_Callout">None</span>: (Default) Nothing is printed.</li>
+                <li value="2"><span class="GUI_Callout">UCIs</span>: Prints the discovered UCIs in the design.</li>
+                <li value="3"><span class="GUI_Callout">Function Calls</span>: Prints a statement denoting which function has been called.</li>
+                <li value="4"><span class="GUI_Callout">HTTP Code</span>: Prints the code returned from HTTP downloads.</li>
+                <li value="5"><span class="GUI_Callout">All</span>: Prints all statements from the plugin.</li>
+            </ul>
+            <h4 class="BridgeHead">Show Debug</h4>
+            <p>Select 'Yes' to show the Debug Output window. Select 'No' (default) to hide the Debug Output window. For details, see the Debug Output topic in the Q-SYS Help.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls"></a>Controls</h2>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Setup</h3>
+            <h4 class="BridgeHead">Network Interface</h4>
+            <p>Select what network interface is used for communication with the plugin. Available selections depend on whether the design is running on the Core (F5) or emulating (F6):</p>
+            <ul>
+                <li value="1">If running on the Core, the Core's LAN interfaces are displayed.</li>
+                <li value="2">If emulating, the PC's interfaces are displayed.</li>
+            </ul>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>If the method of deployment changes, this control prompts for a new selection. If it remains the same when re-deploying, the last selected interface is retained and QR codes are re-generated on startup.</p>
+            <h4 class="BridgeHead">UCI Device</h4>
+            <p>Select how the UCI launches on the mobile device:</p>
+            <ul>
+                <li value="1">iOS App: Launch the UCI in the Q-SYS Control iOS app.</li>
+                <li value="2">Web UCI:&#160;(Default) Launch the UCI in the web browser interface in Q-SYS Core Manager.</li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>QR Codes</h3>
+            <h4 class="BridgeHead">QR Code (Image)</h4>
+            <p>Up to 20 QR codes can display in this tab, depending on the number of UCIs found in the design. Drag or copy/paste these codes into your UCIs.</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>QR codes are regenerated if the Setup controls change and when restarting the design.</p>
+            <h4 class="BridgeHead">UCI Name</h4>
+            <p>These text boxes display the names of discovered UCIs.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Control"></a>Control Pins</h2>
+            <table style="mc-table-style: url('shaded rows_plugin.css');caption-side: top;" class="TableStyle-shaded_rows_plugin" cellspacing="0">
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-shaded_rows_plugin-Head-Header1">
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1">Pin Name</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Value</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">String</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Position</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadD-Column1-Header1" style="text-align: center;">Pins Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>QR Codes</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>UCI <i>n</i> Name<a href="#UCI" class="ParanumOnly MCXref xref xrefParanumOnly"><sup>2</sup></a></p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Setup</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Network Interface</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>UCI Device</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>-</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>iOS App</p>
+                            <p>Web UCI</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>-</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2">
+                            <p>Disable<a href="#Use" class="ParanumOnly MCXref xref xrefParanumOnly"><sup>1</sup></a></p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>disabled</p>
+                            <p>enabled</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyA-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h6 data-mc-autonum="1. "><span class="autonumber"><span>1. </span></span><a name="Use"></a>Use this control pin to enable or disable the plugin in your design. When Disabled is set to enabled (value of 1), the Connection Status changes to "Not Present - Disabled".</h6>
+            <h6 data-mc-autonum="2. "><span class="autonumber"><span>2. </span></span><a name="UCI"></a>UCI Names only. There are no control pins for the actual QR&#160;codes.</h6>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Troubles"></a>Troubleshooting</h2>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>UCI not appearing after scanning the QR code</h3>
+            <p>The mobile device must be on the same network as the Q-SYS Core.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>QR Codes tab is blank</h3>
+            <p>The QR Codes tab does not display QR code images if no UCI exists in your design.</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>You must have a User Control Interface (UCI) deployment feature license to deploy a UCI to the Q-SYS Core.</p>
+        </div>
+        <MadCap:pageFooter class="">
+            <div style="width: 100%;position: relative; border-top: solid 1px #c2c2c2; margin-top: 15px; padding-top: 8px">
+                <p style="text-align: center;"><a href="https://www.qsc.com/resources/software-and-firmware/" target="_blank">Software&#160;and&#160;Firmware</a> | <a href="https://www.qsc.com/resources/" target="_blank">Resources</a> | <a href="https://qscprod.force.com/selfhelpportal/s/" target="_blank">QSC&#160;Self&#160;Help&#160;Portal</a> | <a href="mailto:QSysHelpFeedback@qsc.com?subject=Q-SYS Help Feedback" target="_blank">Q-SYS Help Feedback</a></p>
+                <p class="legal">Copyright © 2019 QSC, LLC. Click <a href="https://q-syshelp.qsc.com/#Legal.htm" target="_blank">here</a> for trademark and other legal notices.</p>
+                <p style="text-align: center;"><a href="https://www.qsc.com/" target="_blank"><img src="qsclogogrey_40_reduced.png" /></a>
+                </p>
+            </div>
+        </MadCap:pageFooter>
+    </body>
+</html>

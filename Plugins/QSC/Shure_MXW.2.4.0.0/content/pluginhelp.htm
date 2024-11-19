@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="en-us" xml:lang="en-us" data-mc-search-type="Stem" data-mc-help-system-file-name="index.xml" data-mc-path-to-help-system="../" data-mc-toc-path="Shure" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic;Default" data-mc-preload-images="false" data-mc-in-preview-mode="false">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Shure Microflex Wireless</title>
+        <link href="../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Print.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="PluginStyles.css" rel="stylesheet" type="text/css" />
+        <link href="shaded_rows_plugin.css" rel="stylesheet" data-mc-stylesheet-type="table" />
+        <script src="../Resources/Scripts/jquery.min.js" type="text/javascript">
+        </script>
+        <script src="../Resources/Scripts/purify.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.config.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/foundation.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/plugins.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/MadCapAll.js" type="text/javascript" defer="defer">
+        </script>
+    </head>
+    <body>
+        <div role="main" id="mc-main-content">
+            <h1 data-mc-autonum=""><span class="autonumber"><span></span></span>Shure Microflex Wireless</h1>
+            <p>Use this plugin to connect to and monitor a Shure Microflex Wireless (MXW) device. You can also identify a channel (if supported by the device) and toggle muting of a particular channel.</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>See the <a href="https://www.shure.com/en-US/products/wireless-systems/microflex_wireless" target="_blank">Microflex Wireless product page</a> on the Shure website for product information and documentation.</p>
+            <ul style="list-style-type: square;">
+                <li><a href="#Compatib" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Compatibility</a>
+                </li>
+                <li><a href="#Prerequi" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Prerequisites</a>
+                </li>
+                <li><a href="#Properti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Properties</a>
+                </li>
+                <li><a href="#Connecti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Connection Setup</a>
+                </li>
+                <li><a href="#Channel" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Channel Controls</a>
+                </li>
+                <li><a href="#Control" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Control Pins</a>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Compatib"></a>Compatibility</h2>
+            <ul>
+                <li>
+                    <p>The plugin is compatible with all models within the MXW series.</p>
+                </li>
+                <li>
+                    <p>One plugin instance per device is supported.</p>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Prerequi"></a>Prerequisites</h2>
+            <p>Use the MXW control software to configure the device before using the plugin:</p>
+            <ul>
+                <li>
+                    <p>In the Preferences tab of the MXW GUI, set the "Mute Preference" to "External Mute" to enable plugin control of the mute state.</p>
+                </li>
+                <li>
+                    <p>To control the LEDs of the microphone, make certain that "External LED Control" is selected in the MXW GUI.</p>
+                    <p>
+                        <img src="shure_microflex_wireless_ledsettings.png" />
+                    </p>
+                    <p>Note that for gooseneck microphones, there is a separate selection between the MX400 Series Bi-Color LED or the MX400R Series Red LED:</p>
+                    <p>
+                        <img src="shure_microflex_wireless_gooseneckledsettings.png" />
+                    </p>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Properti"></a>Properties</h2>
+            <h4 class="BridgeHead">Is Managed</h4>
+            <p>Select 'Yes' to add the plugin to your Inventory list, which makes the plugin's Status available for monitoring in Core Manager and Enterprise Manager. When enabled, you can then specify a <span class="GUI_Callout">Name</span> and <span class="GUI_Callout">Location</span> for the plugin, as with any other Inventory item.</p>
+            <p>For more information, refer to the Plugins topic in the Q-SYS&#160;Help.</p>
+            <h4 class="BridgeHead">Show Debug</h4>
+            <p>Select 'Yes' to show the Debug Output window. For details, see the Debug Output topic in the Q-SYS Help.</p>
+            <h4 class="BridgeHead">Debug Print</h4>
+            <p>Set the data printed to the Show Debug window.</p>
+            <ul>
+                <li>
+                    <p>None: (default) None of the below will be posted to the log debug output.</p>
+                </li>
+                <li>
+                    <p>Tx/Rx: Transmission and Received Data messages will be shown.</p>
+                </li>
+                <li>
+                    <p>Tx: Transmission Data messages will be shown.</p>
+                </li>
+                <li>
+                    <p>Rx: Received Data messages will be shown.</p>
+                </li>
+                <li>
+                    <p>Function Calls: Each function within the plugin will post a message when it is called.</p>
+                </li>
+                <li>
+                    <p>All: All of the above messages.</p>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Connecti"></a>Connection Setup</h2>
+            <h4 class="BridgeHead">Unit/IP</h4>
+            <p>Specify a device IP&#160;address here. One plugin instance per device is supported.</p>
+            <h4 class="BridgeHead">Status</h4>
+            <p>Once a Mode and Unit/IP are selected, the plugin will automatically attempt a connection. If you see "OK" status, you are successfully connected to the device.  If you see a "Fault" or "Missing" error, check the connection parameters.</p>
+            <h4 class="BridgeHead">Details</h4>
+            <p>Once the plugin connects, the detected unit's name and control IP are shown here.</p>
+            <h4 class="BridgeHead">ID</h4>
+            <p>Once the plugin connects, toggle this button to cause an LED to blink on the connected device (if supported by the model).</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Channel"></a>Channel Controls</h2>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Some controls will show as disabled if not applicable to the device/model.</p>
+            <h4 class="BridgeHead">Channel Name</h4>
+            <p>Displays the read-only channel name as set in the MXW control software.</p>
+            <h4 class="BridgeHead">Identify</h4>
+            <p>Toggle this button to cause an LED to blink on the respective channel.</p>
+            <h4 class="BridgeHead">Battery Charge</h4>
+            <p>Displays the level of charge on the respective channel’s battery. This control is disabled if the battery charge is 0 or is not applicable to the device.</p>
+            <h4 class="BridgeHead">Audio Meter</h4>
+            <p>Displays the input level of the connected microphone on that channel, from -60 to 0 dB.</p>
+            <h4 class="BridgeHead">RF</h4>
+            <p>Shows the signal strength of the receiver to the base unit.</p>
+            <h4 class="BridgeHead">Transmitter Status</h4>
+            <p>Displays the read-only status of the respective transmitter. Status colors and messages can be adjusted in the MXW control software.</p>
+            <h4 class="BridgeHead">Mute</h4>
+            <p>Toggles muting of the respective transmitter/channel.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Control"></a>Control Pins</h2>
+            <table style="mc-table-style: url('shaded_rows_plugin.css');caption-side: top;" class="TableStyle-shaded_rows_plugin" cellspacing="0">
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-shaded_rows_plugin-Head-Header1">
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1">Pin Name</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Value</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">String</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Position</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadD-Column1-Header1" style="text-align: center;">Pins Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Audio Meter</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0 to 98</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0 to 98</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0.00 to 1.00</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Battery</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Charge</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0 to 100</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0.00 to 1.00</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Run Time</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p>(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Channel</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Name</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p>(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>ID</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Access Point</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Identify</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Mute</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>false</p>
+                            <p>true</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Setup</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>IP Address</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3">
+                            <p colspan="3" style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Status</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Access Point</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" style="text-align: center;" colspan="3">
+                            <p>(indicator)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Transmitter</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Status</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;" colspan="3">
+                            <p>(indicator)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Type</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P2" data-mc-autonum=""><span class="autonumber"><span></span></span>1-8</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2">
+                            <p>Disable<a href="#Use" class="ParanumOnly MCXref xref xrefParanumOnly"><sup>1</sup></a></p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>disabled</p>
+                            <p>enabled</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyA-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h6 data-mc-autonum="1. "><span class="autonumber"><span>1. </span></span><a name="Use"></a>Use this control pin to enable or disable the plugin in your design. When Disabled is set to enabled (value of 1), the Connection Status changes to "Not Present - Disabled".</h6>
+        </div>
+        <MadCap:pageFooter class="">
+            <div style="width: 100%;position: relative; border-top: solid 1px #c2c2c2; margin-top: 15px; padding-top: 8px">
+                <p style="text-align: center;"><a href="https://www.qsys.com/resources/software-and-firmware/" target="_blank">Software&#160;and&#160;Firmware</a> | <a href="https://www.qsys.com/resources/" target="_blank">Resources</a> | <a href="https://support.qsys.com/" target="_blank">Q-SYS Knowledge Base</a> | <a href="https://help.qsys.com/#Support.htm" target="_blank">Support</a></p>
+                <p class="legal">Copyright © 2024 QSC, LLC. Click <a href="https://help.qsys.com/#Legal.htm" target="_blank">here</a> for trademark and other legal notices.</p>
+                <p style="text-align: center;"><a href="https://www.qsys.com/" target="_blank"><img src="Q-SYS_hex_logo_full_color_wide_final-01_reduced_250.png" /></a>
+                </p>
+            </div>
+        </MadCap:pageFooter>
+    </body>
+</html>

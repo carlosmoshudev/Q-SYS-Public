@@ -1,0 +1,2491 @@
+--[[ BEGIN DIGITAL SIGNATURE
+QMn/kdxFq3Jkhtd0jlEiMAM7Vkicw/YVLC6uNaz9uo0JB8oblH9pYMqJec+dZXlbd52a8VHGqoN+vn6CqLK4E3WgTVAc1QRIZGF+OwuVNgpadfIHwohY/TqAjY9OrRRy21l/EKieVsY3StYS+tn6Qcz/W0kjrvijIFvYCKvKXd4fykvT2pMTr7PsSUoTIoJX2PI6kwypQZU9QwPwCruQrJQbYH6Ip6sveK9AYCu+a18CFJQRDIXCMAYgfpZwKCuSMWokfC7gYghwnp0Fsz2n0m3QfqSodfCk9sng52eSK9Londmh+y2f5BQNxuzYn4PI5puQGUsonvwUB6WC6BemyA==
+END DIGITAL SIGNATURE ]]
+-- Base Plugin
+-- by QSC
+-- Month 20YY
+
+PluginInfo = {
+    Name = "Utility~Command Send And Receive Utility",
+    Version = "1.0",
+    BuildVersion = "1.0.0.0",
+    Id = "0ba3f34a-dde9-4c64-8039-d2045f6683b2",
+    Author = "QSC",
+    Description = "A plugin to send API commands and parse data over a socket."
+}
+-- GUI Colors
+Black = {0, 0, 0}
+Clear = {0, 0, 0, 0}
+White = {255, 255, 255}
+Red = {255, 0, 0}
+LEDOff = {124, 0, 0}
+Gray = {124, 124, 124}
+GBGray = {230, 230, 230}
+DarkGray = {51, 51, 51}
+StatusGray = {194, 194, 194}
+StrokeGray = {105, 105, 105}
+Meter = {110, 198, 241}
+
+-- LOGO
+local Logo = "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"
+
+function GetColor(props)
+  return { 102, 102, 102 }
+end
+
+function GetPrettyName(props)
+  return "Command Send And Receive Utility\rv" .. PluginInfo.Version
+end
+
+pagenames = {"Connection Setup", "Send", "Receive", "Buffer"}
+function GetPages(props)
+  local pages = {}
+  for ix,name in ipairs(pagenames) do
+    table.insert(pages,{name = pagenames[ix]})
+  end
+  return pages
+end
+
+function GetProperties()
+  local props = {}
+  table.insert(
+    props,
+    {
+      Name = "Control Type",
+      Type = "enum",
+      Choices = {"TCP", "HTTP", "UDP", "SSH", "Serial"},
+      Value = "TCP"
+    }
+  )
+  table.insert(
+    props,
+    {
+      Name = "Authentication Required",
+      Type = "enum",
+      Choices = {"No", "Yes"},
+      Value = "No"
+    }
+  )
+  table.insert(
+    props,
+    {
+      Name = "Send String Count",
+      Type = "integer",
+      Min = 1,
+      Max = 64,
+      Value = 8
+    }
+  )
+  table.insert(
+    props,
+    {
+      Name = "Receive String Count",
+      Type = "integer",
+      Min = 1,
+      Max = 64,
+      Value = 8
+    }
+  )
+  table.insert(
+    props,
+    {
+      Name = "Buffer Caching",
+      Type = "enum",
+      Choices = {"Time", "Count"},
+      Value = "Time"
+    }
+  )
+  table.insert(
+    props,
+    {
+      Name = "Message Cache Amount",
+      Type = "integer",
+      Min = 1,
+      Max = 100,
+      Value = 20 -- changed to 20 to fill window
+    }
+  )
+  table.insert(
+    props,
+    {
+      Name = "Debug Print",
+      Type = "enum",
+      Choices = {"None", "Tx/Rx", "Tx", "Rx", "Function Calls", "All"},
+      Value = "None"
+    }
+  )
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value == false then
+    props["Debug Print"].IsHidden = true
+  end
+  if props["Control Type"].Value ~= "HTTP" then
+    props["Authentication Required"].IsHidden = true
+  end
+  if props["Buffer Caching"].Value ~= "Count" then
+    props["Message Cache Amount"].IsHidden = true
+  end
+  return props
+end
+
+function GetControls(props)
+  local controls = {}
+  local controlsType = props["Control Type"].Value
+  local bufferCachingControl = props["Buffer Caching"].Value
+  table.insert(
+    controls,
+    {
+      Name = "Status",
+      ControlType = "Indicator",
+      IndicatorType = Reflect and "StatusGP" or "Status",
+      PinStyle = "Output",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "IPAddress",
+      ControlType = "Text",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "URL",
+      ControlType = "Text",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "Port",
+      ControlType = "Knob",
+      ControlUnit = "Integer",
+      Min = 1,
+      Max = 65535,
+      DefaultValue = controlsType == "SSH" and 22 or 80,
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "HeartBeatTime",
+      ControlType = "Knob",
+      ControlUnit = "Integer",
+      Min = 3,
+      Max = 300,
+      DefaultValue = 3,
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "Username",
+      ControlType = "Text",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "Password",
+      ControlType = "Text",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "EOL",
+      ControlType = "Text",
+      DefaultValue = "None",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "EOLCustom",
+      ControlType = "Text",
+      DefaultValue = "\\x0D",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "Auth",
+      ControlType = "Text",
+      DefaultValue = "any",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "Headers",
+      ControlType = "Text",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "BaudRate",
+      ControlType = "Text",
+      DefaultValue = "9600",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "DataBits",
+      ControlType = "Text",
+      DefaultValue = "8",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "Parity",
+      ControlType = "Text",
+      DefaultValue = "None",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "StopBits",
+      ControlType = "Text",
+      DefaultValue = "1",
+      PinStyle = "Both",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  for i = 1, props["Send String Count"].Value do
+    table.insert(
+      controls,
+      {
+        Name = "SendData" .. i,
+        ControlType = "Text",
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+    table.insert(
+      controls,
+      {
+        Name = "Data" .. i,
+        ControlType = "Text",
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+    table.insert(
+      controls,
+      {
+        Name = "TriggerButton" .. i,
+        ControlType = "Button",
+        ButtonType = "Trigger",
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+    table.insert(
+      controls,
+      {
+        Name = "Method" .. i,
+        ControlType = "Text",
+        DefaultValue = "GET",
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+  end
+  for i = 1, props["Receive String Count"].Value do
+    table.insert(
+      controls,
+      {
+        Name = "Receive" .. i,
+        ControlType = "Text",
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+    table.insert(
+      controls,
+      {
+        Name = "IsDataReceived" .. i,
+        ControlType = "Indicator",
+        IndicatorType = "Led",
+        IsReadOnly = true,
+        PinStyle = "Output",
+        UserPin = true,
+        Count = 1
+      }
+    )
+    table.insert(
+      controls,
+      {
+        Name = "EoL" .. i,
+        ControlType = "Text",
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+  end
+  if bufferCachingControl == "Time" then
+    table.insert(
+      controls,
+      {
+        Name = "BufferRefresh",
+        ControlType = "Knob",
+        ControlUnit = "Integer",
+        DefaultValue = 6,
+        Min = 1,
+        Max = 1800, -- limmiting to 30 minutes
+        PinStyle = "Both",
+        UserPin = true,
+        Count = 1
+      }
+    )
+  end
+  table.insert(
+    controls,
+    {
+      Name = "BufferReceivedData",
+      ControlType = "Text",
+      PinStyle = "Output",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  table.insert(
+    controls,
+    {
+      Name = "LastReceivedMessage",
+      ControlType = "Indicator",
+      IndicatorType = "Text",
+      PinStyle = "Output",
+      UserPin = true,
+      Count = 1
+    }
+  )
+  return controls
+end
+
+function GetControlLayout(props)
+  local layout   = {}
+  local graphics = {}
+  local currentPage = pagenames[props["page_index"].Value]
+  
+  -- Width and Height
+  local groupBoxWidth = 400
+  local groupBoxHeight = 370
+  local logoGroupBoxHeight = 80
+  local textBlockWidth = 180
+  local textBlockHeight = 20
+  local headerWidth = 370
+  local headerHeight = 12
+  local labelWidth = 80
+  local height = 16
+  
+  local controlType = props["Control Type"].Value
+  local sendStringCount =  props["Send String Count"].Value
+  local receiveStringCount = props["Receive String Count"].Value
+  local bufferCachingLayout = props["Buffer Caching"].Value
+  
+  -- Global GroupBox
+  table.insert(
+    graphics,
+    {
+      Type = "GroupBox",
+      Position = {0, 0},
+      Size = (controlType == "Serial" and currentPage == "Connection Setup") and {groupBoxWidth, groupBoxWidth + 26}
+          or (controlType == "HTTP" and currentPage == "Connection Setup") and {groupBoxWidth, groupBoxWidth + 25}
+          or (controlType ~= "HTTP" and currentPage == "Send") and {groupBoxWidth, (math.ceil(sendStringCount) - 1) * 21 + 210}
+          or (controlType == "HTTP" and currentPage == "Send") and {groupBoxWidth + 100, (math.ceil(sendStringCount) - 1) * 21 + 226}
+          or currentPage == "Receive" and {groupBoxWidth, (math.ceil(receiveStringCount) - 1) * 21 + 233}
+          or currentPage == "Buffer" and {groupBoxWidth, groupBoxHeight + 70} or {groupBoxWidth, groupBoxHeight + 15},
+      Fill = White,
+      CornerRadius = 0,
+      StrokeWidth = 0
+    }
+  )
+  
+  -- Logo GroupBox
+  table.insert(
+    graphics,
+    {
+      Type = "GroupBox",
+      Position = {0, 0},
+      Size = (controlType == "HTTP" and currentPage == "Send") and {groupBoxWidth + 100, logoGroupBoxHeight} or {groupBoxWidth, logoGroupBoxHeight},
+      Fill = GBGray,
+      CornerRadius = 0,
+      StrokeWidth = 0
+    }
+  )
+  
+  -- Logo
+  table.insert(
+    graphics,
+    {
+      Type = "Image",
+      Image = Logo,
+      Position = (controlType == "HTTP" and currentPage == "Send") and {70, 0} or {25, 0},
+      Size = {350, 80}
+    }
+  )
+  
+  if currentPage == "Connection Setup" then
+    -- Connection Setup
+    y = 85
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Connection Setup",
+        Position = {5, y},
+        Size = {textBlockWidth, textBlockHeight},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 16,
+        FontStyle = "Bold",
+        HTextAlign = "Left"
+      }
+    )
+    table.insert(
+      graphics,
+      {
+        Type = "GroupBox",
+        Position = {5, y + 25},
+        Size = (controlType ~= "Serial" and controlType ~= "HTTP") and {groupBoxWidth - 10, logoGroupBoxHeight + 50}
+            or (controlType == "HTTP" and {groupBoxWidth - 10, logoGroupBoxHeight + 90})
+            or (controlType == "Serial" and {groupBoxWidth - 10, logoGroupBoxHeight + 91}),
+        Fill = GBGray,
+        CornerRadius = 0,
+        StrokeWidth = 0
+      }
+    )
+    table.insert(
+      graphics,
+      {
+        Type = "Header",
+        Text = "Setup",
+        Position = {15, y + 31},
+        Size = {headerWidth, headerHeight},
+        Fill = DarkGray,
+        Font = "Roboto",
+        FontSize = 14,
+        FontStyle = "Bold",
+        HTextAlign = "Center"
+      }
+    )
+    y = 146
+    if controlType ~= "Serial" and controlType ~= "HTTP"then
+      if controlType == "TCP" or controlType == "UDP" or controlType == "SSH" then
+        table.insert(
+          graphics,
+          {
+            Type = "Label",
+            Text = "IPAddress:",
+            Position = {15, y},
+            Size = {labelWidth, height},
+            Fill = Clear,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 0,
+            StrokeWidth = 0,
+            Font = "Roboto",
+            FontSize = 11,
+            FontStyle = "Bold",
+            HTextAlign = "Right"
+          }
+        )
+        layout["IPAddress"] = {
+          PrettyName = "Connection Setup~IPAddress",
+          Style = "Text",
+          TextBoxStyle = "Normal",
+          Position = {107, y},
+          Size = {textBlockWidth, height},
+          Color = White,
+          OffColor = Gray,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 1,
+          StrokeWidth = 1,
+          FontSize = 9,
+          HTextAlign = "Center"
+        }
+        layout["Port"] = {
+          PrettyName = "Connection Setup~Port",
+          Style = "Text",
+          TextBoxStyle = "MeterBackground",
+          Position = {300, y},
+          Size = {labelWidth - 20, height},
+          Fill = Meter,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 1,
+          StrokeWidth = 1,
+          Font = "Roboto",
+          FontSize = 9,
+          HTextAlign = "Center"
+        }
+        if controlType == "UDP" then
+          table.insert(
+            graphics,
+            {
+              Type = "Label",
+              Text = "Heart Beat Time:",
+              Position = {15, 177},
+              Size = {labelWidth, height * 2},
+              Fill = Clear,
+              CornerRadius = 0,
+              Margin = 0,
+              Padding = 0,
+              StrokeWidth = 0,
+              Font = "Roboto",
+              FontSize = 11,
+              FontStyle = "Bold",
+              HTextAlign = "Right"
+            }
+          )
+          layout["HeartBeatTime"] = {
+            PrettyName = "Connection Setup~Heart Beat Time",
+            Style = "Text",
+            TextBoxStyle = "MeterBackground",
+            Position = {107, 177},
+            Size = {labelWidth - 20, height},
+            Fill = Meter,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 1,
+            StrokeWidth = 1,
+            Font = "Roboto",
+            FontSize = 9,
+            HTextAlign = "Center"
+          }
+        end
+        if controlType == "SSH" then
+          y = y + 21
+          table.insert(
+            graphics,
+            {
+              Type = "Label",
+              Text = "Username:",
+              Position = {15, y},
+              Size = {labelWidth, height},
+              Fill = Clear,
+              CornerRadius = 0,
+              Margin = 0,
+              Padding = 0,
+              StrokeWidth = 0,
+              Font = "Roboto",
+              FontSize = 11,
+              FontStyle = "Bold",
+              HTextAlign = "Right"
+            }
+          )
+          layout["Username"] = {
+            PrettyName = "Connection Setup~Username",
+            Style = "Text",
+            TextBoxStyle = "Normal",
+            Position = {107, y},
+            Size = {textBlockWidth, height},
+            Color = White,
+            OffColor = Gray,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 1,
+            StrokeWidth = 1,
+            FontSize = 9,
+            HTextAlign = "Center"
+          }
+          y = y + 21
+          table.insert(
+            graphics,
+            {
+              Type = "Label",
+              Text = "Password:",
+              Position = {15, y},
+              Size = {labelWidth, height},
+              Fill = Clear,
+              CornerRadius = 0,
+              Margin = 0,
+              Padding = 0,
+              StrokeWidth = 0,
+              Font = "Roboto",
+              FontSize = 11,
+              FontStyle = "Bold",
+              HTextAlign = "Right"
+            }
+          )
+          layout["Password"] = {
+            PrettyName = "Connection Setup~Password",
+            Style = "Text",
+            TextBoxStyle = "Password",
+            Position = {107, y},
+            Size = {textBlockWidth, height},
+            Color = White,
+            OffColor = Gray,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 1,
+            StrokeWidth = 1,
+            FontSize = 9,
+            HTextAlign = "Center"
+          }
+        end
+        if controlType == "TCP" or controlType == "SSH" then
+          table.insert(
+            graphics,
+            {
+              Type = "Label",
+              Text = "EOL:",
+              Position = controlType == "TCP" and {15, 188} or {15, 209},
+              Size = {labelWidth, height},
+              Fill = Clear,
+              CornerRadius = 0,
+              Margin = 0,
+              Padding = 0,
+              StrokeWidth = 0,
+              Font = "Roboto",
+              FontSize = 11,
+              FontStyle = "Bold",
+              HTextAlign = "Right"
+            }
+          )
+          layout["EOL"] = {
+            PrettyName = "Connection Setup~EOL",
+            Style = "ComboBox",
+            Position = controlType == "TCP" and {107, 188} or {107, 209},
+            Size = {height * 4, height},
+            Color = White,
+            OffColor = Gray,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 1,
+            StrokeWidth = 1,
+            FontSize = 9,
+            HTextAlign = "Center"
+          }
+          layout["EOLCustom"] = {
+            PrettyName = "Connection Setup~EOLCustom",
+            Style = "Text",
+            TextBoxStyle = "Normal",
+            Position = controlType == "TCP" and {181, 188} or {181, 209},
+            Size = {179, height},
+            Color = White,
+            OffColor = Gray,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 1,
+            StrokeWidth = 1,
+            FontSize = 9,
+            HTextAlign = "Center"
+          }
+        end
+      end
+    elseif controlType == "Serial" then
+      for k, v in ipairs({"BaudRate", "DataBits", "Parity", "StopBits", "EOL", "Heart Beat Time"}) do
+        table.insert(
+          graphics,
+          {
+            Type = "Label",
+            Text = v .. ":",
+            Position = v ~= "Heart Beat Time" and {85, y} or {65, y},
+            Size = v ~= "Heart Beat Time" and {labelWidth, height} or {labelWidth + 20, height},
+            Fill = Clear,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 0,
+            StrokeWidth = 0,
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right"
+          }
+        )
+        layout[v:gsub("%s+", "")] = {
+          PrettyName = "Connection Setup~" .. v,
+          Style = v ~= "Heart Beat Time" and "ComboBox" or "Text",
+          TextBoxStyle = v ~= "Heart Beat Time" and "None" or "MeterBackground",
+          Position = {177, y},
+          Size = (v ~= "EOL" and v ~= "Heart Beat Time") and {textBlockWidth - 60, height} or (v == "EOL" or v == "Heart Beat Time") and {height * 4, height},
+          Color = v ~= "Heart Beat Time" and White or Meter,
+          OffColor = Gray,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 1,
+          StrokeWidth = 1,
+          FontSize = 9,
+          HTextAlign = "Center"
+        }
+        y = y + 21
+      end
+      layout["EOLCustom"] = {
+        PrettyName = "Connection Setup~EOLCustom",
+        Style = "Text",
+        TextBoxStyle = "Normal",
+        Position = {246, 230},
+        Size = {height * 8, height},
+        Color = White,
+        OffColor = Gray,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 1,
+        StrokeWidth = 1,
+        FontSize = 9,
+        HTextAlign = "Center"
+      }
+    elseif controlType == "HTTP" then
+      local controlTable = props["Authentication Required"].Value == "No" and {"URL", "Headers"} or {"URL", "Username", "Password", "Auth", "Headers"}
+      for k, v in ipairs(controlTable) do
+        table.insert(
+          graphics,
+          {
+            Type = "Label",
+            Text = v .. ":",
+            Position = {15, y},
+            Size = {labelWidth, height},
+            Fill = Clear,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 0,
+            StrokeWidth = 0,
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right"
+          }
+        )
+        layout[v] = {
+          PrettyName = "Connection Setup~" .. v,
+          Style = (v == "Auth") and "ComboBox" or "Text",
+          TextBoxStyle = v ~= "Auth" and "Normal",
+          Position = {107, y},
+          Size = (v ~= "URL" and v ~= "Headers") and {textBlockWidth, height} or {253, height},
+          Color = White,
+          OffColor = Gray,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 1,
+          StrokeWidth = 1,
+          FontSize = 9,
+          HTextAlign = "Center"
+        }
+        y = y + 21
+      end
+    end
+    -- Connection Status
+    y = 245
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Connection Status",
+        Position = (controlType ~= "Serial" and controlType ~= "HTTP") and {5, y}
+                or (controlType == "HTTP") and {5, y + 40}
+                or (controlType == "Serial") and {5, y + 41},
+        Size = {textBlockWidth, textBlockHeight},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 16,
+        FontStyle = "Bold",
+        HTextAlign = "Left"
+      }
+    )
+    y = 270
+    table.insert(
+      graphics,
+      {
+        Type = "GroupBox",
+        Position = (controlType ~= "Serial" and controlType ~= "HTTP") and {5, y}
+                or (controlType == "HTTP") and {5, y + 40}
+                or (controlType == "Serial") and {5, y + 41},
+        Size = {groupBoxWidth - 10, logoGroupBoxHeight + 10},
+        Fill = GBGray,
+        CornerRadius = 0,
+        StrokeWidth = 0
+      }
+    )
+    y = 280
+    table.insert(
+      graphics,
+      {
+        Type = "Header",
+        Text = "Status",
+        Position = (controlType ~= "Serial" and controlType ~= "HTTP") and {15, y}
+                or (controlType == "HTTP") and {15, y + 40}
+                or (controlType == "Serial") and {15, y + 41},
+        Size = {headerWidth, headerHeight},
+        Fill = DarkGray,
+        Font = "Roboto",
+        FontSize = 14,
+        FontStyle = "Bold",
+        HTextAlign = "Center"
+      }
+    )
+    y = 306
+    layout["Status"] = {
+      PrettyName = "Connection Status~Status",
+      Style = "Text",
+      TextBoxStyle = "Normal",
+      Position = (controlType ~= "Serial" and controlType ~= "HTTP") and {65, y}
+              or (controlType == "HTTP") and {65, y + 40}
+              or (controlType == "Serial") and {65, y + 41},
+      Size = {groupBoxHeight - 95, height * 2},
+      Color = StatusGray,
+      OffColor = Gray,
+      CornerRadius = 0,
+      Margin = 0,
+      Padding = 1,
+      StrokeWidth = 1,
+      FontSize = 12,
+      HTextAlign = "Center"
+    }
+    y = 365
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Version " .. PluginInfo.Version,
+        Position = (controlType ~= "Serial" and controlType ~= "HTTP") and {305, y}
+                or (controlType == "HTTP") and {305, y + 40}
+                or (controlType == "Serial") and {305, y + 41},
+        Size = {labelWidth, height - 4},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 9,
+        FontStyle = "Bold",
+        HTextAlign = "Right"
+      }
+    )
+  -- Send Page
+  elseif currentPage == "Send" then
+    y = 85
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Send Strings",
+        Position = {5, y},
+        Size = {textBlockWidth, textBlockHeight},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 16,
+        FontStyle = "Bold",
+        HTextAlign = "Left"
+      }
+    )
+    y = 110
+    table.insert(
+      graphics,
+      {
+        Type = "GroupBox",
+        Position = {5, y},
+        Size = (controlType == "HTTP") and {groupBoxWidth + 90, 73 + math.ceil(sendStringCount) * 21} or {groupBoxWidth - 10, 54 + math.ceil(sendStringCount) * 21},
+        Fill = GBGray,
+        CornerRadius = 0,
+        StrokeWidth = 0
+      }
+    )
+    y = 120
+    table.insert(
+      graphics,
+      {
+        Type = "Header",
+        Text = "Send",
+        Position = {15, y},
+        Size = (controlType == "HTTP") and {headerWidth + 100, headerHeight} or {headerWidth, headerHeight},
+        Fill = DarkGray,
+        Font = "Roboto",
+        FontSize = 14,
+        FontStyle = "Bold",
+        HTextAlign = "Center"
+      }
+    )
+    if controlType == "HTTP" then
+      for k, v in ipairs({"Command", "Data", "Method", "Trigger"}) do
+        table.insert(
+          graphics,
+          {
+            Type = "Label",
+            Text = v,
+            Position = v == "Command" and {120, 142} or v == "Data" and {290, 142} or v == "Method" and {389, 142} or v == "Trigger" and {438, 142},
+            Size = {60, height},
+            Fill = Clear,
+            CornerRadius = 0,
+            Margin = 0,
+            Padding = 0,
+            StrokeWidth = 0,
+            Font = "Roboto",
+            FontSize = 12,
+            HTextAlign = "Center"
+          }
+        )
+      end
+    end
+    if controlType ~= "HTTP" then
+      y = 146
+    else
+      y = 168
+    end
+    for i = 1, sendStringCount do
+      table.insert(
+        graphics,
+        {
+          Type = "Label",
+          Text = tostring(i),
+          Position = controlType ~= "HTTP" and {30, y} or {15, y},
+          Size = {height * 2, height},
+          Fill = Clear,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 0,
+          StrokeWidth = 0,
+          Font = "Roboto",
+          FontSize = 12,
+          HTextAlign = "Center"
+        }
+      )
+      layout["SendData" .. i] = {
+        PrettyName = "Send~SendCommand " .. i,
+        Style = "Text",
+        TextBoxStyle = "Normal",
+        Position = controlType ~= "HTTP" and {95, y} or {55, y},
+        Size = controlType ~= "HTTP" and {textBlockWidth, height} or {textBlockWidth + 10, height},
+        Color = White,
+        OffColor = Gray,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 1,
+        StrokeWidth = 1,
+        FontSize = 9,
+        HTextAlign = "Left"
+      }
+      layout["TriggerButton" .. i] = {
+        PrettyName = "Send~TriggerButton " .. i,
+        Position = controlType ~= "HTTP" and {321, y} or {453, y},
+        Size = {height * 2, height},
+        Color = White,
+        OffColor = Gray,
+        UnlinkOffColor = true,
+        CornerRadius = 2,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 1
+      }
+      if controlType == "HTTP" then
+        layout["Data" .. i] = {
+          PrettyName = "Send~Data " .. i,
+          Style = "Text",
+          TextBoxStyle = "Normal",
+          Position = {255, y},
+          Size = {130, height},
+          Color = White,
+          OffColor = Gray,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 1,
+          StrokeWidth = 1,
+          FontSize = 9,
+          HTextAlign = "Left"
+        }
+        layout["Method" .. i] = {
+          PrettyName = "Send~Method " .. i,
+          Style = "ComboBox",
+          Position = {395, y},
+          Size = {48, height},
+          Color = White,
+          OffColor = Gray,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 1,
+          StrokeWidth = 1,
+          FontSize = 9,
+          HTextAlign = "Center"
+        }
+      end
+      y = y + 21
+    end
+    if controlType ~= "HTTP" then
+      y = 54 + math.ceil(sendStringCount) * 21 + 115
+    else
+      y = 73 + math.ceil(sendStringCount) * 21 + 115
+    end
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Version " .. PluginInfo.Version,
+        Position = controlType ~= "HTTP" and {305, y} or {405, y},
+        Size = {labelWidth, height - 4},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 9,
+        FontStyle = "Bold",
+        HTextAlign = "Right"
+      }
+    )
+  -- Receive Page
+  elseif currentPage == "Receive" then
+    y = 85
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Receive Strings",
+        Position = {5, y},
+        Size = {textBlockWidth, textBlockHeight},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 16,
+        FontStyle = "Bold",
+        HTextAlign = "Left"
+      }
+    )
+    y = 110
+    table.insert(
+      graphics,
+      {
+        Type = "GroupBox",
+        Position = {5, y},
+        Size = {groupBoxWidth - 10, 77 + math.ceil(receiveStringCount) * 21},
+        Fill = GBGray,
+        CornerRadius = 0,
+        StrokeWidth = 0
+      }
+    )
+    y = 120
+    table.insert(
+      graphics,
+      {
+        Type = "Header",
+        Text = "Receive",
+        Position = {15, y},
+        Size = {headerWidth, headerHeight},
+        Fill = DarkGray,
+        Font = "Roboto",
+        FontSize = 14,
+        FontStyle = "Bold",
+        HTextAlign = "Center"
+      }
+    )
+    y = 146
+    for k, v in ipairs({"Parse Data", "Data Received"}) do
+      table.insert(
+        graphics,
+        {
+          Type = "Label",
+          Text = v,
+          Position = v == "Parse Data" and {140, y} or v == "Data Received" and {285, y},
+          Size = {labelWidth, height},
+          Fill = Clear,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 0,
+          StrokeWidth = 0,
+          Font = "Roboto",
+          FontSize = 11,
+          HTextAlign = "Center"
+        }
+      )
+    end
+    y = 167
+    for i = 1, receiveStringCount do
+      table.insert(
+        graphics,
+        {
+          Type = "Label",
+          Text = tostring(i),
+          Position = {30, y},
+          Size = {height * 2, height},
+          Fill = Clear,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 0,
+          StrokeWidth = 0,
+          Font = "Roboto",
+          FontSize = 12,
+          HTextAlign = "Center"
+        }
+      )
+      layout["Receive" .. i] = {
+        PrettyName = "Receive~ParseData " .. i,
+        Style = "Text",
+        TextBoxStyle = "Normal",
+        Position = {95, y},
+        Size = {textBlockWidth, height},
+        Color = White,
+        OffColor = Gray,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 1,
+        StrokeWidth = 1,
+        FontSize = 9,
+        HTextAlign = "Center"
+      }
+      layout["IsDataReceived" .. i] = {
+        PrettyName = "Receive~Is Data Received " .. i,
+        Style = "LED",
+        Position = {321, y},
+        Size = {height, height},
+        Color = Red,
+        OffColor = LEDOff,
+        UnlinkOffColor = true
+      }
+      y = y + 21
+    end
+    y = 77 + math.ceil(receiveStringCount) * 21 + 115
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Version " .. PluginInfo.Version,
+        Position = {310, y},
+        Size = {labelWidth, height - 4},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 9,
+        FontStyle = "Bold",
+        HTextAlign = "Right"
+      }
+    )
+  -- Buffer Page
+  elseif currentPage == "Buffer" then
+    y = 85
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Received Data",
+        Position = {5, y},
+        Size = {textBlockWidth, textBlockHeight},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 16,
+        FontStyle = "Bold",
+        HTextAlign = "Left"
+      }
+    )
+    y = 110
+    -- Buffer GroupBox
+    table.insert(
+      graphics,
+      {
+        Type = "GroupBox",
+        Position = {5, y},
+        Size = {groupBoxWidth - 10, groupBoxHeight - 65},
+        Fill = GBGray,
+        CornerRadius = 0,
+        StrokeWidth = 0
+      }
+    )
+    y = 120
+    table.insert(
+      graphics,
+      {
+        Type = "Header",
+        Text = "Buffer",
+        Position = {15, y},
+        Size = {headerWidth, headerHeight},
+        Fill = DarkGray,
+        Font = "Roboto",
+        FontSize = 14,
+        FontStyle = "Bold",
+        HTextAlign = "Center"
+      }
+    )
+    y = 146
+    if bufferCachingLayout == "Time" then
+      table.insert(
+        graphics,
+        {
+          Type = "Label",
+          Text = "Buffer Refresh",
+          Position = {260, y},
+          Size = {labelWidth, height},
+          Fill = Clear,
+          CornerRadius = 0,
+          Margin = 0,
+          Padding = 0,
+          StrokeWidth = 0,
+          Font = "Roboto",
+          FontSize = 11,
+          FontStyle = "Bold",
+          HTextAlign = "Center"
+        }
+      )
+      layout["BufferRefresh"] = {
+        PrettyName = "Buffer~Refresh",
+        Style = "Text",
+        TextBoxStyle = "MeterBackground",
+        Position = {352, y},
+        Size = {height * 2, height},
+        Fill = Meter,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 1,
+        StrokeWidth = 1,
+        Font = "Roboto",
+        FontSize = 9,
+        HTextAlign = "Center"
+      }
+    end
+    y = 167
+    layout["BufferReceivedData"] = {
+      PrettyName = "Buffer~ReceivedData",
+      Style = "Text",
+      TextBoxStyle = "Normal",
+      IsReadOnly = true,
+      Position = {15, y},
+      Size = {groupBoxHeight, groupBoxHeight - 145},
+      Color = White,
+      OffColor = Gray,
+      CornerRadius = 0,
+      Margin = 0,
+      Padding = 1,
+      StrokeWidth = 1,
+      FontSize = 9,
+      HTextAlign = "Left", -- Changed from Center to Left as comparing data is hard when not aligned
+      VTextAlign = "Bottom"
+    }
+    layout["LastReceivedMessage"] = {
+      Style = "None",
+      PrettyName = "Buffer~Last Received Message",
+    }
+    y = 420
+    table.insert(
+      graphics,
+      {
+        Type = "Label",
+        Text = "Version " .. PluginInfo.Version,
+        Position = {305, y},
+        Size = {labelWidth, height - 4},
+        Fill = Clear,
+        CornerRadius = 0,
+        Margin = 0,
+        Padding = 0,
+        StrokeWidth = 0,
+        Font = "Roboto",
+        FontSize = 9,
+        FontStyle = "Bold",
+        HTextAlign = "Right"
+      }
+    )
+  end
+  return layout, graphics
+end
+
+function GetPins(props)
+  local pins = {}
+  if props["Control Type"].Value == "Serial" then
+    table.insert(
+      pins,
+      {
+        Name = "Serial Input",
+        Direction = "input",
+        Domain = "serial"
+      }
+    )
+  end
+  return pins
+end
+
+--Start event based logic
+if Controls then
+  -- Include library
+  JSON = require("rapidjson")
+  
+  -- Control aliases
+  IPAddress = Controls.IPAddress
+  Port = Controls.Port
+  HeartBeatTime = Controls.HeartBeatTime
+  Username = Controls.Username
+  Password = Controls.Password
+  URL = Controls.URL
+  Auth = Controls.Auth
+  Headers = Controls.Headers
+  EOL = Controls.EOL
+  EOLCustom = Controls.EOLCustom
+  BaudRate = Controls.BaudRate
+  DataBits = Controls.DataBits
+  Parity = Controls.Parity
+  StopBits = Controls.StopBits
+  Status = Controls.Status
+  BufferRefresh = Controls.BufferRefresh
+  BufferReceivedData = Controls.BufferReceivedData
+  
+  -- Debug Settings
+  DebugTx = false
+  DebugRx = false
+  DebugFunction = false
+  DebugPrint = Properties["Debug Print"].Value
+  
+  -- Constants
+  StatusState = {
+    OK = 0,
+    COMPROMISED = 1,
+    FAULT = 2,
+    NOTPRESENT = 3,
+    MISSING = 4,
+    INITIALIZING = 5
+  }
+  
+  SerialConstant = {
+    BaudRateChoices = {
+      "50",
+      "110",
+      "134",
+      "150",
+      "200",
+      "300",
+      "600",
+      "1200",
+      "1800",
+      "2400",
+      "4800",
+      "9600",
+      "19200",
+      "38400",
+      "57600",
+      "115200",
+      "230400"
+    },
+    DataBitsChoices = {"7", "8"},
+    ParityChoices = {"None", "Odd", "Even"}, -- N = None, E = Even, O = Odd
+    StopBitsChoices = {"1", "2"}
+  }
+  
+  EOL_Choices = {"Any", "CrLf", "CrLfStrict", "Lf", "Null", "Custom", "None"}
+  Controls["EOL"].Choices = EOL_Choices
+  
+  Auth_Choices = {"any", "basic", "digest", "digest_ie"}
+  Auth.Choices = Auth_Choices
+  
+  HttpMethods = {"GET", "POST", "PUT", "PATCH", "DELETE"}
+  for i = 1, Properties["Send String Count"].Value do
+    Controls["Method" .. i].Choices = HttpMethods
+  end
+  
+  -- Timers
+  HeartBeatTimer = Timer.New()
+  BufferTimer = Timer.New() -- used if Buffer Caching is set to Time
+  
+  -- Variables
+  HeartBeatGood = false -- Set the connection flag to false
+  ReceivedData = "" -- to store received data
+  BufferData = {}
+  
+  -- Helper functions
+  -- A function to determine common print statement scenarios for troubleshooting
+  function SetupDebugPrint()
+    if DebugPrint == "Tx/Rx" then
+      DebugTx, DebugRx = true, true
+    elseif DebugPrint == "Tx" then
+      DebugTx = true
+    elseif DebugPrint == "Rx" then
+      DebugRx = true
+    elseif DebugPrint == "Function Calls" then
+      DebugFunction = true
+    elseif DebugPrint == "All" then
+      DebugTx, DebugRx, DebugFunction = true, true, true
+    end
+  end
+  
+  -- Update the Status control
+  function ReportStatus(state, message)
+    if DebugFunction then
+      print("ReportStatus() Called")
+    end
+    local message = message or ""
+    Status.Value = StatusState[state]
+    Status.String = message
+  end
+  
+    -- Create a new Queue Class instance to do many things at the same time
+    Queue = {}
+    
+    -- Returns a new Queue object
+    function Queue:New()
+      list = {first = 1, last = 0}
+      self.__index = self
+      setmetatable(list, self)
+      return list
+    end
+    
+    -- Add a value to the end of the Queue
+    function Queue:Push(value)
+      self.last = self.last + 1
+      self[self.last] = value
+    end
+    
+    -- Add a value at the head of the Queue
+    function Queue:PushFirst(value)
+      self.first = self.first - 1
+      self[self.first] = value
+    end
+    
+    -- Return a value removed from the front of the queue
+    function Queue:Pop()
+      if self.first > self.last then
+        error("Queue is empty!")
+      end
+      local value = self[self.first]
+      self[self.first] = nil
+      self.first = self.first + 1
+      return value
+    end
+    
+    -- Return the index within the Queue of the value, or nil
+    function Queue:IndexOf(value)
+      for i = self.first, self.last do
+        if self[i] == value then
+          return i
+        end
+      end
+      return nil
+    end
+    
+    -- Remove all data from the Queue
+    function Queue:Clear()
+      for i = self.first, self.last do
+        self[i] = nil
+      end
+      self.first = 1
+      self.last = 0
+    end
+    
+    -- Returns false if the Queue contains data, true otherwise
+    function Queue:IsEmpty()
+      return self.first > self.last
+    end
+    
+    MyQueue = Queue:New()
+    QueuePopTimer = Timer.New()
+    QueuePopTimer:Start(0.001)
+    QueuePopTimer.EventHandler = function()
+      if not MyQueue:IsEmpty() then
+        local item = MyQueue:Pop()
+        if item ~= "" then
+          if Properties["Control Type"].Value == "HTTP" then
+            WriteData(item.buttonIndex)
+          else
+            WriteData(item.sendData)
+          end
+        end
+      end
+    end
+    -- Returns true if the IP address is not empty
+    function IsIPAddressEntered()
+      local ipAddress = IPAddress.String
+      return ipAddress ~= ""
+    end
+    
+    -- Returns true if all the serial data are not empty
+    function IsSerialDataEntered()
+      local baudRate = BaudRate.String
+      local dataBits = DataBits.String
+      local parity = Parity.String
+      local stopBits = StopBits.String
+      return baudRate ~= "" and dataBits ~= "" and parity ~= "" and stopBits ~= ""
+    end
+    
+    -- Returns true if the credentials are not empty
+    function IsCredentialsEntered()
+      local username = Username.String
+      local password = Password.String
+      return username ~= "" and password ~= ""
+    end
+    
+    -- Enables or disables the Username and Password controls based on the authentication required from the properties panel
+    function EnableLogin()
+      if Properties["Control Type"].Value == "HTTP" then
+        if Properties["Authentication Required"].Value == "No" then
+          print("User credentials aren't required")
+          Username.IsDisabled = true
+          Password.IsDisabled = true
+          Auth.IsDisabled = true
+        elseif Properties["Authentication Required"].Value == "Yes" then
+          print("User credentials required")
+          Username.IsDisabled = false
+          Password.IsDisabled = false
+          Auth.IsDisabled = false
+        end
+      end
+    end
+    
+    -- Enables or disables the EOL controls based on the EOL
+    function EnableEolCustom()
+      if Properties["Control Type"].Value == "TCP" or Properties["Control Type"].Value == "SSH" or Properties["Control Type"].Value == "Serial" then
+        EOLCustom.IsDisabled = (EOL.String ~= "Custom")
+        -- If EOL.String is "Custom", check EOLCustom.String
+        if EOL.String == "Custom" then
+          if EOLCustom.String == "" then
+            EOLCustom.String = "\\x0D"
+          end
+        end
+      end
+    end
+    
+    -- Escapes the special characters in the user input string
+    function Escape(cmd)
+      local escapedLine = ""
+      local hexBuffer = ""
+      local inHex = false
+      local inEscapeSequence = false
+      local function addChar(charByte, position)
+        escapedLine = escapedLine .. string.char(charByte)
+      end
+      for i = 1, #cmd do
+        local char = string.byte(cmd:sub(i, i))
+        if inEscapeSequence then
+          inEscapeSequence = false
+          if char == 120 then
+            inHex = true -- hex indicator
+            hexBuffer = ""
+          else
+            local replacements = {
+              [97] = 7, -- bell
+              [98] = 8, -- backspace
+              [102] = 12, -- formfeed
+              [110] = 10, -- newline
+              [114] = 13, -- carriage return
+              [116] = 9, -- tab
+              [118] = 11, -- vertical tab
+              [92] = 92, -- backslash
+              [34] = 34, -- double quotes
+              [39] = 39 -- single quotes
+            }
+            local replacement = replacements[char]
+            if replacement then
+              addChar(replacement, i)
+            else
+              -- Handle unrecognized escape character
+              addChar(92, i) -- Add backslash
+              addChar(char, i) -- Add the unrecognized escape character itself
+            end
+          end
+        elseif inHex then
+          hexBuffer = hexBuffer .. string.char(char)
+          if #hexBuffer >= 2 then
+            local hexToDec = tonumber(hexBuffer, 16)
+            hexBuffer = ""
+            inHex = false
+            addChar(hexToDec, i)
+          end
+        else
+          if char == 92 then
+            inEscapeSequence = true
+          else
+            addChar(char, i)
+          end
+        end
+      end
+      if inHex then
+        error("Unfinished Hex")
+      end
+      return escapedLine
+    end
+    
+    -- De-escapes the special characters in the user input string
+    function DeEscape(cmd)
+      local data = ""
+      for i = 1, #cmd do
+        local char = string.byte(cmd:sub(i, i))
+        if char > 32 then
+          data = data .. string.char(char)
+        else
+          data = data .. string.format("\\x%02x", char)
+        end
+      end
+      return data
+    end
+    
+    BufferTimer.EventHandler = function()
+      local itemRemoved = false
+      for x= #BufferData, 1, -1 do -- iterate backwards to avoid skipping elements
+        BufferData[x].Time = BufferData[x].Time - 1
+        if BufferData[x].Time <= 0 then
+          table.remove(BufferData, x)
+          itemRemoved = true
+        end
+      end
+      if itemRemoved then -- only update if an item was removed
+        UpdateBufferReceivedData()
+      end
+    end
+    if Properties["Buffer Caching"].Value == "Time" then
+      BufferTimer:Start(1)
+      BufferRefresh.EventHandler = function()
+        BufferTimer:Stop()
+        for x = 1, #BufferData do
+          if BufferData[x].Time > BufferRefresh.Value then -- if time is greater than the new refresh rate, update the time
+            BufferData[x].Time = BufferRefresh.Value
+          end
+        end
+        BufferTimer:Start(1)
+      end
+    end
+    
+    -- Function to add messages to the buffer with appropriate prefixes
+    function AddToBuffer(prefix, message)
+      local toAdd = {}
+      toAdd["message"] = prefix .. ": " .. message
+      if Properties["Buffer Caching"].Value == "Time" then
+        toAdd["Time"] = BufferRefresh and BufferRefresh.Value or 0
+      end
+      table.insert(BufferData, toAdd)
+    
+      -- limit max buffer depending on Caching type
+      if Properties["Buffer Caching"].Value == "Time" then
+        while #BufferData > 1000 do -- Limit the buffer to 1000 messages to preserve lua compute
+          table.remove(BufferData, 1)
+        end
+      elseif Properties["Buffer Caching"].Value == "Count" then
+        while #BufferData > Properties["Message Cache Amount"].Value do
+          table.remove(BufferData, 1)
+        end
+      end
+      UpdateBufferReceivedData()
+    end
+    
+    -- Function to update BufferReceivedData based on Buffer Caching properties
+    function UpdateBufferReceivedData()
+      local messages = {}
+      for _,item in ipairs(BufferData) do
+        table.insert(messages, item.message)
+      end
+      BufferReceivedData.String = table.concat(messages, "\n")
+    end
+    
+    OutputTimers = {}
+    for i = 1, Properties["Receive String Count"].Value do
+      OutputTimers[i] = Timer.New()
+      OutputTimers[i].EventHandler = function()
+        OutputTimers[i]:Stop()
+        Controls["IsDataReceived" .. i].Boolean = false
+      end
+    end
+    
+    function PulseOutput(index)
+      Controls["IsDataReceived" .. index].Boolean = false
+      OutputTimers[index]:Stop()
+      Controls["IsDataReceived" .. index].Boolean = true
+      OutputTimers[index]:Start(3)
+    end
+  -- Socket Management
+  function ConnectionSetup()
+    if DebugFunction then
+      print("ConnectionSetup() Called")
+    end
+  
+    -- Socket Management
+    Tcp = nil
+    Udp = nil
+    SSH = nil
+    Serial = nil
+  
+    ClearVariables()  -- Clear the data and buffer
+    -- memory managment of garbage collection
+    collectgarbage("collect")
+  
+    if Properties["Control Type"].Value == "TCP" then
+      if DebugFunction then
+        print("TCP Connection Initialized...")
+      end
+        ReportStatus("MISSING")
+        
+        -- Socket Management
+        Tcp = TcpSocket.New()
+        -- Tcp.ReadTimeout = 10
+        -- Tcp.WriteTimeout = 10
+        Tcp.ReconnectTimeout = 5
+        
+        -- Event Handler
+        Tcp.EventHandler = function(sock, evt, err)
+          if IsIPAddressEntered() then
+            if evt == TcpSocket.Events.Connected then
+              print("TcpSocket connected")
+              ReportStatus("OK", "Connected")
+            elseif evt == TcpSocket.Events.Reconnect then
+              print("TcpSocket reconnecting...")
+            elseif evt == TcpSocket.Events.Data then
+              local line
+              if EOL.String == "Custom" then
+                if EOLCustom.String ~= "" then
+                  line = sock:ReadLine(TcpSocket.EOL.Custom, Escape(EOLCustom.String))
+                  while (line ~= nil) do
+                    ParseResponse(line)
+                    line = sock:ReadLine(TcpSocket.EOL.Custom, Escape(EOLCustom.String))
+                  end
+                else
+                  print("EOLCustom.String is needed to parse data with Custom EOL")
+                end
+              elseif EOL.String == "None" then
+                line = sock:Read(sock.BufferLength)
+                ParseResponse(line)
+              else
+                line = sock:ReadLine(TcpSocket.EOL[EOL.String])
+                while (line ~= nil) do
+                  ParseResponse(line)
+                  line = sock:ReadLine(TcpSocket.EOL[EOL.String])
+                end
+              end
+            elseif evt == TcpSocket.Events.Closed then
+              print("TcpSocket closed")
+              ReportStatus("MISSING", "Socket Closed")
+            elseif evt == TcpSocket.Events.Error then
+              print("TcpSocket closed due to error: ", err)
+              ReportStatus("MISSING", "Unable to connect")
+            elseif evt == TcpSocket.Events.Timeout then
+              print("TcpSocket closed due to timeout")
+              ReportStatus("MISSING", "Socket Timeout")
+            else
+              print("Unknown TcpSocket event: ", evt)
+            end
+          else
+            ReportStatus("MISSING", "No valid IP Address")
+          end
+        end
+        
+        if IsIPAddressEntered() then
+          local success, err =
+            pcall(
+            function()
+              if Tcp.IsConnected then
+                Tcp:Disconnect()
+              end
+              Tcp:Connect(IPAddress.String, Port.Value)
+            end
+          )
+          if not success then
+            ReportStatus("FAULT", "Socket Error")
+          end
+        else
+          ReportStatus("MISSING", "No valid IP Address")
+        end
+        
+        -- Send the data to the device
+        function WriteData(cmd)
+          if DebugFunction then
+            print("TCP WriteData() Called")
+          end
+          if Tcp.IsConnected then
+            print("TX: ", cmd)
+            Tcp:Write(Escape(cmd))
+          else
+            print("Error - TcpSocket Disconnected; unable to send ", cmd)
+          end
+        end
+    elseif Properties["Control Type"].Value == "HTTP" then
+      if DebugFunction then
+        print("HTTP Connection Initialized...")
+      end
+      if URL.String == "" then
+        ReportStatus("MISSING", "No URL")
+      else
+        ReportStatus("OK")
+      end
+        local headersTable = {}
+        
+        -- Define the lookup table for HTTP status codes
+        local status_codes = {
+          [100] = "Continue",
+          [101] = "Switching Protocols",
+          [102] = "Processing (WebDAV; RFC 2518)",
+          [103] = "Early Hints (RFC 8297)",
+          [200] = "OK",
+          [201] = "Created",
+          [202] = "Accepted",
+          [203] = "Non-Authoritative Information",
+          [204] = "No Content",
+          [205] = "Reset Content",
+          [206] = "Partial Content",
+          [207] = "Multi-Status (WebDAV; RFC 4918)",
+          [208] = "Already Reported (WebDAV; RFC 5842)",
+          [209] = "IM Used (RFC 3229)",
+          [300] = "Multiple Choices",
+          [301] = "Moved Permanently",
+          [302] = "Found",
+          [303] = "See Other (since HTTP/1.1)",
+          [304] = "Not Modified",
+          [305] = "Use Proxy",
+          [306] = "Switch Proxy",
+          [307] = "Temporary Redirect",
+          [308] = "Permanent Redirect",
+          [400] = "Bad Request",
+          [401] = "Unauthorized",
+          [402] = "Payment Required",
+          [403] = "Forbidden",
+          [404] = "Not Found",
+          [405] = "Method Not Allowed",
+          [406] = "Not Acceptable",
+          [407] = "Proxy Authentication Required",
+          [408] = "Request Timeout",
+          [409] = "Conflict",
+          [410] = "Gone",
+          [411] = "Length Required",
+          [412] = "Precondition Failed",
+          [413] = "Payload Too Large",
+          [414] = "URI Too Long",
+          [415] = "Unsupported Media Type",
+          [416] = "Range Not Satisfiable",
+          [417] = "Expectation Failed",
+          [418] = "I'm a Teapot",
+          [421] = "Misdirected Request",
+          [422] = "Unprocessable Entity",
+          [423] = "Locked",
+          [424] = "Failed Dependency",
+          [425] = "Too Early",
+          [426] = "Upgrade Required",
+          [428] = "Precondition Required",
+          [429] = "Too Many Requests",
+          [431] = "Request Header Fields Too Large",
+          [451] = "Unavailable For Legal Reasons",
+          [500] = "Internal Server Error",
+          [501] = "Not Implemented",
+          [502] = "Bad Gateway",
+          [503] = "Service Unavailable",
+          [504] = "Gateway Timeout",
+          [505] = "HTTP Version Not Supported",
+          [506] = "Variant Also Negotiates",
+          [507] = "Insufficient Storage",
+          [508] = "Loop Detected",
+          [510] = "Not Extended",
+          [511] = "Network Authentication Required",
+          -- Unofficial codes
+          [218] = "This is fine (Apache HTTP Server)",
+          [419] = "Page Expired (Laravel Framework)",
+          [420] = "Method Failure (Spring Framework) or  Enhance Your Calm (Twitter)",
+          [430] = "Request Header Fields Too Large / Shopify Security Rejection (Shopify)",
+          [450] = "Blocked by Windows Parental Controls (Microsoft)",
+          [498] = "Invalid Token (Esri)",
+          [499] = "Token Required (Esri)",
+          [509] = "Bandwidth Limit Exceeded (Apache Web Server/cPanel)",
+          [529] = "Site is overloaded(Qualys)",
+          [530] = "Site is frozen (Pantheon Systems) or Origin DNS Error (Shopify)",
+          [540] = "Temporarily Disabled (Shopify)",
+          [598] = "(Informal convention) Network read timeout error",
+          [599] = "Network Connect Timeout Erro",
+          [783] = "Unexpected Token (Shopify)",
+          -- Internet Information Services
+          [440] = "Login Time-out",
+          [449] = "Retry With",
+          [451] = "Redirect",
+          -- nginx
+          [444] = "No Response",
+          [494] = "Request header too large",
+          [465] = "SSL Certificate Error",
+          [496] = "SSL Certificate Required",
+          [497] = "HTTP Request Sent to HTTPS Port",
+          [499] = "Client Closed Request",
+          -- Cloudflare
+          [520] = "Web Server Returned an Unknown Error",
+          [521] = "Web Server Is Down",
+          [522] = "Connection Timed Out",
+          [523] = "Origin Is Unreachable",
+          [524] = "A Timeout Occurred",
+          [525] = "SSL Handshake Failed",
+          [526] = "Invalid SSL Certificate",
+          [527] = "Railgun Error",
+          -- AWS Elastic Load Balancing
+          [460] = "Client closed the connection with the load balancer before the idle timeout period elapsed",
+          [463] = "The load balancer received an X-Forwarded-For request header with more than 30 IP addresses",
+          [464] = "Incompatible protocol versions between Client and Origin server",
+          [561] = "Unauthorized",
+          -- Caching warning codes (obsoleted)
+          [110] = "Response is Stale",
+          [111] = "Revalidation Failed",
+          [112] = "Disconnected Operation",
+          [113] = "Heuristic Expiration",
+          [199] = "Miscellaneous Warning",
+          [214] = "Transformation Applied",
+          [299] = "Miscellaneous Persistent Warning",
+        }
+        
+        -- A function to parse headers
+        function ParseHeaders(headersString)
+          local headers = {}
+          for key, value in headersString:gmatch('%[%"(.-)%"]%s?=%s?%"(.-)%"') do
+            print("KEY: " .. key .. ", VALUE: " .. value)
+            headers[key] = value
+          end
+          headersTable = headers -- Update global headersTable with parsed headers
+          return headers
+        end
+        
+        -- A function reads response code, sets status and prints received data.
+        function HttpResponseHandler(tbl, code, data, err, headers)
+          print(string.format("HTTP response from '%s': Return Code=%i; Error=%s", tbl.Url, code, err or "None"))
+          if data then
+            ParseResponse(data)
+          end
+          local status_description = status_codes[code] or "Unknown Status Code"
+          local state = (code >= 100 and code < 300) and "OK" or "FAULT"
+          ReportStatus(state, string.format("%s - %d", status_description, math.floor(code)))
+          if not status_description then
+            print("Unhandled status code: ", code)
+          end
+        end
+        
+        -- Consolidates HTTP request logic for GET and POST requests.
+        function SendRequest(url, data, method)
+          local headers = ParseHeaders(Headers.String)
+          local username = Username and Username.String or nil
+          local password = Password and Password.String or nil
+          local auth = Auth and Auth.String or nil
+        
+          local request = {
+            Url = url,
+            Headers = headers,
+            User = username,
+            Password = password,
+            Auth = auth,
+            Timeout = 15,
+            EventHandler = HttpResponseHandler
+          }
+        
+          if method == "GET" then
+            HttpClient.Download(request)
+          elseif method == "DELETE" then
+            HttpClient.Delete(request)
+          else
+            request.Data = data
+            request.Method = method
+            HttpClient.Upload(request)
+          end
+        end
+        
+        -- A function to sends an HTTP request based on the specified method and data.
+        function SendHTTPCommand(index)
+          if DebugFunction then
+            print("SendHTTPCommand() Called")
+          end
+          local cmd = Controls["SendData" .. index].String
+          local data = Controls["Data" .. index].String
+          local method = Controls["Method" .. index].String
+        
+          local url = string.format("%s/%s", URL.String, cmd)
+          SendRequest(url, data, method)
+        end
+        
+        -- Send the data to the endpoint
+        function WriteData(buttonIndex)
+          if DebugFunction then
+            print("HTTP WriteData() Called")
+          end
+          SendHTTPCommand(buttonIndex)
+        end
+    elseif Properties["Control Type"].Value == "UDP" then
+      if DebugFunction then
+        print("UDP Connection Initialized...")
+      end
+        HeartBeatTimer:Stop()
+        
+        -- Socket Management
+        Udp = UdpSocket.New()
+        
+        -- Event Handler
+        Udp.EventHandler = function(udp, packet)
+          if packet.Data ~= nil and packet.Address == IPAddress.String then
+            BeatHeart()
+            ParseResponse(packet.Data)
+          end
+        end
+        
+        if IsIPAddressEntered() then
+          local success, err =
+            pcall(
+            function()
+              Udp:Open(_, Port.Value)
+              HeartBeatTimer:Start(HeartBeatTime.Value)
+              ReportStatus("MISSING")
+            end
+          )
+          if not success then
+            ReportStatus("FAULT", "Socket Error unable to open Udp socket")
+          end
+        else
+          ReportStatus("MISSING", "Invalid IP Address")
+        end
+        
+        function WriteData(data)
+          if DebugFunction then
+            print("UDP WriteData() Called")
+          end
+          print("TX: ", data)
+          Udp:Send(IPAddress.String, Port.Value, Escape(data))
+        end
+    elseif Properties["Control Type"].Value == "SSH" then
+      if DebugFunction then
+        print("SSH Connection Initialized...")
+      end
+        -- Socket Management
+        SSH = Ssh.New()
+        -- SSH.ReadTimeout = 10
+        -- SSH.WriteTimeout = 10
+        SSH.ReconnectTimeout = 5
+        
+        local loginFailed = false
+        
+        StrikeoutThreshold = 5
+        Strikes = 0
+        ResponseTimeout = 30
+        WaitingForResponse = false
+        UseStrikeout, UseTimeout = true, true
+        
+        ResponseTimer = Timer.New()
+        ResponseTimer.EventHandler = function()
+          ClearTimeout()
+          ReportStatus("MISSING", "No response from device")
+          Connect()
+        end
+        
+        function CheckStrikeout()
+          if Strikes >= StrikeoutThreshold then
+            ClearTimeout()
+            ReportStatus("MISSING", "Strikeout Threshold Reached")
+            Connect()
+          end
+        end
+        
+        function ClearTimeout() -- Call on recieved Data, even if data is empty as that proves the socket is still alive on the other end
+          ResponseTimer:Stop()
+          WaitingForResponse = false
+          Strikes = 0
+        end
+        
+        function IncrementStrikeout() -- Call on sent Data
+          if not WaitingForResponse and UseTimeout then
+            WaitingForResponse = true
+            ResponseTimer:Start(ResponseTimeout)
+          end
+          if UseStrikeout then
+            Strikes = Strikes + 1
+            CheckStrikeout()
+          end
+        end
+        
+        -- Event Handler
+        -- SSH socket callbacks
+        -- function called when SSH login fails
+        SSH.LoginFailed = function()
+          print("SSH login failed")
+          loginFailed = true
+        end
+        
+        -- function called when the SSH socket is connected
+        SSH.Connected = function()
+          print("Socket connected")
+          ReportStatus("OK", "Connected")
+        end
+        
+        -- function called when the SSH socket is reconnected
+        SSH.Reconnect = function()
+          print("Socket reconnecting...")
+        end
+        
+        -- function called when the SSH socket is closed
+        SSH.Closed = function()
+          print("Socket closed")
+          if not SSH.IsConnected and loginFailed then
+            ReportStatus("FAULT","Access denied - check credentials")
+          else
+            ReportStatus("MISSING", "Socket Closed")
+          end
+        end
+        
+        -- function called when the SSH socket has an error
+        SSH.Error = function()
+          print("Socket error")
+          ReportStatus("MISSING", "Unable to connect")
+        end
+        
+        -- function called when the SSH socket times out
+        SSH.Timeout = function()
+          print("Socket timeout")
+          ReportStatus("MISSING", "Socket Timeout")
+        end
+        
+        -- ParseResponse is called when the SSH object has data
+        SSH.Data = function()
+          local line
+          ClearTimeout()
+          if EOL.String == "Custom" then
+            if EOLCustom.String ~= "" then
+              line = SSH:ReadLine(TcpSocket.EOL.Custom, Escape(EOLCustom.String))
+              while (line ~= nil) do
+                ParseResponse(line)
+                line = SSH:ReadLine(TcpSocket.EOL.Custom, Escape(EOLCustom.String))
+              end
+            else
+              print("EOLCustom.String is needed to parse data with Custom EOL")
+            end
+          elseif EOL.String == "None" then
+            line = SSH:Read(SSH.BufferLength)
+            ParseResponse(line)
+          else
+            line = SSH:ReadLine(TcpSocket.EOL[EOL.String])
+            while (line ~= nil) do
+              ParseResponse(line)
+              line = SSH:ReadLine(TcpSocket.EOL[EOL.String])
+            end
+          end
+        end
+        
+        
+        -- Connect to the device
+        function Connect()
+          -- Connect to the device
+          if not IsIPAddressEntered() then
+            ReportStatus("MISSING", "Invalid IP Address")
+          else
+            if not IsCredentialsEntered() then
+              ReportStatus("MISSING", "Credentials are missing")
+            else
+              -- Reset loginFailed flag
+              loginFailed = false
+              local success, err =
+                pcall(
+                function()
+                  if SSH.IsConnected then
+                    SSH:Disconnect()
+                  end
+                  SSH:Connect(IPAddress.String, Port.Value, Username.String, Password.String)
+                end
+              )
+              if not success then
+                -- Handle error during connection attempt
+                ReportStatus("FAULT", "Socket Error: " .. tostring(err))
+              end
+            end
+          end
+        end
+        Connect()
+        
+        function WriteData(cmd)
+          if DebugFunction then
+            print("SSH WriteData() Called")
+          end
+          if SSH.IsConnected then
+            print("TX: ", cmd)
+            SSH:Write(Escape(cmd))
+            IncrementStrikeout()
+          else
+            print("Error - SSH Socket Disconnected; unable to send ", cmd)
+          end
+        end
+    elseif Properties["Control Type"].Value == "Serial" then
+      if DebugFunction then
+        print("Serial Connection Initialized...")
+      end
+        -- Socket Management
+        SerialPort = SerialPorts[1]
+        
+        -- Choices
+        BaudRate.Choices = SerialConstant.BaudRateChoices
+        DataBits.Choices = SerialConstant.DataBitsChoices
+        Parity.Choices = SerialConstant.ParityChoices
+        StopBits.Choices = SerialConstant.StopBitsChoices
+        local parity = {None = "N", Odd = "O", Even = "E"}
+        
+        -- EventHandler
+        SerialPort.EventHandler = function(port, evt, err)
+          if IsSerialDataEntered() then
+            if evt == SerialPorts.Events.Connected then
+              BeatHeart()
+              print("Serial port connected")
+              ReportStatus("OK")
+            elseif evt == SerialPorts.Events.Reconnect then
+              print("Serial port reconnecting...")
+            elseif evt == SerialPorts.Events.Data then
+              BeatHeart()
+              local line
+              if EOL.String == "Custom" then
+                if EOLCustom.String ~= "" then
+                  line = port:ReadLine(SerialPorts.EOL.Custom, Escape(EOLCustom.String))
+                  while (line ~= nil) do
+                    ParseResponse(line)
+                    line = port:ReadLine(SerialPorts.EOL.Custom, Escape(EOLCustom.String))
+                  end
+                else
+                  print("EOLCustom.String is needed to parse data with Custom EOL")
+                end
+              elseif EOL.String == "None" then
+                line = port:Read(port.BufferLength)
+                ParseResponse(line)
+              else
+                line = port:ReadLine(SerialPorts.EOL[EOL.String])
+                while (line ~= nil) do
+                  ParseResponse(line)
+                  line = port:ReadLine(SerialPorts.EOL[EOL.String])
+                end
+              end
+            elseif evt == SerialPorts.Events.Closed then
+              print("Serial port closed by remote")
+              ReportStatus("MISSING", "Serial port closed")
+              HeartBeatTimer:Stop()
+              HeartBeatGood = false  -- Set HeartBeatGood to false
+            elseif evt == SerialPorts.Events.Error then
+              print("Serial port closed due to error: ", err)
+              ReportStatus("MISSING", "Unable to connect")
+              HeartBeatTimer:Stop()
+              HeartBeatGood = false  -- Set HeartBeatGood to false
+            elseif evt == SerialPorts.Events.Timeout then
+              print("Serial port closed due to timeout")
+              ReportStatus("MISSING", "Serial port timeout")
+              HeartBeatTimer:Stop()
+              HeartBeatGood = false  -- Set HeartBeatGood to false
+            end
+          end
+        end
+        
+        if IsSerialDataEntered() then
+          local success, err =
+            pcall(
+              function()
+                if SerialPort.IsOpen then
+                  SerialPort:Close()
+                end
+                SerialPort:Open(tonumber(BaudRate.String), tonumber(DataBits.String), parity[Controls["Parity"].String])
+              end
+          )
+          if not success then
+            ReportStatus("FAULT", "Socket Error")
+          end
+        else
+          ReportStatus("MISSING", "No valid serial data")
+        end
+        
+        function WriteData(cmd)
+          if DebugFunction then
+            print("Serial WriteData() Called")
+          end
+          if SerialPort.IsOpen then
+            print("TX: ", cmd)
+            SerialPort:Write(Escape(cmd))
+          else
+            print("Error - Serialport Disconnected; unable to send ", cmd)
+          end
+        end
+    end
+  end
+  
+  -- Buffer Management
+  function ParseResponse(data)
+    if DebugFunction then
+      print("ParseResponse() Called")
+    end
+    if data ~= nil then
+      if DebugRx then
+        print("Received Data: ", data)
+      end
+      ReceivedData = data -- update the received data to the global variable
+      local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+      AddToBuffer("RX", "[" .. timestamp .. "] " .. ReceivedData) -- Add received data to buffer
+      -- UpdateBufferReceivedData()  -- Update BufferReceivedData after adding new data
+  
+      Controls["LastReceivedMessage"].String = ReceivedData
+  
+      for i = 1, Properties["Receive String Count"].Value do
+        local receivedString = Controls["Receive" .. i].String
+        if receivedString ~= "" then
+          -- Attempt to compile the string as a regex
+          local isRegEx, err =
+            pcall(
+            function()
+              return data:find(receivedString)
+            end
+          )
+          -- If no error occurred, it's likely a plain text search
+          if isRegEx then
+            if data:find(receivedString) then
+              PulseOutput(i)
+            end
+          else
+            -- If error occurred during regex compilation, it's a regex search
+            isRegEx, err = pcall(function()
+              return data:match(receivedString)
+            end)
+            if isRegEx then
+              PulseOutput(i)
+            else
+              -- Handle error in regex pattern
+              if DebugRx then
+                print("Error in regex pattern: ", err) -- Print the error message for debugging
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  
+  -- A function to clear controls/flags/variables and clears tables
+  function ClearVariables()
+    if DebugFunction then
+      print("ClearVariables() Called")
+    end
+    BufferReceivedData.String = ""
+    Controls["LastReceivedMessage"].String = ""
+    BufferData = {}
+    HeartBeatGood = false
+  end
+  
+  -- Poll function for updates and state changes
+  function PollDevice()
+    if DebugFunction then
+      print("PollDevice() Called")
+    end
+    -- WriteData("PING")
+  end
+  
+  -- EventHandlers
+  function SetEventHandlers()
+    IPAddress.EventHandler = ConnectionSetup
+    Username.EventHandler = ConnectionSetup
+    Password.EventHandler = ConnectionSetup
+    URL.EventHandler = ConnectionSetup
+    Port.EventHandler = ConnectionSetup
+    HeartBeatTime.EventHandler = BeatHeart -- should not need to restart communication
+    Auth.EventHandler = ConnectionSetup
+    Headers.EventHandler = ConnectionSetup
+    BaudRate.EventHandler = ConnectionSetup
+    DataBits.EventHandler = ConnectionSetup
+    Parity.EventHandler = ConnectionSetup
+    StopBits.EventHandler = ConnectionSetup
+    EOL.EventHandler = EnableEolCustom
+    EOLCustom.EventHandler = EnableEolCustom
+  
+    if Properties["Control Type"].Value == "UDP" or Properties["Control Type"].Value == "Serial" then
+      HeartBeatTimer.EventHandler = function() -- Should only be called if the heartbeat is missed
+        if HeartBeatGood then -- only report status missing if the last heartbeat was good
+          ReportStatus("MISSING")
+        end
+        HeartBeatGood = false -- set false so the next heartbeat will report the status as OK
+      end
+      HeartBeatTimer:Start(HeartBeatTime.Value)
+    end
+  
+    for i = 1, Properties["Send String Count"].Value do
+      Controls["TriggerButton" .. i].EventHandler = function()
+        local buttonIndex = i -- Capture the current value of i locally
+        print("TriggerButton " .. buttonIndex .. " Pressed")
+        local sendData = Controls["SendData" .. buttonIndex].String
+        local data = Controls["Data" .. buttonIndex] and Controls["Data" .. buttonIndex].String or ""
+        MyQueue:Push({sendData = sendData, buttonIndex = buttonIndex})
+        -- Add sent data to buffer
+        if sendData ~= "" then
+          local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+          AddToBuffer("TX", "[" .. timestamp .. "] " .. sendData .. " " .. data)
+        end
+      end
+    end
+  end
+  
+  -- function to reset heartbeat timeout and set the flag to true
+  function BeatHeart()
+    if not HeartBeatGood then -- only report status OK if the last heartbeat was missed
+      ReportStatus("OK")
+    end
+    HeartBeatGood = true
+    HeartBeatTimer:Stop()
+    HeartBeatTimer:Start(HeartBeatTime.Value)
+  end
+  
+  -- Initialization Function
+  function Initialization()
+    if DebugFunction then
+      print("Initialization() Called")
+    end
+    SetupDebugPrint()
+    if IPAddress.String == "" then
+      ReportStatus("MISSING", "No IP Address")
+    end
+    SetEventHandlers()
+    EnableLogin()
+    EnableEolCustom()
+    ConnectionSetup()
+  end
+  
+  Initialization()
+end

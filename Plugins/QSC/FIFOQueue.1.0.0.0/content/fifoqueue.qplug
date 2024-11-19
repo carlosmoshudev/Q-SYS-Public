@@ -1,0 +1,220 @@
+--[[ BEGIN DIGITAL SIGNATURE
+OLmGnucFKBGklyaMUa0x+kBLtSkHJ3PNJZ7pEHvFuyoG93lFJZtEqolSMWn8tHZzcBhwWJl0getX+FNOQKVvt51iKac9RWsLjmVFXaM6nzq+NdYq94dsIij2y2gDpje0dQ9nmyNnFmKHTR4KMOPqjiTOYsRhKMnJw/jmTLp7r/+Pbj8EtZOqxxYK1cJx/xkAsdCLn0ufTCzVis9B2Is7vWL7ah2B9lXy8iTOUaKnZFqbGcTYdFeuvTNxNbaVTN/xy5IFN7Nw0QkRsmmVkzQ7xPof7B8kp5ytmfhMHWVZLs+FC0D0D1LFrZVWHrr500hUurnibIs95mwsbovA4KWMlg==
+END DIGITAL SIGNATURE ]]
+-- FIFO Queue
+-- by QSC
+-- October 2020
+
+PluginInfo = {
+    Name = "Tools~FIFO Queue v0.1",
+    Version = "0.1",
+    BuildVersion = "0.1.0.0",
+    Id = "f7319594-9e96-4a49-839c-68fb01a0a102",
+    Author = "QSC",
+    Description = "A tool for queuing commands",
+}
+
+-- UI colors
+Clear = {0,0,0,0}
+White = {255,255,255}
+Black = {0,0,0}
+Gray = {105,105,105}
+LED = {255,0,0}
+Meter = {110,198,241}
+GBGray = {230,230,230}
+BoldText = {27,33,43}
+MainText = {51,51,51}
+
+function GetColor(props)
+  return { 102, 102, 102 }
+end
+
+function GetPrettyName(props)
+  return "FIFO Queue v" .. PluginInfo.BuildVersion
+end
+
+function GetProperties()
+  props = {}
+  table.insert(props,{Name = "Debug Print",Type = "enum",Choices = {"None", "Tx/Rx", "Tx", "Rx", "Function Calls", "All"},Value = "None"})
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value==false then props["Debug Print"].IsHidden=true end
+  return props
+end
+
+function GetControls(props)
+  ctrls = {}
+  -- Sending Configuration
+  table.insert(ctrls,{Name = "SendNext",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Both",Count = 1})
+  table.insert(ctrls,{Name = "Sending",ControlType = "Indicator",IndicatorType = "Led",UserPin = true,PinStyle = "Output",Count = 1})
+  table.insert(ctrls,{Name = "AutoSend",ControlType = "Button",ButtonType = "Toggle",UserPin = true,PinStyle = "Both",Count = 1})
+  table.insert(ctrls,{Name = "QueueTime",ControlType = "Knob",ControlUnit = "Seconds",Min = 1,Max = 216000,Count = 1})
+  -- Queue
+  table.insert(ctrls,{Name = "ClearQueue",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Both",Count = 1})
+  table.insert(ctrls,{Name = "Queue",ControlType = "Text",UserPin = true,PinStyle = "Output",Count = 1})
+  -- Control Pin only
+  table.insert(ctrls,{Name = "QueueInput",ControlType = "Text",PinStyle = "Input",Count = 1})
+  table.insert(ctrls,{Name = "QueueOutput",ControlType = "Text",PinStyle = "Output",Count = 1})
+  return ctrls
+end
+
+function GetControlLayout(props)
+  layout   = {}
+  graphics = {}
+  -- Non control graphics
+  table.insert(graphics,{Type = "GroupBox",Fill = White,CornerRadius = 0,StrokeWidth = 0,Position = {0,0},Size = {309,371}})
+  table.insert(graphics,{Type = "GroupBox",Fill = GBGray,CornerRadius = 0,StrokeWidth = 0,Position = {6,23},Size = {296,63}})
+  table.insert(graphics,{Type = "GroupBox",Fill = GBGray,CornerRadius = 0,StrokeWidth = 0,Position = {6,110},Size = {296,254}})
+  table.insert(graphics,{Type = "Label",Text = "Sending Configuration",HTextAlign = "Left",Fill = Clear,Font = "Roboto",FontStyle = "Bold",FontColor = BoldText,FontSize = 18,Position = {6,0},Size = {204,22}})
+  table.insert(graphics,{Type = "Label",Text = "Queue",HTextAlign = "Left",Fill = Clear,Font = "Roboto",FontStyle = "Bold",FontColor = BoldText,FontSize = 18,Position = {6,87},Size = {150,22}})
+  table.insert(graphics,{Type = "Label",Text = "Send Next",HTextAlign = "Right",Fill = Clear,Font = "Roboto",FontSize = 12,Position = {20,34},Size = {62,19}})
+  table.insert(graphics,{Type = "Label",Text = "Sending",HTextAlign = "Right",Fill = Clear,Font = "Roboto",FontSize = 12,Position = {156,35},Size = {71,19}})
+  table.insert(graphics,{Type = "Label",Text = "Auto Send",HTextAlign = "Right",Fill = Clear,Font = "Roboto",FontSize = 12,Position = {20,53},Size = {62,19}})
+  table.insert(graphics,{Type = "Label",Text = "Queue Time",HTextAlign = "Right",Fill = Clear,Font = "Roboto",FontSize = 12,Position = {156,54},Size = {71,19}})
+  table.insert(graphics,{Type = "Label",Text = "Clear",HTextAlign = "Right",Fill = Clear,Font = "Roboto",FontSize = 12,Position = {156,118},Size = {71,19}})
+  table.insert(graphics,{Type = "Label",Text = "Version "..PluginInfo.Version,HTextAlign = "Right",Fill = Clear,Font = "Roboto",FontSize = 9,Position = {227,352},Size = {73,12}})
+  -- Control graphics
+  -- Sending Configuration
+  layout["SendNext"] = {PrettyName = "Sending Configuration~Send Next",Style = "Button",ButtonStyle = "Trigger",ButtonVisualStyle = "Gloss",CornerRadius = 2,Margin = 1,Position = {83,34},Size = {59,19}}
+  layout["Sending"] = {PrettyName = "Sending Configuration~Sending",Style = "Led",Margin = 3,IsReadOnly = true,Position = {247,34},Size = {20,20}}
+  layout["AutoSend"] = {PrettyName = "Sending Configuration~Auto Send",Style = "Button",ButtonStyle = "Toggle",ButtonVisualStyle = "Gloss",CornerRadius = 2,Margin = 1,Position = {83,53},Size = {59,19}}
+  layout["QueueTime"] = {PrettyName = "Sending Configuration~Queue Time",Style = "Text",TextBoxStyle = "MeterBackground",Color = Meter,HTextAlign = "Center",Position = {228,54},Size = {59,20}}
+  -- Queue
+  layout["ClearQueue"] = {PrettyName = "Queue~Clear Queue",Style = "Button",ButtonStyle = "Trigger",ButtonVisualStyle = "Gloss",CornerRadius = 2,Margin = 1,Position = {228,118},Size = {59,19}}
+  layout["Queue"] = {PrettyName = "Queue~Queue",Style = "ListBox",TextBoxStyle = "Normal",IsReadOnly = true,Fill = White,HTextAlign = "Center",Position = {20,138},Size = {268,211}}
+  -- Controls with no graphics
+  layout["QueueInput"] = {PrettyName = "Queue Input",Style = "None"}
+  layout["QueueOutput"] = {PrettyName = "Queue Output",Style = "None"}
+  return layout, graphics
+end
+
+--Start event based logic
+if Controls then
+  -- Control aliases
+  Next = Controls.SendNext
+  Sending = Controls.Sending
+  Auto = Controls.AutoSend
+  Time = Controls.QueueTime
+  Clear = Controls.ClearQueue
+  Display = Controls.Queue
+  Input = Controls.QueueInput
+  Output = Controls.QueueOutput
+  
+  -- Variables and flags
+  DebugTx=false
+  DebugRx=false
+  DebugFunction=false
+  DebugPrint=Properties["Debug Print"].Value
+  
+  -- Timers, tables, and constants
+  SendQueue = {}
+  QueueTimer = Timer.New()
+  
+  -- Helper functions
+  -- A function to determine common print statement scenarios for troubleshooting
+  function SetupDebugPrint()
+    if DebugPrint=="Tx/Rx" then
+      DebugTx,DebugRx=true,true
+    elseif DebugPrint=="Tx" then
+      DebugTx=true
+    elseif DebugPrint=="Rx" then
+      DebugRx=true
+    elseif DebugPrint=="Function Calls" then
+      DebugFunction=true
+    elseif DebugPrint=="All" then
+      DebugTx,DebugRx,DebugFunction=true,true,true
+    end
+  end
+  
+  function UpdateQueue()
+    if DebugFunction then print("UpdateQueue() Called") end
+    Display.Choices = SendQueue
+  end
+  
+  function DisableControls()
+    if DebugFunction then print("DisableControls() Called") end
+    Time.IsDisabled = not Auto.Boolean and true or false
+    Next.IsDisabled = Auto.Boolean and true or false
+  end
+  
+  function SendingCommand()
+    if DebugFunction then print("SendingCommand() Called") end
+    Sending.Boolean = true
+    Timer.CallAfter(function() Sending.Boolean = false end,0.5)
+  end
+  
+  -- Send data to device
+  function Send(cmd)
+    if DebugFunction then print("Send() Called") end
+    if DebugTx then print("Tx: "..cmd) end
+    Output.String = cmd
+    SendingCommand()
+  end
+  
+  -- Queue management
+  function AddToQueue(cmd)
+    if DebugFunction then print("AddToQueue() Called") end
+    table.insert(SendQueue,cmd)
+    UpdateQueue()
+  end
+  
+  function QueueGet()
+    if DebugFunction then print("QueueGet() Called") end
+    local cmd = ""
+    if #SendQueue > 0 then
+      cmd = SendQueue[1]
+      table.remove(SendQueue,1)
+      UpdateQueue()
+    end
+    return cmd
+  end
+  
+  function Queue()
+    if DebugFunction then print("Queue() Called") end
+    if #SendQueue > 0 then
+      Send(QueueGet())
+    end
+  end
+  
+  -- A function to clear controls/flags/variables and clears tables
+  function ClearQueue()
+    if DebugFunction then print("ClearQueue() Called") end
+    SendQueue = {}
+    UpdateQueue()
+  end
+  
+  -- EventHandlers
+  Input.EventHandler = function()
+    if DebugFunction then print("Input() Called") end
+    local cmd = Input.String
+    if DebugTx then print("Rx: "..cmd) end
+    if Input.String ~= "" then
+      AddToQueue(cmd)
+    end
+  end
+  
+  Auto.EventHandler = function()
+    if DebugFunction then print("Auto() Called") end
+    DisableControls()
+    if Auto.Boolean then
+      QueueTimer:Start(Time.Value)
+    else
+      QueueTimer:Stop()
+    end
+  end
+  
+  -- Initialization Function
+  function Initialization()
+    if DebugFunction then print("Initialization() Called") end
+    SetupDebugPrint()
+    UpdateQueue()
+    DisableControls()
+    Next.EventHandler = Queue
+    QueueTimer.EventHandler  = Queue
+    Clear.EventHandler = ClearQueue
+  end
+  
+  Initialization()
+end

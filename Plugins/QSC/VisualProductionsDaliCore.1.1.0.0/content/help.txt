@@ -1,0 +1,80 @@
+ ****************************************************************************************
+ *
+ *  Q-SYS DaliCore PLUGIN HELP DOCUMENTATION
+ *
+ *  Copyright (c) 2023 Visual Productions BV - The Netherlands
+ *
+ ****************************************************************************************
+
+Use this plugin to control the DaliCore using the TCP API. Product manual and the vManager software utility can be found at:
+https://www.visualproductions.nl/downloads/
+
+For support, contact support@visualproductions.nl
+
+For more information about the DaliCore, see https://www.visualproductions.nl/products/dalicore
+
+The plugin is tested in Q-Sys designer 8.0, 8.4 and 9.4 using DaliCore firmware 1.10 and 1.13.
+
+****************************************************************************************
+*	Prerequisites
+****************************************************************************************
+
+Before configuring the plugin:
+    *  Use vManager to discover the DaliCore and configure the network settings
+    *  Configure the DMX and DALI patch and record scenes, more info can be found in the DaliCore manual. 
+
+****************************************************************************************
+*	Configuration Overview
+****************************************************************************************
+
+*  Drag the plugin into your schematic.
+*  (Optional) Set the control mode to "Advanced" for control over the full API, or use "Simple" for basic functionality. 
+*  Press F6 to emulate your design.
+*  In your schematic, double-click the plugin to open the component's control panel.
+*  In the Network tab, specify the DaliCore's API prefix, IP address and TCP port. Make sure these match the settings configured on the DaliCore.
+*  The status should indicate OK.
+*  Control can be done using the control pins after enabling them in the plugin properties. Every functionality in the UI has a corresponding control pin.
+     
+/****************************************************************************************
+*	Tabs in simple control mode
+*****************************************************************************************
+
+Scenes
+    Trigger one of the sixteen scenes.
+    
+Network
+    * Prefix
+        API prefix, can be configured on the DaliCore webinterface
+    * IP Address
+        IP address of the DaliCore to control
+    * TCP Port
+        The target TCP port, can be configured on the DaliCore webinterface
+    * Status
+        Connection status
+    * Identify
+        Blink the DaliCore LED to identify the connected unit
+
+****************************************************************************************
+*	Extra tabs in advanced control mode
+****************************************************************************************
+
+    
+    
+Actionlist
+    Actionlists programmed in the DaliCore can be enabled or disabled. 
+    Actions in enabled actionlists can be triggered by first setting the index of the action in the right actionlists, and then executing it.
+
+DMX control
+    DMX channels 1 thru 512 can be set by selecting a channel and value, and then executing it.
+    
+Timer
+    Countdown timers of the DaliCore can be started, stopped, paused, restarted and set here. The results can be used in ShowControl using the webinterface.
+
+Variable
+    DaliCore variables can be set or refreshed here. The results can be used in ShowControl using the webinterface.
+
+****************************************************************************************
+*	Notes
+****************************************************************************************
+
+As of plugin version 1.01, API feedback is not supported yet.

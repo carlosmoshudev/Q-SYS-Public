@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="en-us" xml:lang="en-us" data-mc-search-type="Stem" data-mc-help-system-file-name="index.xml" data-mc-path-to-help-system="../" data-mc-toc-path="Utilities" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic;Default" data-mc-preload-images="false" data-mc-in-preview-mode="false">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Command Send And Receive Utility</title>
+        <link href="../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Print.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="PluginStyles.css" rel="stylesheet" type="text/css" />
+        <link href="shaded_rows_plugin.css" rel="stylesheet" data-mc-stylesheet-type="table" />
+        <script src="../Resources/Scripts/jquery.min.js" type="text/javascript">
+        </script>
+        <script src="../Resources/Scripts/purify.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.config.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/foundation.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/plugins.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/MadCapAll.js" type="text/javascript" defer="defer">
+        </script>
+    </head>
+    <body>
+        <div role="main" id="mc-main-content">
+            <h1 data-mc-autonum=""><span class="autonumber"><span></span></span>Command Send And Receive Utility</h1>
+            <p>The Command Send and Receive Utility plugin enables non-scripting users to send data over a socket and interpret responses. It simplifies integration, enhances automation, and eliminates the need for scripting.</p>
+            <ul style="list-style-type: square;">
+                <li><a href="#Compatib" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Compatibility</a>
+                </li>
+                <li><a href="#Properti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Properties</a>
+                </li>
+                <li><a href="#Controls" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls &gt;&#160;Connection Setup Tab</a>
+                </li>
+                <li><a href="#Controls2" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls &gt;&#160;Send Tab</a>
+                </li>
+                <li><a href="#Controls3" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls &gt;&#160;Receive Tab</a>
+                </li>
+                <li><a href="#Controls4" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls &gt;&#160;Buffer Tab</a>
+                </li>
+                <li><a href="#Control" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Control Pins</a>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Compatib"></a>Compatibility</h2>
+            <p>This plugin was developed and tested with Q-SYS Designer Software version 9.10.  It establishes a connection with the TCP, HTTP, UDP, SSH, and Serial protocols based on the control type of the endpoint. To begin using the plugin, drag it into the schematic from the Plugins &gt;&#160;Asset Manager &gt; Utility folder.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Properti"></a>Properties</h2>
+            <h4 class="BridgeHead">Control Type</h4>
+            <p>Select a control type (TCP, HTTP, UDP, SSH, and Serial) from the Properties panel. If the control type is HTTP, then an additional field called "Authentication Required" (with a "Yes" or "No" choice) will be added.</p>
+            <h4 class="BridgeHead">Send and Receive String Count</h4>
+            <p>The Send and Receive string text fields can be adjusted within a range of 1 to 64 from the Properties panel during design time. Depending on the Send String Count, controls will be drawn in the Send tab. Based on the Receive String Count, controls will be drawn in the Receive tab.</p>
+            <p>
+                <img src="CSRU_properties_panel.png" />
+            </p>
+            <p>
+                <img src="CSRU_http_properties_panel.png" />
+            </p>
+            <h4 class="BridgeHead">Buffer Caching</h4>
+            <p>When configuring the Buffer Caching functionality in the plugin, you have the option to choose either "Time" or "Count". If you select "Time", the Buffer Refresh interval can be set from 1 to 1800 seconds. This setting ensures that the responses from the endpoints are displayed in the Buffer Received Data panel for a specified duration based on the Buffer Refresh interval.<br /></p>
+            <h4 class="BridgeHead">Time:</h4>
+            <p>If you select "Time", the Buffer Refresh interval can be set from 1 to 1800 seconds. This setting ensures that the responses from the endpoints are displayed in the Buffer Received Data panel for a specified duration based on the Buffer Refresh interval.</p>
+            <p>
+                <img src="CSRU_buffer_page_with_buffer_caching_time.png" />
+                <br />
+            </p>
+            <h4 class="BridgeHead">Count:</h4>
+            <p>If you select "Count", an additional field called "Message Cache Amount" will be added. You can select a value from 1 to 100 for this setting. It ensures that the responses data from the endpoints is displayed in the Buffer Received Data panel for a specified amount set in "Message Cache Amount".</p>
+            <p>
+                <img src="CSRU_buffer_page_with_buffer_caching_count.png" />
+            </p>
+            <h4 class="BridgeHead">Show Debug</h4>
+            <p>Select 'Yes' to show the Debug Output window. For details, see the Debug Output topic in the Q-SYS Help.</p>
+            <h4 class="BridgeHead">Debug Print</h4>
+            <p>Set the data printed to the Show Debug window.</p>
+            <ul>
+                <li>None: (default) None of the below will be posted to the log debug output.</li>
+                <li>Tx/Rx: Transmission and Received Data messages will be shown.</li>
+                <li>Tx: Transmission Data messages will be shown.</li>
+                <li>Rx: Received Data messages will be shown.</li>
+                <li>Function Calls: Each function within the plugin will post a message when it is called.</li>
+                <li>All: All of the above messages.</li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Script Access Properties</h3>
+            <h4 class="BridgeHead">Code Name</h4>
+            <p>Displays the currently assigned name for control access. You can use the auto-assigned name or customize it. Q-SYS will automatically check all Code Names in the design to ensure the name is unique.</p>
+            <h4 class="BridgeHead">Script Access</h4>
+            <p>Defines whether the component will be accessible by script and/or externally, or not at all. Choices include All, External, None (default), and Script.</p>
+            <p class="tip" data-mc-autonum="&lt;b&gt;Tip: &lt;/b&gt;"><span class="autonumber"><span><b>Tip: </b></span></span>Use Script Programmer Mode to quickly view the Script Access setting directly on the component in the design schematic without the need to disconnect from the Q-SYS Core processor.</p>
+            <p class="note" data-mc-autonum="&lt;b&gt;Note: &lt;/b&gt;"><span class="autonumber"><span><b>Note: </b></span></span>Enable script level access for both the HID Conferencing and Bin Loop components.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls"></a>Controls &gt;&#160;Connection Setup Tab</h2>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>TCP</h3>
+            <p>
+                <img src="CSRU_tcp_connection_setup_page.png" />
+            </p>
+            <h4 class="BridgeHead">IPAddress</h4>
+            <p>By default, it will be empty during runtime.</p>
+            <h4 class="BridgeHead">Port</h4>
+            <p>By default, it will be set to 80 during runtime. However, you can modify this value between 1 and 65535 according to your requirements.</p>
+            <h4 class="BridgeHead">EOL (End of Line)</h4>
+            <p>By default, it will be set to “None”. However, you can select a preferred EOL from the dropdown.</p>
+            <h4 class="BridgeHead">EOLCustom</h4>
+            <p>This option will only be enabled when you select “Custom” as the EOL from the dropdown; otherwise, it will remain disabled.</p>
+            <h4 class="BridgeHead">Status</h4>
+            <ul>
+                <li>
+                    <p>When no IPAddress is entered, the status will be displayed as “MISSING - No Valid IP Address”.</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>When a valid IPAddress or hostname is entered along with the correct port, the status will be displayed as “OK - Connected”.</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the port does not match with the physical device, the status will be displayed as "FAULT - Socket Error".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>When the TCP socket is closed, the status will be displayed as "MISSING - Socket Closed".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the TCP socket encounters an error, the status will be displayed as "FAULT - Socket Error".</p>
+                </li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>HTTP</h3>
+            <p>When Authentication is set to No (by default) from the properties panel:</p>
+            <p>
+                <img src="CSRU_http_connection_setup_page_without_authentication.png" />
+            </p>
+            <p>When Authentication is set to Yes from the properties panel:</p>
+            <p>
+                <img src="CSRU_http_connection_setup_page_with_authentication.png" />
+            </p>
+            <h4 class="BridgeHead">URL</h4>
+            <p>Enter a valid URL. If the URL necessitates a port, it should be included in the URL itself (e.g., http://&lt;ip-address&gt; or &lt;hostname&gt;:port).</p>
+            <h4 class="BridgeHead">Username</h4>
+            <p>The username is mandatory for authentication-based connections and must adhere to the configuration requirements of the endpoint.</p>
+            <h4 class="BridgeHead">Password</h4>
+            <p>A password is necessary for authentication-based connections and must be a valid password according to the endpoint configuration.</p>
+            <h4 class="BridgeHead">Auth</h4>
+            <p>Authentication is required for endpoints that demand it. By default, Auth will be set to "any", and you can select from the dropdown menu based on your requirements.</p>
+            <h4 class="BridgeHead">Headers</h4>
+            <p>You should provide headers in a valid format in the text field (e.g., ["Content-Type"] = "application/json"). If additional headers are required for the request, they can be appended in comma-separated key-value pairs.</p>
+            <h4 class="BridgeHead">Status</h4>
+            <ul>
+                <li>
+                    <p>When the URL field is empty, the status will be displayed as "MISSING - No URL".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>When the HTTP connection is established with the endpoint, the status will be displayed as "OK".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the request to the endpoint results in a successful 200 code, the status will be displayed as "OK - 200".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the response returns a 400 code, indicating a malformed request, the status will be displayed as "FAULT - Malformed Request".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>A 401 code in the response will result in the status being displayed as "FAULT - Unauthorized".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>A 403 code in the response will result in the status being displayed as "FAULT - Forbidden".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the response returns a 404 code, indicating a resource not found, the status will be displayed as "FAULT - Resource not Found".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the response returns a 500 code, indicating an internal server error, the status will be displayed as "FAULT - Internal Server Error".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the response returns a 503 code, indicating a service unavailable, the status will be displayed as "FAULT - Service Unavailable".</p>
+                </li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>UDP</h3>
+            <p>
+                <img src="CSRU_udp_connection_setup_page.png" />
+            </p>
+            <h4 class="BridgeHead">IPAddress</h4>
+            <p>By default, it will be empty during runtime.</p>
+            <h4 class="BridgeHead">Port</h4>
+            <p>By default, it will be set to 80 during runtime. However, you can modify this value between 1 and 65535 according to your requirements.</p>
+            <h4 class="BridgeHead">Heart Beat Time</h4>
+            <p>By default, it will be set to 3 during runtime. However, you can modify this value between 3 and 300 according to your requirements. This will help to monitor the status of the endpoints. If the endpoint fails to respond to the heartbeat, it indicates a potential issue that needs attention.</p>
+            <h4 class="BridgeHead">Status</h4>
+            <ul>
+                <li>
+                    <p>When no IPAddress is entered, the status will be displayed as "MISSING - Invalid IP Address".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the UDP socket successfully connects, the status will indicate "OK".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If there's an error with the UDP socket connection, resulting in the inability to open the UDP socket, the status will be displayed as "FAULT - Socket Error: Unable to open UDP socket".</p>
+                </li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>SSH</h3>
+            <p>
+                <img src="CSRU_ssh_connection_setup_page.png" />
+            </p>
+            <h4 class="BridgeHead">IPAddress</h4>
+            <p>By default, it will be empty during runtime.</p>
+            <h4 class="BridgeHead">Port</h4>
+            <p>By default, it will be set to 22 during runtime. However, you can adjust this value between 1 and 65535 based on your requirements.</p>
+            <h4 class="BridgeHead">Username</h4>
+            <p>A username is required for authentication-based connections and must adhere to the configuration requirements of the endpoint.</p>
+            <h4 class="BridgeHead">Password</h4>
+            <p>A password is required for authentication-based connections and must be a valid password according to the endpoint configuration.</p>
+            <h4 class="BridgeHead">EOL (End of Line)</h4>
+            <p>By default, it will be set to "None". However, you can select your required EOL from the dropdown.</p>
+            <h4 class="BridgeHead">EOLCustom</h4>
+            <p>This option will only be enabled when you select “Custom” as the EOL from the dropdown; otherwise, it will remain disabled.</p>
+            <h4 class="BridgeHead">Status</h4>
+            <ul>
+                <li>
+                    <p>When no IPAddress is entered, the status will be displayed as "MISSING - Invalid IP Address".</p>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <p>If the SSH socket successfully connects with a valid IP address, port, username, and password, the status will be displayed as "OK - Connected".</p>
+                </li>
+                <li>
+                    <p>If the SSH socket connection is closed, resulting in a socket closure, the status will be displayed as "MISSING - Socket Closed".</p>
+                </li>
+                <li>
+                    <p>If there's an error with the SSH socket connection, the status will be displayed as "FAULT - Socket Error".</p>
+                </li>
+                <li>
+                    <p>If the SSH socket connection times out, resulting in a socket timeout, the status will be displayed as "MISSING - Socket Timeout".</p>
+                </li>
+                <li>
+                    <p>If the SSH socket login fails, indicating incorrect credentials, the status will be displayed as "MISSING - Check credentials".</p>
+                </li>
+            </ul>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Serial</h3>
+            <p>
+                <img src="CSRU_serial_connection_setup_page.png" />
+            </p>
+            <h4 class="BridgeHead">BaudRate</h4>
+            <p>You can select the required baud rate from the combobox based on your needs. By default, it will be set to 9600.</p>
+            <h4 class="BridgeHead">DataBits</h4>
+            <p>You can select the required number of data bits from the combobox based on your needs. By default, it will be set to 8.</p>
+            <h4 class="BridgeHead">Parity</h4>
+            <p>You can select the required parity from the combobox based on your needs. By default, it will be set to None.</p>
+            <h4 class="BridgeHead">DataBits</h4>
+            <p>By default, it will be set to 80 during runtime. However, you can modify this value between 1 and 65535 according to your requirements.</p>
+            <h4 class="BridgeHead">StopBits</h4>
+            <p>You can select the required number of stop bits from the combobox based on your needs. By default, it will be set to 1.</p>
+            <h4 class="BridgeHead">EOL (End of Line)</h4>
+            <p>By default, it will be set to “None”. However, you can select your preferred EOL from the dropdown.</p>
+            <h4 class="BridgeHead">EOLCustom</h4>
+            <p>This option will only be enabled if you select “Custom” as the EOL from the dropdown; otherwise, it will remain disabled.</p>
+            <h4 class="BridgeHead">Heart Beat Time</h4>
+            <p>By default, it will be set to 3 during runtime. However, you can modify this value between 3 and 300 according to your requirements. This will help to monitor the status of the endpoints. If the endpoint fails to respond to the heartbeat, it indicates a potential issue that needs attention.</p>
+            <h4 class="BridgeHead">Status</h4>
+            <ul>
+                <li>
+                    <p>When all settings are correct with the physical device and it is connected, the status will be displayed as "OK - Connected".</p>
+                </li>
+                <li>
+                    <p>If a serial port is closed, resulting in a serial port closure, the status will be displayed as "MISSING - Serial port Closed".</p>
+                </li>
+                <li>
+                    <p>If there's an error with the serial port connection, the status will be displayed as "FAULT - Serial port error".</p>
+                </li>
+                <li>
+                    <p>If the serial port connection times out, resulting in a serial port timeout, the status will be displayed as "MISSING - Serial port timeout".</p>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls2"></a>Controls &gt;&#160;Send Tab</h2>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>TCP, UDP, SSH and Serial</h3>
+            <p>
+                <img src="CSRU_send_page.png" />
+            </p>
+            <p>During runtime, after the selected control type socket (TCP or UDP or SSH or Serial) is properly connected to the endpoint, you can send plain text or regex control commands to the endpoint from the Send page by entering commands in the text field and triggering the button.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>HTTP</h3>
+            <p>
+                <img src="CSRU_http_send_page.png" />
+            </p>
+            <p>During runtime, you can send plain text or regex control commands to the endpoint from the "Send" page by entering commands in the Command text field. If any data is required to pass based on the endpoint's API (using GET or POST requests), you can add it in the Data field before triggering the button. Before pressing the trigger button,  select GET, POST, PUT, PATCH, or DELETE from the combo box. GET will be selected by default.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls3"></a>Controls &gt;&#160;Receive Tab</h2>
+            <p>
+                <img src="CSRU_receive_page.png" />
+            </p>
+            <p>Once the string/command has been sent to the endpoint from the Send page, the device will provide a response. If the text/string matches the response in the Receive page text field, then the LED will go high for 3 seconds before returning to low. The LED will remain low if the received data does not match. During runtime, the LED will be low by default.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls4"></a>Controls &gt;&#160;Buffer Tab</h2>
+            <p>If Buffer Caching is set to "Time", the Buffer Refresh interval can be set from 1 to 1800 seconds. This setting ensures that the responses from the endpoints are displayed in the Buffer Received Data panel for a specified duration based on the Buffer Refresh interval.</p>
+            <p>
+                <img src="CSRU_buffer_page_with_buffer_caching_time.png" />
+            </p>
+            <p>If Buffer Caching is set to "Count", an additional field called "Message Cache Amount" will be added. You can select a value from 1 to 100 for this setting. It ensures that the responses data from the endpoints is displayed in the Buffer Received Data panel for a specified amount set in "Message Cache Amount".</p>
+            <p>
+                <img src="CSRU_buffer_page_with_buffer_caching_count.png" />
+            </p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Control"></a>Control Pins</h2>
+            <table style="mc-table-style: url('shaded_rows_plugin.css');caption-side: top;" class="TableStyle-shaded_rows_plugin" cellspacing="0">
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 180px;">
+                </col>
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 79px;">
+                </col>
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1">
+                </col>
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1">
+                </col>
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" style="width: 104px;">
+                </col>
+                <thead>
+                    <tr class="TableStyle-shaded_rows_plugin-Head-Header1">
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1">
+                            <p>Pin Name</p>
+                        </th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">
+                            <p>Value</p>
+                        </th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">
+                            <p>String</p>
+                        </th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">
+                            <p>Position</p>
+                        </th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadD-Column1-Header1" style="text-align: center;">
+                            <p>Pins Available</p>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Connection Setup</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>IP Address</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Port</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(knob, integer from 1 to 65535)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Username</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Password</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>EOL</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>EOLCustom</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>URL</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Auth</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Headers</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Heart Beat Time</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(knob, integer from 3 to 300)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>BaudRate</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>DataBits</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Parity</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>StopBits</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Status</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Status</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                            <p>2</p>
+                            <p>3</p>
+                            <p>4</p>
+                            <p>5</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>OK (Green)
+						</p>
+                            <p>Compromised (Orange)</p>
+                            <p>
+							Fault (Red)
+						</p>
+                            <p>Not Present (Gray)
+						</p>
+                            <p>Missing (Red)
+						</p>
+                            <p>Initializing (Blue)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" style="text-align: center;">
+                            <p>-</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Send</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Send Strings</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Data</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Methods</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(combobox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Trigger Button</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(trigger button)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" colspan="5">
+                            <p>Receive</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Receive Strings</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>IsReceived</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(LED)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Buffer</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>BufferRefresh</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(knob, integer from 1 to 3000)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>BufferReceivedData</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p style="text-align: center;">(listbox)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyA-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h6 data-mc-autonum="1. "><span class="autonumber"><span>1. </span></span><a name="Use"></a>Use this control pin to enable or disable the plugin in your design. When Disabled is set to enabled (value of 1), the Connection Status changes to "Not Present - Disabled".</h6>
+        </div>
+        <MadCap:pageFooter class="">
+            <div style="width: 100%;position: relative; border-top: solid 1px #c2c2c2; margin-top: 15px; padding-top: 8px">
+                <p style="text-align: center;"><a href="https://www.qsys.com/resources/software-and-firmware/" target="_blank">Software&#160;and&#160;Firmware</a> | <a href="https://www.qsys.com/resources/" target="_blank">Resources</a> | <a href="https://support.qsys.com/" target="_blank">Q-SYS Knowledge Base</a> | <a href="https://help.qsys.com/#Support.htm" target="_blank">Support</a></p>
+                <p class="legal">Copyright © 2024 QSC, LLC. Click <a href="https://help.qsys.com/#Legal.htm" target="_blank">here</a> for trademark and other legal notices.</p>
+                <p style="text-align: center;"><a href="https://www.qsys.com/" target="_blank"><img src="Q-SYS_hex_logo_full_color_wide_final-01_reduced_250.png" /></a>
+                </p>
+            </div>
+        </MadCap:pageFooter>
+    </body>
+</html>

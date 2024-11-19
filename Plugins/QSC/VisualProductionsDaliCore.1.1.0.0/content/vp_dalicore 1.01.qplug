@@ -1,0 +1,808 @@
+-- Visual Productions DaliCore plugin
+-- by Bootsy van der Zande, Visual Productions B.V.
+PluginInfo = {
+    Name = "Visual Productions~DaliCore",
+    Version = "1.01",
+    Id = "9de0dc8a-6fd9-4fb3-99fc-4e573e953593",
+    Description = "A plugin to control the DaliCore using the TCP API.",
+    Author = "Visual Productions",
+    Manufacturer = "Visual Productions",
+    Model = "dalicore",
+}
+-------------------------------------
+--Change plugin block color & name
+-------------------------------------
+function GetColor(props)
+    return { 138, 0, 133 }
+end
+function GetPrettyName(props)
+    return string.format("Visual Productions DaliCore \rv%s", PluginInfo.Version)
+end
+-------------------------------------
+-- Properties plugin mode
+-------------------------------------
+function GetProperties()
+    local props = {}
+    table.insert(props,
+            {
+                Name = "Control mode",
+                Type = "enum",
+                Choices = { "Simple", "Advanced" },
+                Value = "Simple",
+            }
+    )
+    return props
+end
+-------------------------------------
+-- Define pages
+-------------------------------------
+function getPageNames(props)
+    local pagenames
+    local controlMode = props["Control mode"].Value
+    if controlMode == "Simple" then
+        pagenames = {
+            "Scenes",
+            "Network",
+        }
+    elseif controlMode == "Advanced" then
+        pagenames = {
+            "Scenes",
+            "Actionlist",
+            "DMX control",
+            "Timer",
+            "Variable",
+            "Network",
+        }
+    end
+    return pagenames
+end
+function GetPages(props)
+    local pagenames = getPageNames(props)
+    local pages = {}
+    for i in ipairs(pagenames) do
+        table.insert(pages, { name = pagenames[i] })
+    end
+    return pages
+end
+-------------------------------------
+-- Define controls
+-------------------------------------
+function GetControls(props)
+    local controlMode = props["Control mode"].Value
+    local ctls = {
+        --Scenes page
+ 
+        { Name = "goScenes",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 16,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        --Network page
+        { Name = "prefix",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "ipAddress",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "port",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "blink",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "status",
+          ControlType = "Indicator",
+          IndicatorType = "Status",
+          Count = 1,
+          PinStyle = "Output",
+          UserPin = true,
+        },
+    }
+    local ctlsAdvanced = {
+        --Actionlist page
+        { Name = "actionlistEnable",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 8,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "actionlistDisable",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 8,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "actionlistAction",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 8,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "actionlistActionTrigger",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 8,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        --Variable page
+        { Name = "variableSet",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 10,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "variableSetTrigger",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 10,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "variableRefresh",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 10,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "variableRefreshAll",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        --DMX control page
+        { Name = "dmxChannel",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "dmxValue",
+          ControlType = "Knob",
+          ControlUnit = "Integer",
+          Min = 0,
+          Max = 255,
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "dmxTrigger",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 1,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        --Timer page
+        { Name = "timerStart",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 4,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "timerStop",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 4,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "timerPause",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 4,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "timerRestart",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 4,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "timerSet",
+          ControlType = "Text",
+          ButtonType = "Custom",
+          Count = 4,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+        { Name = "timerSetTrigger",
+          ControlType = "Button",
+          ButtonType = "Trigger",
+          Count = 4,
+          PinStyle = "Both",
+          UserPin = true,
+        },
+    }
+    if controlMode == "Advanced" then
+        for _, v in ipairs(ctlsAdvanced) do
+            table.insert(ctls, v)
+        end
+    end
+    return ctls
+end
+-------------------------------------
+-- Define layout
+-------------------------------------
+function GetControlLayout(props)
+    local layout, graphics = {}, {}
+    local pagenames = getPageNames(props)
+    local currentPage = pagenames[props["page_index"].Value]
+    local controlMode = props["Control mode"].Value
+    local font = "Lato"
+    local fontstyle = "Bold"
+    local function Led(prettyname, legend, x, y, size_x, size_y)
+        size_x = size_x or 30
+        size_y = size_y or 30
+        return
+        {
+            PrettyName = prettyname,
+            Legend = legend,
+            Size = { size_x, size_y },
+            Position = { x, y },
+            Style = "Led",
+            Color = { 0, 255, 0 },
+            OffColor = { 102, 102, 102 },
+            UnlinkOffColor = true,
+        }
+    end
+    local function Button(prettyname, legend, x, y, size_x, size_y)
+        size_x = size_x or 60
+        size_y = size_y or 60
+        return
+        {
+            PrettyName = prettyname,
+            Legend = legend,
+            Size = { size_x, size_y },
+            Position = { x, y },
+            Style = "Button",
+            ButtonStyle = "Trigger",
+            Font = font,
+            FontSize = 12,
+            FontStyle = fontstyle,
+            Margin = 0,
+            Radius = 8,
+            Padding = 2,
+            StrokeWidth = 2,
+            StrokeColor = { 0, 0, 0 },
+            OffColor = { 102, 102, 102 },
+            UnlinkOffColor = true
+        }
+    end
+    local function Fader(prettyname, legend, x, y)
+        return
+        {
+            PrettyName = prettyname,
+            Legend = legend,
+            Style = "Fader",
+            FontSize = 12,
+            Font = font,
+            FontStyle = fontstyle,
+            Color = { 102, 102, 102 },
+            Margin = 0,
+            Radius = 8,
+            Padding = 2,
+            StrokeColor = { 0, 0, 0 },
+            StrokeWidth = 2,
+            Position = { x, y },
+            Size = { 60, 120 },
+            UnlinkOffColor = true,
+            OffColor = { 0, 0, 0 }
+        }
+    end
+    local function Box (prettyname, legend, pos_x, pos_y, size_x, size_y, fontsize, textalign)
+        fontsize = fontsize or 14
+        textalign = textalign or "Center"
+        return
+        {
+            PrettyName = prettyname,
+            Legend = legend,
+            FontSize = fontsize,
+            Font = font,
+            FontStyle = fontstyle,
+            Color = { 51, 51, 51 },
+            Margin = 0,
+            Radius = 8,
+            Padding = 2,
+            StrokeColor = { 0, 0, 0 },
+            StrokeWidth = 2,
+            Position = { pos_x, pos_y },
+            Size = { size_x, size_y },
+            UnlinkOffColor = true,
+            OffColor = { 102, 102, 102 },
+            HTextAlign = textalign
+        }
+    end
+    local function Background (size_x, size_y)
+        return {
+            Type = "GroupBox",
+            Fill = { 26, 26, 26 },
+            StrokeColor = { 138, 0, 133 },
+            StrokeWidth = 2,
+            Color = { 255, 0, 0 },
+            CornerRadius = 8,
+            Position = { 0, 0 },
+            Size = { size_x, size_y }
+        }
+    end
+    local function Background2(pos_x, pos_y, size_x, size_y)
+        return
+        { Type = "GroupBox",
+          Fill = { 51, 51, 51 },
+          CornerRadius = 8,
+          Position = { pos_x, pos_y },
+          Size = { size_x, size_y }
+        }
+    end
+    local function Text(text, fontsize, pos_x, pos_y, size_x, size_y, textalign)
+        textalign = textalign or "Center"
+        return
+        { Text = text,
+          Type = "Label",
+          FontSize = fontsize,
+          Font = font,
+          FontStyle = fontstyle,
+          Color = { 255, 255, 255 },
+          HTextAlign = textalign,
+          VTextAlign = "Center",
+          Radius = 8,
+          Position = { pos_x, pos_y },
+          Size = { size_x, size_y },
+        }
+    end
+    if currentPage == "Scenes" then
+        table.insert(graphics, Background(490, 500))
+        table.insert(graphics, Background2(50, 90, 400, 350))
+        for i = 1, 4 do
+            --layout["playbackStatus "..i] = Led("Playback~"..i.."~Status", "Status+", 125+(60*(i-1)), 100)
+            layout["goScenes " .. i] = Button("scene" .. i .. "~Go", "Scene"..tostring(i), 70 + (100 * (i - 1)), 100)
+
+            
+        end
+        for i = 5, 8 do
+            --layout["playbackStatus "..i] = Led("Playback~"..i.."~Status", "Status+", 125+(60*(i-1)), 100)
+            layout["goScenes " .. i] = Button("scene" .. i .. "~Go", "Scene"..tostring(i), 70 + (100 * (i - 5)), 180)
+
+ 
+        end
+        for i = 9, 12 do
+            --layout["playbackStatus "..i] = Led("Playback~"..i.."~Status", "Status+", 125+(60*(i-1)), 100)
+            layout["goScenes " .. i] = Button("scene" .. i .. "~Go", "Scene"..tostring(i), 70 + (100 * (i - 9)), 260)
+
+
+        end
+        for i = 13, 16 do
+            --layout["playbackStatus "..i] = Led("Playback~"..i.."~Status", "Status+", 125+(60*(i-1)), 100)
+            layout["goScenes " .. i] = Button("scene" .. i .. "~Go", "Scene"..tostring(i), 70 + (100 * (i - 13)), 340)
+
+   
+        end
+    end
+    if controlMode == "Advanced" then
+        if currentPage == "Actionlist" then
+            table.insert(graphics, Background(490, 650))
+            table.insert(graphics, Background2(115, 90, 260, 270))
+            for i = 1, 4 do
+                layout["actionlistEnable " .. i] = Button("Showcontrol~Actionlist~Enable " .. i, "Enable", 125 + (60 * (i - 1)), 100)
+                layout["actionlistDisable " .. i] = Button("Showcontrol~Actionlist~Disable " .. i, "Disable", 125 + (60 * (i - 1)), 160)
+                layout["actionlistAction " .. i] = Box("Showcontrol~Actionlist~ " .. i .. " Action", "Action", 125 + (60 * (i - 1)), 250, 60, 30)
+                layout["actionlistActionTrigger " .. i] = Box("Showcontrol~Actionlist~ " .. i .. " Action trigger", "Action", 125 + (60 * (i - 1)), 280, 60, 30)
+                table.insert(graphics, Text(tostring(i), 24, 125 + (60 * (i - 1)), 320, 60, 30))
+            end
+            table.insert(graphics, Background2(115, 370, 260, 270))
+            for i = 5, 8 do
+                layout["actionlistEnable " .. i] = Button("Showcontrol~Actionlist~Enable " .. i, "Enable", 125 + (60 * (i - 5)), 380)
+                layout["actionlistDisable " .. i] = Button("Showcontrol~Actionlist~Disable " .. i, "Disable", 125 + (60 * (i - 5)), 440)
+                layout["actionlistAction " .. i] = Box("Showcontrol~Actionlist~ " .. i .. " Action", "Action", 125 + (60 * (i - 5)), 530, 60, 30)
+                layout["actionlistActionTrigger " .. i] = Box("Showcontrol~Actionlist~ " .. i .. " Action trigger", "Action", 125 + (60 * (i - 5)), 560, 60, 30)
+                table.insert(graphics, Text(tostring(i), 24, 125 + (60 * (i - 5)), 600, 60, 30))
+            end
+        end
+        if currentPage == "Variable" then
+            table.insert(graphics, Background(490, 620))
+            table.insert(graphics, Background2(85, 90, 320, 210))
+            for i = 1, 5 do
+                layout["variableSet " .. i] = Box("Showcontrol~Variable~Set " .. i, "Set", 95 + (60 * (i - 1)), 100, 60, 30)
+                layout["variableSetTrigger " .. i] = Button("Showcontrol~Variable~Set trigger " .. i, "Set", 95 + (60 * (i - 1)), 130, 60, 30)
+                layout["variableRefresh " .. i] = Button("Showcontrol~Variable~Refresh " .. i, "Refresh", 95 + (60 * (i - 1)), 190)
+                table.insert(graphics, Text(tostring(i), 24, 95 + (60 * (i - 1)), 260, 60, 30))
+            end
+            table.insert(graphics, Background2(85, 310, 320, 210))
+            for i = 6, 10 do
+                layout["variableSet " .. i] = Box("Showcontrol~Variable~Set " .. i, "Set", 95 + (60 * (i - 6)), 320, 60, 30)
+                layout["variableSetTrigger " .. i] = Button("Showcontrol~Variable~Set trigger " .. i, "Set", 95 + (60 * (i - 6)), 350, 60, 30)
+                layout["variableRefresh " .. i] = Button("Showcontrol~Variable~Refresh " .. i, "Refresh", 95 + (60 * (i - 6)), 410)
+                table.insert(graphics, Text(tostring(i), 24, 95 + (60 * (i - 6)), 480, 60, 30))
+            end
+            table.insert(graphics, Background2(205, 530, 80, 80))
+            layout["variableRefreshAll"] = Button("Showcontrol~Variable~Refresh All", "Refresh\nAll", 215, 540)
+        end
+        if currentPage == "DMX control" then
+            table.insert(graphics, Background(490, 360))
+            table.insert(graphics, Background2(205, 90, 80, 260))
+            table.insert(graphics, Text("Channel", 14, 215, 100, 60, 30))
+            layout["dmxChannel"] = Box("Showcontrol~Direct DMX control~Set DMX Channel", "Channel", 215, 140, 60, 30)
+            layout["dmxValue"] = Fader("Showcontrol~Direct DMX control~Set DMX Value", "Value", 215, 180)
+            layout["dmxTrigger"] = Button("Showcontrol~Direct DMX control~Execute", "Execute", 215, 310, 60, 30)
+        end
+        if currentPage == "Timer" then
+            table.insert(graphics, Background(490, 460))
+            table.insert(graphics, Background2(115, 90, 260, 360))
+            for i = 1, 4 do
+                layout["timerStart " .. i] = Button("Showcontrol~Timer~Start " .. i, "Start", 125 + (60 * (i - 1)), 100)
+                layout["timerStop " .. i] = Button("Showcontrol~Timer~Stop " .. i, "Stop", 125 + (60 * (i - 1)), 160)
+                layout["timerPause " .. i] = Button("Showcontrol~Timer~Pause " .. i, "Pause", 125 + (60 * (i - 1)), 220)
+                layout["timerRestart " .. i] = Button("Showcontrol~Timer~Restart " .. i, "Restart", 125 + (60 * (i - 1)), 280)
+                layout["timerSet " .. i] = Box("Showcontrol~Timer~Set " .. i, "Set " .. i, 125 + (60 * (i - 1)), 340, 60, 30)
+                layout["timerSetTrigger " .. i] = Button("Showcontrol~Timer~Set trigger" .. i, "Set", 125 + (60 * (i - 1)), 370, 60, 30)
+                table.insert(graphics, Text(tostring(i), 24, 125 + (60 * (i - 1)), 410, 60, 30))
+            end
+        end
+    end
+    if currentPage == "Network" then
+        table.insert(graphics, Background(490, 420))
+        layout.prefix = Box("Network~API Prefix", "Prefix", 145, 100, 325, 60, 40, "Left")
+        layout.ipAddress = Box("Network~IP Address", "IP", 145, 160, 325, 60, 40, "Left")
+        layout.port = Box("Network~Communications Port", "Port", 145, 220, 325, 60, 40, "Left")
+        layout.status = Box("Network~Status", "Status", 145, 280, 325, 60, 40, "Left")
+        layout.status.Color = { 102, 102, 102 }
+        layout.status.IsReadOnly = true
+        layout.blink = Button("Network~Blink", "Blink", 145, 340)
+        table.insert(graphics, Background2(10, 90, 470, 320))
+        table.insert(graphics, Text("Prefix", 24, 20, 100, 120, 60, "Left"))
+        table.insert(graphics, Text("IP Address", 24, 20, 160, 120, 60, "Left"))
+        table.insert(graphics, Text("TCP Port", 24, 20, 220, 120, 60, "Left"))
+        table.insert(graphics, Text("Status", 24, 20, 280, 120, 60, "Left"))
+        table.insert(graphics, Text("Identify", 24, 20, 340, 120, 60, "Left"))
+    end
+    --Header
+    table.insert(graphics, Background2(10, 10, 470, 70))
+    table.insert(graphics, {  --Logo
+        Type = "Image",
+        Image = "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",
+        Position = { 20, 20 },
+        Size = { 250, 46 }
+    })
+    return layout, graphics
+end
+-------------------------------------
+-- Runtime code
+-------------------------------------
+if Controls then
+    -- Start of runtime Lua code
+    local defaultPrefix = "core"
+    local defaultIpAddress = "192.168.1.10"
+    local defaultPort = 7000
+    local networkInputBuffer = 255
+    local prefixMaxlength = 9
+    local lastDmxChannel = 512
+    local maxActions = 48
+    local tokenize = function(input, sep)
+        local t = {}
+        for str in string.gmatch(input, "([^" .. sep .. "]+)") do
+            table.insert(t, str)
+        end
+        return t
+    end
+    local getPrefix = function()
+        local prefix = Controls.prefix.String
+        print("Prefix is set to: ", prefix)
+        if string.len(prefix) > prefixMaxlength then
+            prefix = string.sub(prefix, 1, 9)
+            print("Prefix too long, prefix is set to: ", prefix)
+            Controls.prefix.String = prefix
+        end
+        if prefix == "" then
+            print("Prefix can not be empty, setting to default: ", defaultPrefix)
+            prefix = defaultPrefix
+            Controls.prefix.String = prefix
+        end
+        return prefix
+    end
+    local getIpAddress = function()
+        local ipAddress = Controls.ipAddress.String
+        print("IP address is set to: ", ipAddress)
+        if ipAddress == "" then
+            print("IP address can not be empty, setting to default: ", defaultIpAddress)
+            ipAddress = defaultIpAddress
+            Controls.ipAddress.String = defaultIpAddress
+        end
+        local ipTable = tokenize(ipAddress, ".")
+        if #ipTable ~= 4 then
+            ipAddress = "INVALID"
+        else
+            for _, v in ipairs(ipTable) do
+                if tonumber(v) == nil or tonumber(v) < 0 or tonumber(v) > 255 then
+                    ipAddress = "INVALID"
+                    break
+                end
+            end
+        end
+        if ipAddress == "INVALID" then
+            print("Invalid IP address, setting to default: ", defaultIpAddress)
+            ipAddress = defaultIpAddress
+            Controls.ipAddress.String = defaultIpAddress
+        end
+        return ipAddress
+    end
+    local getPort = function()
+        local port = Controls.port.String
+        print("Port is set to: ", port)
+        if string.match(port, "%D") then
+            print("Invalid port, setting to default: ", defaultPort)
+            port = defaultPort
+            Controls.port.String = defaultPort
+        end
+        port = tonumber(port)
+        if port == nil then
+            print("Port can not be empty, setting to default: ", defaultPort)
+            port = defaultPort
+            Controls.port.String = defaultPort
+        end
+        return port
+    end
+    local parseMessage = function(message)
+        --print(message)
+        message = tokenize(message, '=')
+        local apiValue = tokenize(message[1], '-')
+        local controlValue = message[2]
+    end
+    local roundDown = function(value)
+        if value ~= nil then
+            return math.floor(value)
+        else
+            return nil
+        end
+    end
+    local toFloat = function(value)
+        if value ~= nil then
+            return math.floor(value + 0.5) / 100
+        else
+            return nil
+        end
+    end
+    local controlMode = Properties["Control mode"].Value
+    local prefix = getPrefix()
+    local ipAddress = getIpAddress()
+    local port = getPort()
+    local sock = TcpSocket.New()
+    sock.ReadTimeout = 0
+    sock.WriteTimeout = 0
+    sock.ReconnectTimeout = 5
+    local connect = function()
+        Controls.status.Value = 5
+        print("Connecting to:\nAddress:", ipAddress, "\nPort:", port)
+        sock:Connect(ipAddress, port)
+    end
+    local sendBuffer = {}
+    local sendTimer = Timer.New()
+    sendTimer.EventHandler = function(self)
+        if #sendBuffer == 0 then
+            self:Stop()
+        else
+            sock:Write(table.remove(sendBuffer, 1))
+        end
+    end
+    local send = function(message)
+        if Controls.status.Value == 0 then
+            table.insert(sendBuffer, message)
+            sendTimer:Start(0.1)
+        else
+            print("Error: not connected, ignoring message: " .. message)
+        end
+    end
+    sock.EventHandler = function(sock, evt, err)
+        if evt == TcpSocket.Events.Connected then
+            Controls.status.Value = 0
+            print("Socket has succesfully connected")
+        elseif evt == TcpSocket.Events.Reconnect then
+            Controls.status.Value = 5
+            print("Socket is reconnecting...")
+        elseif evt == TcpSocket.Events.Data then
+            --print( "Socket has data: " .. sock.BufferLength .. " bytes" )
+            local message = sock:Read(networkInputBuffer)
+            parseMessage(message)
+        elseif evt == TcpSocket.Events.Closed then
+            Controls.status.Value = 2
+            print("Socket is closed by remote ")
+        elseif evt == TcpSocket.Events.Error then
+            Controls.status.Value = 2
+            print("Socket is closed due to error ", err)
+        elseif evt == TcpSocket.Events.Timeout then
+            Controls.status.Value = 2
+            print("Socket is closed due to timeout")
+        else
+            Controls.status.Value = 2
+            print("Unknown socket event: ", evt, "\nThis should probably not happen.\nIf you run into network issues,\nplease contact ",
+                    PluginInfo.Author, "\nand include this debug log.")
+        end
+    end
+    local smartBuffer = {}
+    local smartBufferTimer = Timer.New()
+    local smartBufferTimerRunning = false
+    local smartBufferInsert = function(command, handle)
+        for _, k in ipairs(smartBuffer) do
+            if k.command == command then
+                k.value = handle.Value
+                handle = nil
+                break
+            end
+        end
+        if handle then
+            table.insert(smartBuffer, { command = command, value = handle.Value })
+        end
+        if smartBufferTimerRunning == false then
+            smartBufferTimerRunning = true
+            smartBufferTimer:Start(0.1)
+        end
+    end
+    smartBufferTimer.EventHandler = function()
+        local bundle = table.remove(smartBuffer, 1)
+        send(bundle.command .. bundle.value / 100)
+        sendTimer:Start(0.1)
+        if #smartBuffer == 0 then
+            smartBufferTimer:Stop()
+            smartBufferTimerRunning = false
+        end
+    end
+    for i = 1, 16 do
+        Controls.goScenes[i].EventHandler = function()
+            send(prefix .. "-scene=" .. i )
+        end
+    end
+
+
+
+    Controls.prefix.EventHandler = function()
+        prefix = getPrefix()
+    end
+    Controls.ipAddress.EventHandler = function()
+        ipAddress = getIpAddress()
+        connect()
+    end
+    Controls.port.EventHandler = function()
+        port = getPort()
+        connect()
+    end
+    Controls.blink.EventHandler = function()
+        send(prefix .. "-blink")
+    end
+    if controlMode == "Advanced" then
+        local actionlistAction = {}
+        local getActionlistAction = function(i)
+            actionlistAction[i] = roundDown(tonumber(Controls.actionlistAction[i].String))
+            Controls.actionlistAction[i].String = tostring(actionlistAction[i])
+            if actionlistAction[i] == nil or actionlistAction[i] < 1 then
+                Controls.actionlistAction[i].String = "1"
+                actionlistAction[i] = "1"
+            elseif actionlistAction[i] > maxActions then
+                Controls.actionlistAction[i].String = tostring(maxActions)
+                actionlistAction[i] = maxActions
+            end
+        end
+        for i = 1, 8 do
+            getActionlistAction(i)
+            Controls.actionlistAction[i].EventHandler = function()
+                getActionlistAction(i)
+            end
+            Controls.actionlistActionTrigger[i].EventHandler = function()
+                send(prefix .. "-al-" .. i .. "-" .. actionlistAction[i] .. "-execute=true")
+            end
+            Controls.actionlistEnable[i].EventHandler = function()
+                send(prefix .. "-al-" .. i .. "-enable=true")
+            end
+            Controls.actionlistDisable[i].EventHandler = function()
+                send(prefix .. "-al-" .. i .. "-enable=false")
+            end
+        end
+        local variableSet = {}
+        local getVariableSet = function(i)
+            variableSet[i] = roundDown(tonumber(Controls.variableSet[i].String))
+            Controls.variableSet[i].String = tostring(variableSet[i])
+            if variableSet[i] == nil or variableSet[i] < 0 then
+                Controls.variableSet[i].String = "0"
+                variableSet[i] = "0"
+            elseif variableSet[i] > 255 then
+                Controls.variableSet[i].String = "255"
+                variableSet[i] = "255"
+            end
+        end
+        for i = 1, 10 do
+            getVariableSet(i)
+            Controls.variableSet[i].EventHandler = function()
+                getVariableSet(i)
+            end
+            Controls.variableSetTrigger[i].EventHandler = function()
+                send(prefix .. "-va-" .. i .. "-set=" .. variableSet[i])
+            end
+            Controls.variableRefresh[i].EventHandler = function()
+                send(prefix .. "-va-" .. i .. "-refresh")
+            end
+        end
+        Controls.variableRefreshAll.EventHandler = function()
+            send(prefix .. "-va-refresh")
+        end
+        local dmxChannel
+        local dmxValue = Controls.dmxValue.Value
+        local getDmxChannel = function()
+            dmxChannel = roundDown(tonumber(Controls.dmxChannel.String))
+            Controls.dmxChannel.String = tostring(dmxChannel)
+            if dmxChannel == nil or dmxChannel < 1 then
+                Controls.dmxChannel.String = "1"
+                dmxChannel = 1
+            elseif dmxChannel > lastDmxChannel then
+                Controls.dmxChannel.String = tostring(lastDmxChannel)
+                dmxChannel = lastDmxChannel
+            end
+        end
+        getDmxChannel()
+        Controls.dmxChannel.EventHandler = function()
+            getDmxChannel()
+        end
+        Controls.dmxValue.EventHandler = function()
+            dmxValue = Controls.dmxValue.Value
+        end
+        Controls.dmxTrigger.EventHandler = function()
+            send(prefix .. "-dmx-" .. dmxChannel .. "=" .. dmxValue)
+        end
+        local timerSet = {}
+        local getTimerSet = function(i)
+            timerSet[i] = Controls.timerSet[i].String
+            if timerSet[i] == "" then
+                Controls.timerSet[i].String = "0:00:00"
+                timerSet[i] = "0:00:00"
+            end
+        end
+        for i = 1, 4 do
+            getTimerSet(i)
+            Controls.timerStart[i].EventHandler = function()
+                send(prefix .. "-tm-" .. i .. "-start")
+            end
+            Controls.timerStop[i].EventHandler = function()
+                send(prefix .. "-tm-" .. i .. "-stop")
+            end
+            Controls.timerPause[i].EventHandler = function()
+                send(prefix .. "-tm-" .. i .. "-pause")
+            end
+            Controls.timerRestart[i].EventHandler = function()
+                send(prefix .. "-tm-" .. i .. "-restart")
+            end
+            Controls.timerSet[i].EventHandler = function()
+                getTimerSet(i)
+            end
+            Controls.timerSetTrigger[i].EventHandler = function()
+                send(prefix .. "-tm-" .. i .. "-set=" .. timerSet[i])
+            end
+        end
+    end
+    connect()
+end -- end of runtime Lua code

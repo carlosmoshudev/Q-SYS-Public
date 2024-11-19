@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="en-us" xml:lang="en-us" data-mc-search-type="Stem" data-mc-help-system-file-name="index.xml" data-mc-path-to-help-system="../" data-mc-toc-path="Plugins|Tools" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic;Default" data-mc-preload-images="false" data-mc-in-preview-mode="false">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>On Screen Keyboard</title>
+        <link href="../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" type="text/css" data-mc-generated="True" />
+        <link href="PluginStyles.css" rel="stylesheet" type="text/css" />
+        <link href="shaded rows_plugin.css" rel="stylesheet" data-mc-stylesheet-type="table" />
+        <script src="../Resources/Scripts/jquery.min.js" type="text/javascript">
+        </script>
+        <script src="../Resources/Scripts/require.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/require.config.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/foundation.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/plugins.min.js" type="text/javascript" defer="defer">
+        </script>
+        <script src="../Resources/Scripts/MadCapAll.js" type="text/javascript" defer="defer">
+        </script>
+    </head>
+    <body>
+        <div role="main" id="mc-main-content">
+            <h1 data-mc-autonum=""><span class="autonumber"><span></span></span>On Screen Keyboard</h1>
+            <p>The On&#160;Screen Keyboard plugin is a tool that enables User Control Interface (UCI) users to type keystrokes directly within a UCI on a Q-SYS TSC touch screen controller.</p>
+            <ul style="list-style-type: square;">
+                <li><a href="#Compatib" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Compatibility</a>
+                </li>
+                <li><a href="#Configur" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Configuration Overview</a>
+                </li>
+                <li><a href="#Properti" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Properties</a>
+                </li>
+                <li><a href="#Controls" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Controls</a>
+                </li>
+                <li><a href="#Control" class="ParagraphTextOnly MCXref xref xrefParagraphTextOnly">Control Pins</a>
+                </li>
+            </ul>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Compatib"></a>Compatibility</h2>
+            <p>The plugin was developed and tested with Q-SYS&#160;Designer Software version 9.0 and also tested to work with version 8.4.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Configur"></a>Configuration Overview</h2>
+            <p>To begin using the plugin, drag it into the schematic.</p>
+            <ol>
+                <li value="1">
+                    <p>By default, a String Output control pin is exposed. Wire this pin to a scripting or control component – for example, Custom Controls.</p>
+                </li>
+                <li value="2">
+                    <p>Configure the scripting or control component to display a text box.</p>
+                </li>
+                <li value="3">
+                    <p>Double-click the plugin to open its control panel.</p>
+                </li>
+                <li value="4">
+                    <p>Drag the keyboard buttons into a UCI.</p>
+                </li>
+                <li value="5">
+                    <p>If desired, drag the scripting or control component text box into the UCI, which allows the user to see a keystroke echo.</p>
+                </li>
+                <li value="6">
+                    <p>Press F5 to save your design to the Core and run it. Users can now use the keyboard in the UCI to input keystrokes directly from the TSC touch panel.</p>
+                </li>
+            </ol>
+            <p>
+                <img src="Tools_On_Screen_Keyboard_example.png" />
+            </p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Properti"></a>Properties</h2>
+            <h4 class="BridgeHead">Show Debug</h4>
+            <p>Select 'Yes' to show the Debug Output window. For details, see the Debug Output topic in the Q-SYS Help.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Controls"></a>Controls</h2>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Alphanumeric Keys</h3>
+            <h4 class="BridgeHead">Letter keys</h4>
+            <p>These are lowercase by default and uppercase as an alternate.</p>
+            <h4 class="BridgeHead">Number keys</h4>
+            <p>These are numbers by default and the displayed character as an alternate.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Special Characters</h3>
+            <h4 class="BridgeHead">Characters</h4>
+            <p>The bottom character is displayed by default. The upper character is displayed as an alternate.</p>
+            <h4 class="BridgeHead">Space</h4>
+            <p>An ASCII space character.</p>
+            <h4 class="BridgeHead">Tab</h4>
+            <p>An ASCII horizontal tab character.</p>
+            <h3 data-mc-autonum=""><span class="autonumber"><span></span></span>Control Keys</h3>
+            <h4 class="BridgeHead">Backspace</h4>
+            <p>Removes the last singular character on with each press. Clears the string output if Shift is engaged.</p>
+            <h4 class="BridgeHead">Enter</h4>
+            <p>Inserts a carriage return, line feed to the string output.</p>
+            <h4 class="BridgeHead">Shift</h4>
+            <p>A single press enables shift for next press. A quick double-press latches the shift function until pressed again. The small LED in the lower-left corner of the left Shift button denotes the shift state.</p>
+            <h4 class="BridgeHead">Caps Lock</h4>
+            <p>A single press toggles Caps Lock on or off. The LED in the lower-left corner of the button denotes the current Caps Lock state.</p>
+            <h2 data-mc-autonum=""><span class="autonumber"><span></span></span><a name="Control"></a>Control Pins</h2>
+            <table style="mc-table-style: url('shaded rows_plugin.css');caption-side: top;" class="TableStyle-shaded_rows_plugin" cellspacing="0">
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <col class="TableStyle-shaded_rows_plugin-Column-Column1" />
+                <thead>
+                    <tr class="TableStyle-shaded_rows_plugin-Head-Header1">
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1">Pin Name</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Value</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">String</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadE-Column1-Header1" style="text-align: center;">Position</th>
+                        <th class="TableStyle-shaded_rows_plugin-HeadD-Column1-Header1" style="text-align: center;">Pins Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p>String Output</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(text)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Alphabetical Keys</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>A - Z</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Control Keys</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Backspace</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Caps Lock</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Enter</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Left Shift</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Right Shift</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Space</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>Tab</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Number Keys</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>0 - 9</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" colspan="5">
+                            <p>Special Character Keys</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>'</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>-</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>,</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>.</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>/</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>;</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>[</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>\</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>]</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>`</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body2" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body2" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body1">
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1">
+                            <p class="P1" data-mc-autonum=""><span class="autonumber"><span></span></span>=</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyE-Column1-Body1" colspan="3" style="text-align: center;">
+                            <p colspan="3">(trigger)</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyD-Column1-Body1" style="text-align: center;">
+                            <p>Input / Output</p>
+                        </td>
+                    </tr>
+                    <tr class="TableStyle-shaded_rows_plugin-Body-Body2">
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2">
+                            <p>Disable<a href="#Use" class="ParanumOnly MCXref xref xrefParanumOnly"><sup>1</sup></a></p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>disabled</p>
+                            <p>enabled</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyB-Column1-Body2" style="text-align: center;">
+                            <p>0</p>
+                            <p>1</p>
+                        </td>
+                        <td class="TableStyle-shaded_rows_plugin-BodyA-Column1-Body2" style="text-align: center;">
+                            <p style="text-align: center;">Input / Output</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h6 data-mc-autonum="1. "><span class="autonumber"><span>1. </span></span><a name="Use"></a>Use this control pin to enable or disable the plugin in your design. When Disabled is set to enabled (value of 1), the Connection Status changes to "Not Present - Disabled".</h6>
+        </div>
+        <MadCap:pageFooter class="">
+            <div style="width: 100%;position: relative; border-top: solid 1px #c2c2c2; margin-top: 15px; padding-top: 8px">
+                <p style="text-align: center;"><a href="https://www.qsc.com/resources/software-and-firmware/" target="_blank">Software&#160;and&#160;Firmware</a> | <a href="https://www.qsc.com/resources/" target="_blank">Resources</a> | <a href="https://qscprod.force.com/selfhelpportal/s/" target="_blank">QSC&#160;Self&#160;Help&#160;Portal</a> | <a href="mailto:QSysHelpFeedback@qsc.com?subject=Q-SYS Help Feedback" target="_blank">Q-SYS Help Feedback</a></p>
+                <p class="legal">Copyright © 2021 QSC, LLC. Click <a href="https://q-syshelp.qsc.com/#Legal.htm" target="_blank">here</a> for trademark and other legal notices.</p>
+                <p style="text-align: center;"><a href="https://www.qsc.com/" target="_blank"><img src="qsclogogrey_40_reduced.png" /></a>
+                </p>
+            </div>
+        </MadCap:pageFooter>
+    </body>
+</html>

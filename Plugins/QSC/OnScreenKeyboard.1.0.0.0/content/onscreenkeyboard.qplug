@@ -1,0 +1,326 @@
+--[[ BEGIN DIGITAL SIGNATURE
+MwL3kx2gvQzMt0OV/dzhK8QVXf5YAoZoPYwWGQYqLzQYbeyRBlQSL1GW81Hs2KLn3/Ih5R/l3ROzfQ4+Qc4PeIh6scphyQtaZwfO+mhmLSmp5gY6e6EFSNKyQkioAHBg/0AG1eaPVxwyXgkFidetpkQ6b0Xr1s090hR2IvgSR/7UPRhYu5+0aS6bEvGVB/LIPtLbtiEtYW11zzscKGHGMWqkLNsspd7X+z2/xV5VaaWSSnlld6xX5PZXe9EdpAKwppbDE4E8wAtmFpDRwj4tkKFiK+YfbnYZ7gX7M/2rhSX6OiQNyjw+8c34VwCDTK3mhOvZZFJ6t2f/yNRE8Vhppg==
+END DIGITAL SIGNATURE ]]
+-- On Screen Keyboard
+-- by QSC
+-- August 2020
+
+PluginInfo = {
+    Name = "Tools~UCI On Screen Keyboard v1.0",
+    Version = "1.0",
+    BuildVersion = "1.0.0.2",
+    Id = "3f5e3fb2-fe05-4b6f-a78b-e414ba8ece87",
+    Author = "QSC",
+    Description = "A plugin that provides on screen keyboard for QSC Touch Panels",
+}
+
+Colors = {
+  Key = {40,40,40},
+  KeyPressed = {102,102,102},
+  KeyStroke = {0,0,0},
+  Icon = {240,240,240},
+}
+
+AlphaKeys = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"}
+AlphaPosition = {{64,72},{228,108},{156,108},{136,72},{128,36},{172,72},{208,72},{244,72},{308,36},{280,72},{316,72},{352,72},{300,108},{264,108},{344,36},{380,36},{56,36},{164,36},{100,72},{200,36},{272,36},{192,108},{92,36},{120,108},{236,36},{84,108}}
+NumberKeys = {"!","@","#","$","%","^","&","*","(",")"}
+SpecialKeys = {"~\r\n`","_\r\n-","+\r\n=","{\r\n[","}\r\n]","|\r\n\\",":\r\n;","\"\r\n\'","<\r\n,",">\r\n.","?\r\n/"}
+SpecialPosition = {{0,0},{396,0},{432,0},{416,36},{452,36},{488,36},{388,72},{424,72},{336,108},{372,108},{408,108}}
+CtrlKeys = {"Backspace","Tab","Caps Lock","Enter","Left Shift","Right Shift","Space"}
+CtrlSize = {{66,36},{56,36},{64,36},{74,36},{84,36},{90,36},{206,36}}
+CtrlPosition = {{468,0},{0,36},{0,72},{460,72},{0,108},{444,108},{166,144}}
+
+function GetColor(props)
+  return { 102, 102, 102 }
+end
+
+function GetPrettyName(props)
+  return "On Screen Keyboard " .. PluginInfo.Version
+end
+
+function GetProperties()
+  props = {}
+  table.insert(props,{Name = "Debug Print",Type = "enum",Choices = {"None","Tx","Function Calls", "All"},Value = "None"})
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value==false then props["Debug Print"].IsHidden=true end
+  return props
+end
+
+function GetControls(props)
+  ctrls = {}
+  -- Controls
+  table.insert(ctrls,{Name = "StringOutput",ControlType = "Text",PinStyle = "Output",Count = 1})
+  table.insert(ctrls,{Name = "NumberKeys",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Both",Count = 10})
+  table.insert(ctrls,{Name = "AlphabeticalKeys",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Both",Count = 26})
+  table.insert(ctrls,{Name = "SpecialCharacterKeys",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Both",Count = 11})
+  table.insert(ctrls,{Name = "ControlKeys",ControlType = "Button",ButtonType = "Trigger",UserPin = true,PinStyle = "Both",Count = 7})
+  table.insert(ctrls,{Name = "CapsLED",ControlType = "Indicator",IndicatorType = "Led",UserPin = false,Count = 1})
+  table.insert(ctrls,{Name = "ShiftLED",ControlType = "Indicator",IndicatorType = "Led",UserPin = false,Count = 1})
+  return ctrls
+end
+
+function GetControlLayout(props)
+  layout   = {}
+  graphics = {}
+  -- Helper functions
+  local function SpecialSize(i)
+    local size
+    if i==6 then
+      size = {46,36}
+    else
+      size = {36,36}
+    end
+    return size
+  end
+  
+  local function CtrlLegend(index)
+    local legend
+    local string = CtrlKeys[index]
+    if string:find("Left") then
+      legend = string.sub(string,5,#string)
+    elseif string:find("Right") then
+      legend = string.sub(string,6,#string)
+    elseif string=="Space" then
+      legend = ""
+    else
+      legend = string
+    end
+    return legend
+  end
+  
+  -- Controls
+  layout["StringOutput"] = {PrettyName = "String Output",Style = "None"}
+  layout["CapsLED"] = {PrettyName = "Caps Lock Indicator",Style = "Led",Color = {255,255,255},UnlinkOffColor = true,OffColor = {0,0,0},StrokeColor = {105,105,105},Padding = 2,Position = {1,95},Size = {12,12},ZOrder = 1000}
+  layout["ShiftLED"] = {PrettyName = "Shift Indicator",Style = "Led",Color = {255,255,255},UnlinkOffColor = true,OffColor = {0,0,0},StrokeColor = {105,105,105},Padding = 2,Position = {1,131},Size = {12,12}}
+  -- Number keys
+  for i=1,10 do
+    local index
+    if i==10 then index=0 else index=i end
+    layout["NumberKeys "..i] = {PrettyName = "Number Keys~"..index,Style = "Button",ButtonStyle = "Trigger",Color = Colors.KeyPressed,UnlinkOffColor = true,OffColor = Colors.Key,StrokeColor = Colors.KeyStroke,Legend = string.format("%s\r\n%i",NumberKeys[i],index),Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Left",VTextAlign = "Top",Padding = 2,Position = {36*i,0},Size = {36,36}}
+  end
+  -- Alphabetical keys
+  for i=1,26 do
+    layout["AlphabeticalKeys "..i] = {PrettyName = "Alphabetical Keys~"..AlphaKeys[i],Style = "Button",ButtonStyle = "Trigger",Color = Colors.KeyPressed,UnlinkOffColor = true,OffColor = Colors.Key,StrokeColor = Colors.KeyStroke,Legend = AlphaKeys[i],Font = "Roboto",FontSize = 12,FontStyle = "Bold",HTextAlign = "Left",VTextAlign = "Top",Padding = 2,Position = AlphaPosition[i],Size = {36,36}}
+  end
+  -- Special keys
+  for i=1,11 do
+    layout["SpecialCharacterKeys "..i] = {PrettyName = "Special Character Keys~"..string.match(SpecialKeys[i],"\r\n(.)"),Style = "Button",ButtonStyle = "Trigger",Color = Colors.KeyPressed,UnlinkOffColor = true,OffColor = Colors.Key,StrokeColor = Colors.KeyStroke,Legend = SpecialKeys[i],Font = "Roboto",FontSize = 11,FontStyle = "Bold",HTextAlign = "Left",VTextAlign = "Top",Padding = 2,Position = SpecialPosition[i],Size = SpecialSize(i)}
+  end
+  -- Control Keys
+  for i=1,7 do
+    layout["ControlKeys "..i] = {PrettyName = "Control Keys~"..CtrlKeys[i],Style = "Button",ButtonStyle = "Trigger",Legend = CtrlLegend(i),Color = Colors.KeyPressed,UnlinkOffColor = true,OffColor = Colors.Key,StrokeColor = Colors.KeyStroke,Font = "Roboto",FontSize = 8,FontStyle = "Bold",HTextAlign = "Left",VTextAlign = "Top",Padding = 2,Position = CtrlPosition[i],Size = CtrlSize[i]}
+  end
+  return layout, graphics
+end
+
+--Start event based logic
+if Controls then
+  -- Control Aliases
+  Numbers = Controls["NumberKeys"]
+  Alphas = Controls["AlphabeticalKeys"]
+  Special = Controls["SpecialCharacterKeys"]
+  Control = Controls["ControlKeys"]
+  Caps = Controls["CapsLED"]
+  ShiftKey = Controls["ShiftLED"]
+  Output = Controls["StringOutput"]
+  
+  -- Variables, flags, and timers
+  ShiftTimer = Timer.New()
+  ShiftStroke = 0
+  DebugTx=false
+  DebugRx=false
+  DebugFunction=false
+  ShiftLatch = false
+  DebugPrint=Properties["Debug Print"].Value
+  
+  -- Tables
+  String = {}
+  
+  -- Helper functions
+  -- A function to determine common print statement scenarios for troubleshooting
+  function SetupDebugPrint()
+    if DebugPrint=="Tx" then
+      DebugTx=true
+    elseif DebugPrint=="Function Calls" then
+      DebugFunction=true
+    elseif DebugPrint=="All" then
+      DebugTx,DebugFunction=true,true
+    end
+  end
+  
+  function ConcatString(str)
+    if DebugFunction then print("ConcatString() Called") end
+    if str then 
+      table.insert(String,str)
+      if DebugTx then print("Tx: "..str) end
+    end
+    Output.String = table.concat(String,"")
+    if not ShiftLatch then
+      ShiftKey.Boolean = false  
+      ShiftStroke = 0
+    end
+  end
+  
+  -- A function to clear controls/flags/variables and clears tables
+  function ClearVariables()
+    if DebugFunction then print("ClearVariables() Called") end
+    ShiftStroke = 0
+    ShiftLatch = false
+    ShiftKey.Boolean = false
+    Caps.Boolean = false
+    Output.String = ""
+  end
+  
+  -- EventHandlers
+  -- Control Keys
+  function Backspace()
+    if DebugFunction then print("Backspace() Called") end
+    if ShiftKey.Boolean then
+      String = {}
+    else
+      table.remove(String)
+    end
+    ConcatString()
+  end
+  
+  function Tab()
+    if DebugFunction then print("Tab() Called") end
+    local char = string.char(9)
+    ConcatString(char)
+  end
+  
+  function CapsLock()
+    if DebugFunction then print("CapsLock() Called") end
+    if Caps.Boolean then
+      Caps.Boolean = false
+    else
+      Caps.Boolean = true
+    end
+  end
+  
+  function Enter()
+    if DebugFunction then print("Enter() Called") end
+    local char = "\r\n"
+    ConcatString(char)
+  end
+  
+  function LatchShift()
+    if DebugFunction then print("LatchShift() Called") end
+    if ShiftStroke % 2 == 0 then
+      ShiftLatch = true
+      ShiftKey.Boolean = true
+      ShiftStroke = 0
+    else
+      ShiftLatch = false
+      if ShiftKey.Boolean then
+        ShiftKey.Boolean = false
+        ShiftStroke = 0
+      else
+        ShiftKey.Boolean = true
+      end
+    end
+    ShiftTimer:Stop()
+  end
+  
+  function Shift()
+    if DebugFunction then print("Shift() Called") end
+    ShiftStroke = ShiftStroke + 1
+    ShiftTimer:Start(0.1)
+  end
+  
+  function Space()
+    if DebugFunction then print("Space() Called") end
+    local char = " "
+    ConcatString(char)
+  end
+  
+  CtrlKeyFunctions = {
+    Backspace = function() Backspace() end,
+    Tab = function() Tab() end,
+    CapsLock = function() CapsLock() end,
+    Enter = function() Enter() end,
+    LeftShift = function() Shift() end,
+    RightShift = function() Shift() end,
+    Space = function() Space() end
+  }
+  
+  function CtrlKeyParser(key)
+    if DebugFunction then print("CtrlKeyParser() Called") end
+    for k,v in pairs(CtrlKeyFunctions) do
+      if tostring(k)==key then
+        v()
+      end
+    end
+  end
+  
+  for k,v in pairs(Control) do
+    v.EventHandler = function()
+      local key 
+      if CtrlKeys[k]=="" then
+        key = "Space"
+      else
+        key = string.gsub(CtrlKeys[k],"%s","")
+      end
+      CtrlKeyParser(key)
+    end
+  end
+  
+  -- Alphabetical
+  for i=1,26 do
+    Alphas[i].EventHandler = function()
+      if DebugFunction then print(Alphas[i].Legend.."() Called") end
+      local char
+      if Caps.Boolean or ShiftKey.Boolean then
+        char = AlphaKeys[i]
+      else
+        char = string.lower(AlphaKeys[i])
+      end
+      ConcatString(char)
+    end
+  end
+  
+  -- Numbers
+  for i=1,10 do
+    Numbers[i].EventHandler = function()
+      if DebugFunction then print(Numbers[i].Legend.."() Called") end
+      local char
+      if ShiftKey.Boolean then
+        char = NumberKeys[i]
+      else
+        if i == 10 then 
+          char = tostring(0)
+        else
+          char = tostring(i)
+        end
+      end
+      ConcatString(char)
+    end
+  end
+  
+  -- Special Characters
+  for i=1,11 do
+    Special[i].EventHandler = function()
+      if DebugFunction then print(Special[i].Legend.."() Called") end
+      local char
+      if ShiftKey.Boolean then
+        char = string.match(SpecialKeys[i],"(.)\r\n")
+      else
+        char = string.match(SpecialKeys[i],"\r\n(.)")
+      end
+      ConcatString(char)
+    end
+  end
+  
+  -- Initialization Function
+  function Initialization()
+    if DebugFunction then print("Initialization() Called") end
+    ShiftTimer.EventHandler = LatchShift
+    SetupDebugPrint()
+    ClearVariables()
+  end
+  
+  Initialization()
+end

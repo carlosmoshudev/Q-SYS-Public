@@ -1,0 +1,2370 @@
+--[[ BEGIN DIGITAL SIGNATURE
+kPz5/ZHH6DbQvHF6YJ6wK/fATLFjTf2+lorz/244lHo9Ewi1g23m1G1TrCNlI8X9mAdmaTLrY1MemhoeKBY+5pqS+47TYXiBhkfvTVG+Y5rH1Z6wG/WbdD8nCbxseD/BhI3qJdeJAflamFbIeTGJbOZUiZLlcVgpznG489B7PwWRaouU4kKPZuThgZmRsqdz6IYAUcrOrIyHPOIYKPiiIH6cQOywFsi9SAM37R7BGv1zZyv6dUY5knCCBZdbpTZJ/wKntQGBTPNfKlJTUSuWiLLb8++q/wa6Ppj4DV9FFhHKy7hTwvhjONqkk9T2Rsg+ub3BZDjVOgks264OSYSrvg==
+END DIGITAL SIGNATURE ]]
+-- PJ Link Plugin
+-- by Eric Urbaniak / QSC Boulder
+-- Decmeber 2018
+-- Last Edited June 2022
+
+
+PluginInfo = {
+  Name = "Enterprise Manager~PJLink~PJLink v3.3",
+  Version = "3.3",
+  BuildVersion = "3.3.0.0",
+  Id = "80a40a84-e685-4b13-a5c4-fbdc12bd85e6",
+  Description = "Control for PJLink capable projectors",
+  IsManaged = true,
+  Manufacturer = "JBMIA",
+  Model = "PJ Link",
+  Type = Reflect and Reflect.Types.Projector or 0,
+  Author = "QSC"
+}
+
+function GetColor(props)
+  return {27,70,150}
+end
+
+function GetPrettyName(props)
+  return "PJLink\rv"..PluginInfo.Version
+end
+
+local pagenames = {"Control", "Status", "Setup"}
+function GetPages(props)
+  local pages = {}
+  for ix,name in ipairs(pagenames) do
+    table.insert(pages, {name = pagenames[ix]})
+  end
+  return pages
+end
+
+function GetProperties()
+  local props = {}
+  table.insert(props,{
+    Name   = "Uppercase Messages",
+    Type   = "boolean",
+    Value  = true
+  })
+  table.insert(props,{
+    Name   = "Poll Rate",
+    Type   = "integer",
+    Min    = 1,
+    Max    = 30,
+    Value  = 2
+  })
+  table.insert(props,{
+    Name   = "Warmup Time",
+    Type   = "integer",
+    Min    = 1,
+    Max    = 60,
+    Value  = 15
+  })
+  table.insert(props,{
+    Name   = "Power Off Polling",
+    Type   = "boolean",
+    Value  = true
+  })
+  table.insert(props,{
+    Name   = "Poll Errors",
+    Type   = "boolean",
+    Value  = true
+  })
+  table.insert(props,{
+    Name   = "Poll Lamp",
+    Type   = "boolean",
+    Value  = true
+  })
+  table.insert(props,{
+    Name   = "Poll Filters",
+    Type   = "boolean",
+    Value  = true
+  })
+  table.insert(props,{
+    Name   = "Poll Resolution",
+    Type   = "boolean",
+    Value  = true
+  })
+  table.insert(props,{
+    Name   = "Input Count",
+    Type   = "integer",
+    Min    = 2,
+    Max    = 36,
+    Value  = 4
+  })
+  table.insert(props,{
+    Name    = "Debug Print",
+    Type    = "enum",
+    Choices = {"None", "Tx/Rx", "Tx", "Rx", "Function Calls", "All"},
+    Value   = "None"
+  })
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value == false then 
+    props["Debug Print"].IsHidden = true 
+  end
+  return props
+end
+
+function GetControls(props)
+  local ctrls = {
+    {
+      Name           = "IPAddress",
+      ControlType    = "Text",
+      Count          = 1
+    },
+    {
+      Name           = "Port",
+      ControlType    = "Knob",
+      ControlUnit    = "Integer",
+      DefaultValue   = 4352,
+      Min            = 1,
+      Max            = 65535,
+      Count          = 1,
+    },
+    {
+      Name           = "Password",
+      ControlType    = "Text",
+      Count          = 1,
+    },
+    {
+      Name           = "Status",
+      ControlType    = "Indicator",
+      IndicatorType  = Reflect and "StatusGP" or "Status",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Manufacturer",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Model",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "DeviceName",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SerialNumber",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "DeviceFirmware",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "PowerStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Power",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      IconType       = "Icon",
+      Icon           = "Power",
+      UserPin        = true,
+      PinStyle       = "Both"
+    },
+    {
+      Name           = "AVMute",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      UserPin        = true,
+      PinStyle       = "Both",
+      Count          = 3
+    },
+    {
+      Name           = "VideoFreeze",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      UserPin        = true,
+      PinStyle       = "Both",
+      Count          = 1
+    },
+    {
+      Name           = "LampHours",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 2,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "FilterHours",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "LampText",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "FilterText",
+      ControlType    = "Text",
+      DefaultValue   = "Filter Hours:",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "NoRGB",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "NoVid",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "NoDig",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "NoSto",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "NoNet",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "NoInternal",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = 1,
+    },
+    {
+      Name           = "RGB",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Input"
+    },
+    {
+      Name           = "RGBName",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SelectedRGB",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Video",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Input"
+    },
+    {
+      Name           = "VideoName",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SelectedVideo",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Digital",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Input"
+    },
+    {
+      Name           = "DigitalName",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SelectedDigital",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Storage",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Input"
+    },
+    {
+      Name           = "StorageName",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SelectedStorage",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Network",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Input"
+    },
+    {
+      Name           = "NetworkName",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SelectedNetwork",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "Internal",
+      ControlType    = "Button",
+      ButtonType     = "Toggle",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Input"
+    },
+    {
+      Name           = "InternalName",
+      ControlType    = "Text",
+      TextBoxType    = "NoBackground",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "SelectedInternal",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = props["Input Count"].Value,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "PJJLinkClass",
+      ControlType    = "Knob",
+      ControlUnit    = "Integer",
+      DefaultValue   = 1,
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "FanStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = 3,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "LampStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = 3,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "TemperatureStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = 3,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "CoverStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = 3,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "FilterStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = 3,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "OtherStatus",
+      ControlType    = "Indicator",
+      IndicatorType  = "LED",
+      Count          = 3,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "InputResolution",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "RecommendedResolution",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "ReplacementFilter",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+    {
+      Name           = "ReplacementLamp",
+      ControlType    = "Indicator",
+      IndicatorType  = "Text",
+      Count          = 1,
+      UserPin        = true,
+      PinStyle       = "Output"
+    },
+  }
+  return ctrls
+end
+
+function GetControlLayout(props)
+  local layout   = {}
+  local graphics = {}
+  local function GetIPos(qty, rowlen, base, ofs)
+    local row,col = (qty-1)//(rowlen),(qty-1)%rowlen
+    return { base.x + col*ofs.x, base.y + row*ofs.y }
+  end
+  
+  -- Local Variables
+  local CurrentPage = pagenames[props["page_index"].Value]
+  local layout, graphics = {}, {}
+  local PJLinkLogo = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNDEuMDMgODIuMjYiPjx0aXRsZT5QSiBMaW5rPC90aXRsZT48ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIj48ZyBpZD0iVHJhY2UiPjxnIGlkPSJQIj48ZyBpZD0iTSI+PHBvbHlnb24gaWQ9Ik0tMiIgZGF0YS1uYW1lPSJNIiBwb2ludHM9IjMyOS4yOSAxMy40IDMyOS4yOSAwLjg5IDMzMS4zNiAwLjg5IDMzNS4xMyAxMC42MyAzMzguOTkgMC44OSAzNDEuMDMgMC44OSAzNDEuMDMgMTMuNCAzMzkuMzcgMTMuNCAzMzkuMzcgNC4wOCAzMzUuOTYgMTMuMjQgMzM0LjM4IDEzLjI1IDMzMS4wNCA0LjA1IDMzMS4wNCAxMy40IDMyOS4yOSAxMy40IiBzdHlsZT0iZmlsbDojMWI0Njk2Ii8+PC9nPjxwb2x5Z29uIGlkPSJUIiBwb2ludHM9IjMxOC4yMSAwLjg5IDMxOC4yMSAzLjI1IDMyMS44NSAzLjI1IDMyMS44NSAxMy40IDMyNC4zNCAxMy40IDMyNC4zNCAzLjI5IDMyOC4wNCAzLjI5IDMyOC4wNCAwLjg5IDMxOC4yMSAwLjg5IiBzdHlsZT0iZmlsbDojMWI0Njk2Ii8+PGcgaWQ9ImsiPjxwb2x5Z29uIGlkPSJrLTIiIGRhdGEtbmFtZT0iayIgcG9pbnRzPSIzMjMuNjggODAuNzIgMzA1LjMyIDgwLjcyIDI4NC4yNiA1Ni4wNCAyODQuMjYgODAuODcgMjY5LjM2IDgwLjg3IDI2OS4zNiAxLjQ5IDI4NC4yNiAxLjQ5IDI4NC4yNiA0Ny4yMyAzMDUuMzIgMjQuMTMgMzE3LjgzIDI0LjEzIDI5NS4zNiA0OC42NCAzMjMuNjggODAuNzIiIHN0eWxlPSJmaWxsOiMxYjQ2OTYiLz48L2c+PGcgaWQ9Im4iPjxwYXRoIGQ9Ik0yMTAuMywyNC4xM2gxNVYzNC4zNGEyNi42OCwyNi42OCwwLDAsMSwxNS42My0xMS45MWM2LjY2LTIsMTIuMSwxLjY3LDE1LjUxLDUuNTFhMTUuODcsMTUuODcsMCwwLDEsMy45MiwxMC41OFY4MC42NGgtMTVWNDIuNTVhOC4xLDguMSwwLDAsMC0zLjEtNi41NCw1LjA2LDUuMDYsMCwwLDAtMy4yNi0xLjFjLTUuNDMuMjQtMTEuOTUsNy4zMy0xMy43Miw5LjgxVjgwLjY0aC0xNVoiIHN0eWxlPSJmaWxsOiMxYjQ2OTYiLz48L2c+PGcgaWQ9ImkiPjxyZWN0IGlkPSJpLTIiIGRhdGEtbmFtZT0iaSIgeD0iMTg2LjcyIiB5PSIyNC4wNCIgd2lkdGg9IjE1LjMyIiBoZWlnaHQ9IjU2LjY4IiBzdHlsZT0iZmlsbDojMWI0Njk2Ii8+PGNpcmNsZSBpZD0iaV9kb3QiIGRhdGEtbmFtZT0iaSBkb3QiIGN4PSIxOTQuNTciIGN5PSI4LjMzIiByPSI4LjMzIiBzdHlsZT0iZmlsbDojMWI0Njk2Ii8+PC9nPjxnIGlkPSJMIj48cG9seWdvbiBpZD0iTC0yIiBkYXRhLW5hbWU9IkwiIHBvaW50cz0iMTI5LjUzIDEuNjYgMTI5LjUzIDgwLjY4IDE3OS4zMiA4MC42OCAxNzkuMzIgNjkuNyAxNDYuMTMgNjkuNyAxNDYuMTMgMS42NiAxMjkuNTMgMS42NiIgc3R5bGU9ImZpbGw6IzFiNDY5NiIvPjwvZz48ZyBpZD0iSiI+PHBhdGggZD0iTTk4LjUxLDEuNjZoMjQuMTNWNTcuNWMuMDcsMSwuNzEsMTIuMTEtOC4xMSwxOS4xNmEyNS4zOCwyNS4zOCwwLDAsMS0xNiw1LjZINjkuOTFjLTUuODQtLjQxLTEyLjQyLS4yMi0yMC43NC04LjQxLTIuNzYtMi43Mi0zLjU2LTYuMTgtNC4wNi04LjQ5YTQuNiw0LjYsMCwwLDEtLjExLTF2LTZINjcuNDljMCwuNC0uNTEsNC4yLDIuNTUsNi40NWExMSwxMSwwLDAsMCw2LjcsMS43OUg5MC40YTguMzgsOC4zOCwwLDAsMCw1LjM3LTIsOC40OCw4LjQ4LDAsMCwwLDIuNzQtNloiIHN0eWxlPSJmaWxsOiMxYjQ2OTYiLz48L2c+PGcgaWQ9IlAtMiIgZGF0YS1uYW1lPSJQIj48Y2lyY2xlIGlkPSJQX0RvdCIgZGF0YS1uYW1lPSJQIERvdCIgY3g9IjU0IiBjeT0iMjguODMiIHI9IjkiIHN0eWxlPSJmaWxsOiMxYjQ2OTYiLz48cGF0aCBpZD0iUC0zIiBkYXRhLW5hbWU9IlAiIGQ9Ik04OCw5LjgzYTI2LjQxLDI2LjQxLDAsMCwwLTE2LTlIMHY4MEgyNHYtMjZINzJhMjYuMTUsMjYuMTUsMCwwLDAsMjItMjV2LTRBMjYuMiwyNi4yLDAsMCwwLDg4LDkuODNabS0yMSwyNy0uMDYuMDZhMTAuNCwxMC40LDAsMCwxLTcuMzgsMi45NEgxNS4zNWExMC41LDEwLjUsMCwwLDEtNy43Ni0zLjMxYy0uMi0uMjItLjQtLjQ1LS41OS0uNjlhMTEuNCwxMS40LDAsMCwxLTIuNTEtNy40OSwxMS41OCwxMS41OCwwLDAsMSwyLjA1LTYuMTMsMTAuNDIsMTAuNDIsMCwwLDEsOC42NS00LjM4SDYxLjA3YTEwLDEwLDAsMCwxLDMuMTIuNDZBOSw5LDAsMCwxLDY3LDE5LjgzYzMuMzMsMi43MywzLjM3LDcsMy4zOCw4LjM0QTEyLjMyLDEyLjMyLDAsMCwxLDY3LDM2LjgzWiIgc3R5bGU9ImZpbGw6IzFiNDY5NiIvPjwvZz48L2c+PC9nPjwvZz48L3N2Zz4="
+  local MuteLabels={"Video","Audio","A/V","Freeze"}
+  
+  -- Color Lookup Table
+  local Black        = { 0  , 0  , 0   }
+  local White        = { 255, 255, 255 }
+  local BGGray       = { 236, 236, 236 }
+  local BtnGrn       = { 0  , 199, 0   }
+  local BtnGrnOff    = { 0  , 127, 0   }
+  local BtnGrnOn     = { 0  , 255, 0   }
+  local LEDRedOff    = { 127, 0  , 0   }
+  local LEDRedOn     = { 255, 0  , 0   }
+  local LEDGreenOff  = { 0  , 127, 0   }
+  local LEDGreenOn   = { 0  , 255, 0   }
+  local LEDYellowOff = { 127, 127, 0   }
+  local LEDYellowOn  = { 255, 255, 0   }
+  
+  local BtnGray   = { 130, 130, 130 }
+  
+  --Controls Layout
+  if CurrentPage=="Control" then
+    local offset = math.max(0, (props["Input Count"].Value - 4) * 25)
+    -- Groupbox
+    table.insert(graphics,{
+      Type            = "GroupBox",
+      Fill            = BGGray,
+      StrokeWidth     = 1,
+      CornerRadius    = 0,
+      Position        = {0,0},
+      Size            = {278 + offset*2,425}
+    })
+      -- Header
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Power",
+      Position        = {9,59},
+      Size            = {259 + offset*2,10},
+      FontSize        = 14
+    })
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "A/V Mute",
+      Position        = {9,122},
+      Size            = {259 + offset*2,10},
+      FontSize        = 14
+    })
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Inputs",
+      Position        = {9,195},
+      Size            = {259 + offset*2,10},
+      FontSize        = 14
+    })
+      -- Text
+      table.insert(graphics,{
+      Type            = "Text",
+      Text            = "RGB",
+      Position        = {2,238},
+      Size            = {60,16},
+      HTextAlign      = "Right",
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Video",
+      Position        = {2,270},
+      Size            = {60,16},
+      HTextAlign      = "Right",
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Digital",
+      Position        = {2,302},
+      Size            = {60,16},
+      HTextAlign      = "Right",
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Storage",
+      Position        = {2,332},
+      Size            = {60,16},
+      HTextAlign      = "Right",
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Network",
+      Position        = {2,364},
+      Size            = {60,16},
+      HTextAlign      = "Right",
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Internal",
+      Position        = {2,396},
+      Size            = {60,16},
+      HTextAlign      = "Right",
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+      -- Logo
+    table.insert(graphics,{
+      Type            = "Svg",
+      Image           = PJLinkLogo,
+      Position        = {65 + offset,12},
+      Size            = {149,36}
+    })
+      -- Controls
+    layout["Power"]={
+      PrettyName      = "Device Power",
+      Style           = "Button",
+      ButtonStyle     = "Toggle",
+      Color           = {241,53,45},
+      OffColor        = {167,35,35},
+      UnlinkOffColor  = true,
+      Position        = {36 + offset,84},
+      Size            = {33,25}
+    }
+    layout["PowerStatus"]={
+      PrettyName      = "Device's Power Status",
+      Style           = "Textdisplay",
+      FontSize        = 12,
+      Color           = White,
+      IsReadOnly      = true,
+      Position        = {86 + offset,84},
+      Size            = {149,22}
+    }
+    layout["NoRGB"]={
+      PrettyName      = "No RGB Inputs",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      IsReadOnly      = true,
+      Position        = {81,238},
+      Size            = {149,16},
+      FontSize        = 12
+    }
+    layout["NoVid"]={
+      PrettyName      = "No Analog Video Inputs",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      IsReadOnly      = true,
+      Position        = {81,270},
+      Size            = {149,16},
+      FontSize        = 12
+    }
+    layout["NoDig"]={
+      PrettyName      = "No Digital Video Inputs",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      IsReadOnly      = true,
+      Position        = {81,302},
+      Size            = {149,16},
+      FontSize        = 12
+    }
+    layout["NoSto"]={
+      PrettyName      = "No Storage Inputs",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      IsReadOnly      = true,
+      Position        = {81,332},
+      Size            = {149,16},
+      FontSize        = 12
+    }
+    layout["NoNet"]={
+      PrettyName      = "No Network Inputs",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      IsReadOnly      = true,
+      Position        = {81,364},
+      Size            = {149,16},
+      FontSize        = 12
+    }
+    layout["NoInternal"]={
+      PrettyName      = "No Internal Inputs",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      IsReadOnly      = true,
+      Position        = {81 + offset,396},
+      Size            = {149,16},
+      FontSize        = 12
+    }
+    for i=1,3 do
+      layout["AVMute "..i]={
+        PrettyName      = "Mute~"..MuteLabels[i],
+        Style           = "Button",
+        Legend          = MuteLabels[i],
+        ButtonStyle     = "Toggle",
+        Position        = GetIPos(i,3,{x=16 + offset,y=141},{x=90,y=0}),
+        Size            = {68,20}
+      }
+    end
+    layout["VideoFreeze"]={
+      PrettyName      = "Mute~Video Freeze",
+      Style           = "Button",
+      Legend          = "Freeze",
+      ButtonStyle     = "Toggle",
+      Position        = {106 + offset,166},
+      Size            = {68,20}
+    }
+    for i=1,props["Input Count"].Value do
+      table.insert(graphics,{
+        Type            = "Text",
+        Text            = "" .. i,
+        Position        = {22 + i*50,210},
+        Size            = {36,14},
+        StrokeWidth     = 0,
+        FontSize        = 12
+      })
+      layout["RGBName "..i]={
+        PrettyName      = "RGB Inputs~RGB "..i.." Name",
+        Style           = "Text",
+        TextBoxStyle    = "NoBackground",
+        IsReadOnly      = true,
+        FontSize        = 10,
+        HTextAlign      = "Center",
+        Position        = GetIPos(i,props["Input Count"].Value,{x=68,y=226},{x=50,y=52}),
+        Size            = {44,12}
+      }
+      layout["RGB "..i]={
+        PrettyName      = "RGB Inputs~RGB In "..i,
+        Style           = "Button",
+        UnlinkOffColor  = true,
+        Color           = White,
+        OffColor        = BtnGray,
+        Position        = GetIPos(i,props["Input Count"].Value,{x=72,y=238},{x=50,y=52}),
+        Size            = {36,16}
+        
+      }
+      layout["SelectedRGB "..i]={
+        PrettyName      = "RGB Inputs~RGB "..i.." Selected",
+        Style           = "None"
+      }
+  
+      layout["VideoName "..i]={
+        PrettyName      = "Analog Video Inputs~Analog "..i.." Name",
+        Style           = "Text",
+        TextBoxStyle    = "NoBackground",
+        IsReadOnly      = true,
+        FontSize        = 10,
+        HTextAlign      = "Center",
+        Position        = GetIPos(i,props["Input Count"].Value,{x=68,y=258},{x=50,y=52}),
+        Size            = {44,12}
+      }
+      layout["Video "..i]={
+        PrettyName      = "Analog Video Inputs~Analog Video In "..i,
+        Style           = "Button",
+        UnlinkOffColor  = true,
+        Color           = White,
+        OffColor        = BtnGray,
+        Position        = GetIPos(i,props["Input Count"].Value,{x=72,y=270},{x=50,y=52}),
+        Size            = {36,16}
+      }
+      layout["SelectedVideo "..i]={
+        PrettyName      = "Analog Video Inputs~Analog "..i.." Selected",
+        Style           = "None"
+      }
+  
+      layout["DigitalName "..i]={
+        PrettyName      = "Digital Video Inputs~Digital Video "..i.." Name",
+        Style           = "Text",
+        TextBoxStyle    = "NoBackground",
+        IsReadOnly      = true,
+        FontSize        = 10,
+        HTextAlign      = "Center",
+        Position        = GetIPos(i,props["Input Count"].Value,{x=68,y=290},{x=50,y=52}),
+        Size            = {44,12}
+      }
+      layout["Digital "..i]={
+        PrettyName      = "Digital Video Inputs~Digital Video In "..i,
+        Style           = "Button",
+        UnlinkOffColor  = true,
+        Color           = White,
+        OffColor        = BtnGray,
+        Position        = GetIPos(i,props["Input Count"].Value,{x=72,y=302},{x=50,y=52}),
+        Size            = {36,16}
+      }
+      layout["SelectedDigital "..i]={
+        PrettyName      = "Digital Video Inputs~Digital Video "..i.." Selected",
+        Style           = "None"
+      }
+  
+      layout["StorageName "..i]={
+        PrettyName      = "Storage Inputs~Storage "..i.." Name",
+        Style           = "Text",
+        TextBoxStyle    = "NoBackground",
+        IsReadOnly      = true,
+        FontSize        = 10,
+        HTextAlign      = "Center",
+        Position        = GetIPos(i,props["Input Count"].Value,{x=68,y=320},{x=50,y=52}),
+        Size            = {44,12}
+      }
+      layout["Storage "..i]={
+        PrettyName      = "Storage Inputs~Storage In "..i,
+        Style           = "Button",
+        UnlinkOffColor  = true,
+        Color           = White,
+        OffColor        = BtnGray,
+        Position        = GetIPos(i,props["Input Count"].Value,{x=72,y=332},{x=50,y=52}),
+        Size            = {36,16}
+      }
+      layout["SelectedStorage "..i]={
+        PrettyName      = "Storage Inputs~Storage "..i.." Selected",
+        Style           = "None"
+      }
+      
+      layout["NetworkName "..i]={
+        PrettyName      = "Network Inputs~Network "..i.." Name",
+        Style           = "Text",
+        TextBoxStyle    = "NoBackground",
+        IsReadOnly      = true,
+        FontSize        = 10,
+        HTextAlign      = "Center",
+        Position        = GetIPos(i,props["Input Count"].Value,{x=68,y=352},{x=50,y=52}),
+        Size            = {44,12}
+      }
+      layout["Network "..i]={
+        PrettyName      = "Network Inputs~Network In "..i,
+        Style           = "Button",
+        UnlinkOffColor  = true,
+        Color           = White,
+        OffColor        = BtnGray,
+        Position        = GetIPos(i,props["Input Count"].Value,{x=72,y=364},{x=50,y=52}),
+        Size            = {36,16}
+      }
+      layout["SelectedNetwork "..i]={
+        PrettyName      = "Network Inputs~Network "..i.." Selected",
+        Style           = "None"
+      }
+      
+      layout["InternalName "..i]={
+        PrettyName      = "Internal Inputs~Internal "..i.." Name",
+        Style           = "Text",
+        TextBoxStyle    = "NoBackground",
+        IsReadOnly      = true,
+        FontSize        = 10,
+        HTextAlign      = "Center",
+        Position        = GetIPos(i,props["Input Count"].Value,{x=68,y=384},{x=50,y=52}),
+        Size            = {44,12}
+      }
+      layout["Internal "..i]={
+        PrettyName      = "Internal Inputs~Internal In "..i,
+        Style           = "Button",
+        UnlinkOffColor  = true,
+        Color           = White,
+        OffColor        = BtnGray,
+        Position        = GetIPos(i,props["Input Count"].Value,{x=72,y=396},{x=50,y=52}),
+        Size            = {36,16}
+      }
+      layout["SelectedInternal "..i]={
+        PrettyName      = "Internal Inputs~Internal "..i.." Selected",
+        Style           = "None"
+      }
+    end
+      -- Version Watermark
+    table.insert(graphics,{
+      Type            = "Label",
+      Text            = string.format("Version %s",PluginInfo.Version),
+      Position        = {215 + offset*2,415},
+      Size            = {60,10},
+      FontSize        = 7,
+      HTextAlign      = "Right"
+    })
+  
+  elseif CurrentPage == "Status" then
+      -- Controls
+    layout["InputResolution"]={
+      PrettyName      = "Status~Input Resoltuion",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,79},
+      Size            = {125,14}
+    }
+    layout["RecommendedResolution"]={
+      PrettyName      = "Status~Recommended Resoltuion",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,95},
+      Size            = {125,14}
+    }
+    local LEDLables = {"OK", "Warning", "Fault"}
+    for j,name in ipairs({"Fan", "Lamp", "Temperature", "Cover", "Filter", "Other"}) do
+      for i,ledColor in ipairs({LEDGreenOn, LEDYellowOn, LEDRedOn}) do
+        layout[name.."Status "..i]={
+          PrettyName = "Status~"..name.." "..LEDLables[i],
+          Style      = "LED",
+          Color      = ledColor,
+          Position   = GetIPos(i,3,{x=150,y=140+(j*16)},{x=36,y=0}),
+          Size       = {16,16}
+        }
+      end
+    end
+    layout["LampHours 1"]={
+      PrettyName      = "Lamp 1 Hours",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,280},
+      Size            = {81,14}
+    }
+    layout["LampHours 2"]={
+      PrettyName      = "Lamp 2 Hours",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,297},
+      Size            = {81,14}
+    }
+    layout["LampText"]={
+      PrettyName      = "No 2nd Lamp",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Right",
+      IsReadOnly      = true,
+      Position        = {51,297},
+      Size            = {80,14},
+      FontSize        = 12
+    }
+    layout["FilterText"]={
+      PrettyName      = "Filter Info",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Right",
+      IsReadOnly      = true,
+      Position        = {51,313},
+      Size            = {80,14},
+      FontSize        = 12
+    }
+    layout["FilterHours"]={
+      PrettyName      = "Filter Hours",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,313},
+      Size            = {81,14}
+    }
+    layout["ReplacementLamp"]={
+      PrettyName      = "Lamp Model",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,357},
+      Size            = {125,14}
+    }
+    layout["ReplacementFilter"]={
+      PrettyName      = "Filter Model",
+      Style           = "Text",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,373},
+      Size            = {125,14}
+    }
+      -- Groupbox
+    table.insert(graphics,{
+      Type            = "GroupBox",
+      Fill            = BGGray,
+      StrokeWidth     = 1,
+      CornerRadius    = 0,
+      Position        = {0,0},
+      Size            = {278,405}
+    })
+      -- Header
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Video Info",
+      Position        = {9,59},
+      Size            = {259,6},
+      FontSize        = 14
+    })
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Error Status",
+      Position        = {9,122},
+      Size            = {259,10},
+      FontSize        = 14
+    })
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Lamp Hours",
+      Position        = {9,263},
+      Size            = {259,6},
+      FontSize        = 14
+    })
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Lamp Replacements",
+      Position        = {9,340},
+      Size            = {259,6},
+      FontSize        = 14
+    })
+      -- Text
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Current Resolution:",
+      HTextAlign      = "Right",
+      Position        = {13,79},
+      Size            = {120,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Recommended:",
+      HTextAlign      = "Right",
+      Position        = {13,95},
+      Size            = {120,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "OK",
+      Position        = {140,142},
+      Size            = {36,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Warn",
+      Position        = {176,142},
+      Size            = {36,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Fault",
+      Position        = {212,142},
+      Size            = {36,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Fan:",
+      HTextAlign      = "Right",
+      Position        = {33,156},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Lamp:",
+      HTextAlign      = "Right",
+      Position        = {33,172},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Temperature:",
+      HTextAlign      = "Right",
+      Position        = {33,188},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Cover:",
+      HTextAlign      = "Right",
+      Position        = {33,204},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Filter:",
+      HTextAlign      = "Right",
+      Position        = {33,220},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Other:",
+      HTextAlign      = "Right",
+      Position        = {33,236},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Lamp 1:",
+      HTextAlign      = "Right",
+      Position        = {52,280},
+      Size            = {81,16},
+      StrokeColor     = Black,
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Lamp Model:",
+      HTextAlign      = "Right",
+      Position        = {33,357},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Filter Model:",
+      HTextAlign      = "Right",
+      Position        = {33,373},
+      Size            = {100,14},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+  
+    -- Logo
+    table.insert(graphics,{
+      Type            = "Svg",
+      Image           = PJLinkLogo,
+      Position        = {65,12},
+      Size            = {149,36}
+    })
+      -- Version Watermark
+    table.insert(graphics,{
+      Type            = "Label",
+      Text            = string.format("Version %s",PluginInfo.Version),
+      Position        = {215,395},
+      Size            = {60,10},
+      FontSize        = 7,
+      HTextAlign      = "Right"
+    })
+  
+  elseif CurrentPage == "Setup" then
+      -- Controls
+    layout["IPAddress"]={
+      PrettyName      = "Device's IP Address",
+      Style           = "Text",
+      Color           = White,
+      Position        = {128,79},
+      Size            = {93,16},
+      FontSize        = 9
+    }
+    layout["Port"]={Style="Text",
+      PrettyName      = "Device's Port",
+      Position        = {128,99},
+      Size            = {93,16},
+      Color           = White,
+      CornerRadius    = 0,
+      Margin          = 0,
+      Padding         = 0,
+      StrokeColor     = LEDStrk,
+      StrokeWidth     = 1
+    }
+    layout["Password"]={
+      PrettyName      = "Device's Password",
+      Style           = "Text",
+      Color           = White,
+      Position        = {128,119},
+      Size            = {93,16},
+      FontSize        = 9
+    }
+    layout["Status"]={
+      PrettyName      = "Connection Status",
+      Style           = "Text",
+      TextBoxStyle    = "Normal",
+      Position        = {9,163},
+      Size            = {259,28}
+    } 
+    layout["Model"]={
+      PrettyName      = "Device's Model",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,220},
+      Size            = {122,16}
+    }
+    layout["Manufacturer"]={
+      PrettyName      = "Device's Manufacturer",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,236},
+      Size            = {122,16}
+    }
+    layout["DeviceName"]={
+      PrettyName      = "Device's Name",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,252},
+      Size            = {122,16}
+    }
+    layout["SerialNumber"]={
+      PrettyName      = "Serial Number",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,268},
+      Size            = {122,16}
+    }
+    layout["DeviceFirmware"]={
+      PrettyName      = "Software Version",
+      Style           = "Textdisplay",
+      TextBoxStyle    = "NoBackground",
+      HTextAlign      = "Left",
+      FontSize        = 10,
+      IsReadOnly      = true,
+      Position        = {141,284},
+      Size            = {122,16}
+    }
+    --Hidden PJLink Class for Pin
+    layout["PJJLinkClass"]={
+      PrettyName      = "PJLink Class",
+      Style           = "None"
+    }
+      -- Groupbox
+    table.insert(graphics,{
+      Type            = "GroupBox",
+      Fill            = BGGray,
+      StrokeWidth     = 1,
+      CornerRadius    = 0,
+      Position        = {0,0},
+      Size            = {278,320}
+    })
+      -- Header
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Connection",
+      Position        = {9,59},
+      Size            = {259,6},
+      FontSize        = 14
+  
+    })
+    table.insert(graphics,{
+      Type            = "Header",
+      Text            = "Projector Information",
+      Position        = {9,206},
+      Size            = {259,6},
+      FontSize        = 14
+    })
+      -- Text
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "IP Address:",
+      HTextAlign      = "Right",
+      Position        = {48,79},
+      Size            = {75,16},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Port:",
+      HTextAlign      = "Right",
+      Position        = {48,99},
+      Size            = {75,16},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Password:",
+      HTextAlign      = "Right",
+      Position        = {48,120},
+      Size            = {75,16},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Connection Status",
+      Position        = {63,147},
+      Size            = {150,12},
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Model:",
+      HTextAlign      = "Right",
+      Position        = {41,220},
+      Size            = {93,16},
+      StrokeColor     = Black,
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Manufacturer:",
+      HTextAlign      = "Right",
+      Position        = {41,236},
+      Size            = {93,16},
+      StrokeColor     = Black,
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Projector Name:",
+      HTextAlign      = "Right",
+      Position        = {41,252},
+      Size            = {93,16},
+      StrokeColor     = Black,
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "Serial Number:",
+      HTextAlign      = "Right",
+      Position        = {41,268},
+      Size            = {93,16},
+      StrokeColor     = Black,
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+    table.insert(graphics,{
+      Type            = "Text",
+      Text            = "SW Version:",
+      HTextAlign      = "Right",
+      Position        = {41,284},
+      Size            = {93,16},
+      StrokeColor     = Black,
+      StrokeWidth     = 0,
+      FontSize        = 12
+    })
+      -- Logo
+    table.insert(graphics,{
+      Type            = "Svg",
+      Image           = PJLinkLogo,
+      Position        = {65,12},
+      Size            = {149,36}
+    })
+      -- Version Number
+    table.insert(graphics,{
+      Type            = "Label",
+      Text            = string.format("Version %s",PluginInfo.Version),
+      Position        = {215,310},
+      Size            = {60,10},
+      FontSize        = 7,
+      HTextAlign      = "Right"
+    })
+  end
+  return layout, graphics
+end
+
+--Start event based logic
+if Controls then
+  -- Control Aliases
+  IPAddress = Controls.IPAddress
+  Port=Controls.Port
+  Password=Controls.Password
+  ManufacturerFB = Controls.Manufacturer
+  ModelFB = Controls.Model
+  PrjNameFB = Controls.DeviceName
+  SerialNumber = Controls.SerialNumber
+  SWVersion = Controls.DeviceFirmware
+  PowerStatusFB = Controls.PowerStatus
+  LampHrsFB1 = Controls.LampHours[1]
+  LampHrsFB2 = Controls.LampHours[2]
+  Status = Controls.Status
+  LampHrs2 = Controls.LampText
+  FilterHrs = Controls.FilterHours
+  FilterHrsLabel = Controls.FilterText
+  ReplacementFilter = Controls.ReplacementFilter
+  ReplacementLamp = Controls.ReplacementLamp
+  Power = Controls.Power
+  AVMute = Controls.AVMute
+  Freeze = Controls.VideoFreeze
+  RGBNo = Controls.NoRGB
+  VidNo = Controls.NoVid
+  DigNo = Controls.NoDig
+  StoNo = Controls.NoSto
+  NetNo = Controls.NoNet
+  IntNo = Controls.NoInternal
+  
+  
+  -- Global Constants
+  H = "%1"
+  CR = "\r"
+  PowerOn = { 40, 197, 38 }
+  PowerOff = { 255, 50, 50 }
+  WarmUp = { 255, 242, 62 }
+  PollRate = Properties["Poll Rate"].Value
+  WarmupTimeout = Properties["Warmup Time"].Value
+  InputCount = Properties["Input Count"].Value
+  
+  
+  -- Global Variables
+  PowerStatus = false
+  DebugTx=false
+  DebugRx=false
+  DebugFunction=false
+  DebugPrint=Properties["Debug Print"].Value
+  InputSwitchResponse = ""
+  CurrentInputNameRequest = nil
+  WarmupTime = false
+  
+  
+  --Commands; Does not include header, transmission parameters or <CR>
+  cmds = {
+    --Control Commands
+    ["pwr"   ] = { "POWR "   , "Power Instruction"            },
+    ["input" ] = { "INPT "   , "Input Instruction"            },
+    ["mute"  ] = { "AVMT "   , "Audio/Video Mute Instruction" },
+    ["frez"  ] = { "FREZ "   , "Video Freeze Instruction"     },
+    --Query Commands
+    ["manufq"  ] = { "INF1 ?" , "Manufacturer Query"           },
+    ["modelq"  ] = { "INF2 ?" , "Model Query"                  },
+    ["swverq"  ] = { "SVER ?" , "Software Version Query"       },
+    ["snumq"   ] = { "SNUM ?" , "Serial Number Query"          },
+    ["infoq"   ] = { "INFO ?" , "Information Query"            },
+    ["pwrq"    ] = { "POWR ?" , "Power Status Query"           },
+    ["inptq"   ] = { "INPT ?" , "Input selection query"        },
+    ["inptnq"  ] = { "INNM ?" , "Input Terminal Name query"    },
+    ["errorq"  ] = { "ERST ?" , "Error Status Query"           },
+    ["lampq"   ] = { "LAMP ?" , "Lamp query"                   },
+    ["filterq" ] = { "FILT ?" , "Filter hours query"           },
+    ["nameq"   ] = { "NAME ?" , "Projector/Display Name Query" },
+    ["classq"  ] = { "CLSS ?" , "Class Information Query"      },
+    ["inlistq" ] = { "INST ?" , "Input List Query"             },
+    ["muteq"   ] = { "AVMT ?" , "Audio/Video Mute Query"       },
+    ["frezq"   ] = { "FREZ ?" , "Video Freeze Query"           },
+    ["iresq"   ] = { "IRES ?" , "Input Resolution Query"       },
+    ["rresq"   ] = { "RRES ?" , "Recommended Resolution Query" },
+    ["rlampq"  ] = { "RLMP ?" , "Replacement Lamp Query"       },
+    ["rfiltq"  ] = { "RFIL ?" , "Replacement Filter Query"     }
+  }
+  
+  if not Properties["Uppercase Messages"].Value then
+    for key,value in pairs(cmds)do
+      value[1] = string.lower(value[1])
+    end
+  end
+  
+  
+  --Init States
+  LampHrs2.String = "Lamp 2:"
+  ConnectionStatus = "Disconnected"
+  Power.Boolean = false
+  RGBNo.String, VidNo.String, DigNo.String, StoNo.String, NetNo.String, IntNo.String = "Input not available", "Input not available", "Input not available", "Input not available", "Input not available", "Input not available"
+  status_state = {OK=0,COMPROMISED=1,FAULT=2,NOTPRESENT=3,MISSING=4,INITIALIZING=5}
+  
+  
+  --Input tables
+  RGBin,Videoin,Digitalin,Storagein,Networkin,Internalin = {},{},{},{},{},{}
+  
+  
+  -- Timers
+  Heartbeat = Timer.New()
+  WarmupTimer = Timer.New()
+  RetryTimer = Timer.New()
+  
+  
+  -- Sockets
+  PJLink = TcpSocket.New()
+  PJLink.ReconnectTimeout = 5
+  PJLink.ReadTimeout = math.max(10, WarmupTimeout+1)
+  PJLink.WriteTimeout = math.max(10, WarmupTimeout+1)
+  
+  
+  -- Functions
+  -- A function to determine common print statement scenarios for troubleshooting
+  function SetupDebugPrint()
+    if DebugPrint=="Tx/Rx" then
+      DebugTx,DebugRx=true,true
+    elseif DebugPrint=="Tx" then
+      DebugTx=true
+    elseif DebugPrint=="Rx" then
+      DebugRx=true
+    elseif DebugPrint=="Function Calls" then
+      DebugFunction=true
+    elseif DebugPrint=="All" then
+      DebugTx,DebugRx,DebugFunction=true,true,true
+    end
+  end
+  
+  function Connect()
+    if DebugFunction then print("Connect() called") end
+    Heartbeat:Stop()
+    if PJLink.IsConnected then
+      PJLink:Disconnect()
+    end
+    ConnectionStatus = "Initializing"
+    PJLink:Connect(ipaddress,Port.Value)
+  end
+  
+  function ReportStatus(state,msg)
+    if DebugFunction then print("ReportStatus() called") end
+    if state == "OK" and Properties["Poll Errors"].Value then
+      for j,name in ipairs({"Fan", "Lamp", "Temperature", "Cover", "Filter", "Other"}) do
+        if Controls[name.."Status"][2].Boolean then
+          msg = msg .. " " .. name .. " warning;"
+          state = "COMPROMISED"
+        elseif Controls[name.."Status"][3].Boolean then
+          msg = msg .. " " .. name .. " fault;"
+          state = "COMPROMISED"
+        end
+      end
+    end
+    Status.Value = status_state[state]
+    Status.String = msg
+  end
+  
+  function Init()
+    if DebugFunction then print("Init() called") end
+    Disconnected()
+    ipaddress = IPAddress.String
+    password = Password.String
+    if ipaddress ~= "" then
+      Connect()
+    else
+      ReportStatus("MISSING","No IP Address")
+    end
+  end
+  
+  function Disconnected()
+    if DebugFunction then print("Disconnected() called") end
+    for i,obj in ipairs({ManufacturerFB, ModelFB, PrjNameFB, LampHrsFB1, LampHrsFB2, PowerStatusFB, SWVersion, SerialNumber, FilterHrs, ReplacementFilter, ReplacementLamp}) do
+      obj.String = "Connect Device"
+    end
+    RGBin,Videoin,Digitalin,Storagein,Networkin,Internalin = {},{},{},{},{},{}
+    ConnectionStatus = "Disconnected"
+    Heartbeat:Stop()
+    WarmupTimer:Stop()
+    if PJLink.IsConnected then
+      PJLink:Disconnect()
+    end
+    HideInputs()
+    DisableErrorStatus()
+  end
+  
+  function Send(cmd)
+    if DebugFunction then print("Send() called") end
+    if PJLink.IsConnected then
+      if DebugTx then print("TX: "..cmd) end
+      PJLink:Write(cmd..CR)
+    end
+  end
+  
+  function Authenticate(resp)
+    if DebugFunction then print("Authenticate() called") end
+    ConnectionStatus = "Authenticated"
+    local init = "%1"..cmds["classq"][1]
+    Send(tostring(resp and resp or "")..init)
+  end
+  
+    -- Manage Input Buttons
+  function HideInputs()
+    if DebugFunction then print("HideInputs() called") end
+    for i=1,InputCount do
+      Controls['RGB'][i].IsInvisible = true
+      Controls['Video'][i].IsInvisible = true
+      Controls['Digital'][i].IsInvisible = true
+      Controls['Storage'][i].IsInvisible = true
+      Controls['Network'][i].IsInvisible = true
+      Controls['Internal'][i].IsInvisible = true
+      Controls['RGBName'][i].IsInvisible = true
+      Controls['VideoName'][i].IsInvisible = true
+      Controls['DigitalName'][i].IsInvisible = true
+      Controls['StorageName'][i].IsInvisible = true
+      Controls['NetworkName'][i].IsInvisible = true
+      Controls['InternalName'][i].IsInvisible = true
+    end
+    InputSwitchResponse = ""
+    RGBNo.IsInvisible = false
+    VidNo.IsInvisible = false
+    DigNo.IsInvisible = false
+    StoNo.IsInvisible = false
+    NetNo.IsInvisible = false
+    IntNo.IsInvisible = false
+  end
+  
+  function ShowInputs(r, v, d, s, n, internal)
+    if DebugFunction then print("ShowInputs() called") end
+    if r > 0 then RGBNo.IsInvisible = true end
+    if v > 0 then VidNo.IsInvisible = true end
+    if d > 0 then DigNo.IsInvisible = true end
+    if s > 0 then StoNo.IsInvisible = true end
+    if n > 0 then NetNo.IsInvisible = true end
+    if internal > 0 then IntNo.IsInvisible = true end
+    for i=1, math.min(InputCount, r) do
+      Controls['RGB'][i].IsInvisible = false
+      Controls['RGBName'][i].IsInvisible = false
+    end
+    for i=1, math.min(InputCount, v) do
+      Controls['Video'][i].IsInvisible = false
+      Controls['VideoName'][i].IsInvisible = false
+    end
+    for i=1, math.min(InputCount, d) do
+      Controls['Digital'][i].IsInvisible = false
+      Controls['DigitalName'][i].IsInvisible = false
+    end
+    for i=1, math.min(InputCount, s) do
+      Controls['Storage'][i].IsInvisible = false
+      Controls['StorageName'][i].IsInvisible = false
+    end
+    for i=1, math.min(InputCount, n) do
+      Controls['Network'][i].IsInvisible = false
+      Controls['NetworkName'][i].IsInvisible = false
+    end
+    for i=1, math.min(InputCount, internal) do
+      Controls['Internal'][i].IsInvisible = false
+      Controls['InternalName'][i].IsInvisible = false
+    end
+  end
+  
+  function DisableErrorStatus()
+    if DebugFunction then print("DisableErrorStatus() called") end
+    for i,name in ipairs({"Fan","Lamp","Temperature","Cover","Filter","Other"}) do
+      for j=1,3 do
+        Controls[name.."Status"][j].Boolean = false
+      end
+    end
+  end
+  
+  function CurrentInput(InputNum)
+    if DebugFunction then print("CurrentInput() called") end
+    if InputNum:sub(1,3) == "ERR" then
+      print("Error retrieving current input")
+      return
+    end
+    for k,v in pairs(RGBin) do
+      if string.match(RGBin[k], InputNum) then
+        Controls['RGB'][k].Value = true
+        Controls["SelectedRGB"][k].Boolean = true
+      else
+        Controls['RGB'][k].Value = false
+        Controls["SelectedRGB"][k].Boolean = false
+      end
+    end
+    for k,v in pairs(Videoin) do
+      if string.match(Videoin[k], InputNum) then
+        Controls['Video'][k].Value = true
+        Controls["SelectedVideo"][k].Boolean = true
+      else
+        Controls['Video'][k].Value = false
+        Controls["SelectedVideo"][k].Boolean = false
+      end
+    end  
+    for k,v in pairs(Digitalin) do
+      if string.match(Digitalin[k], InputNum) then
+        Controls['Digital'][k].Value = true
+        Controls["SelectedDigital"][k].Boolean = true
+      else
+        Controls['Digital'][k].Value = false
+        Controls["SelectedDigital"][k].Boolean = false
+      end
+    end
+    for k,v in pairs(Storagein) do
+      if string.match(Storagein[k], InputNum) then
+        Controls['Storage'][k].Value = true
+        Controls["SelectedStorage"][k].Boolean = true
+      else
+        Controls['Storage'][k].Value = false
+        Controls["SelectedStorage"][k].Boolean = false
+      end
+    end
+    for k,v in pairs(Networkin) do
+      if string.match(Networkin[k], InputNum) then
+        Controls['Network'][k].Value = true
+        Controls["SelectedNetwork"][k].Boolean = true
+      else
+        Controls['Network'][k].Value = false
+        Controls["SelectedNetwork"][k].Boolean = false
+      end
+    end
+    for k,v in pairs(Internalin) do
+      if string.match(Internalin[k], InputNum) then
+        Controls['Internal'][k].Value = true
+        Controls["SelectedInternal"][k].Boolean = true
+      else
+        Controls['Internal'][k].Value = false
+        Controls["SelectedInternal"][k].Boolean = false
+      end
+    end
+  end
+  
+  
+    -- Polling
+    -- Init Queries
+  function ProjectorNamePoll()
+    Send("%1"..cmds["nameq"][1])
+  end
+  
+  function ManufacturerPoll()
+    Send("%1"..cmds["manufq"][1])
+  end
+  
+  function ModelPoll()
+    Send("%1"..cmds["modelq"][1])
+  end
+  
+  function SerialNumberPoll()
+    Send("%2"..cmds["snumq"][1])
+  end
+  
+  function SWVersionPoll()
+    Send("%2"..cmds["swverq"][1])
+  end
+  
+  function ReplacementLampPoll()
+    Send("%2"..cmds["rlampq"][1])
+  end
+  
+  function ReplacementFilterPoll()
+    Send("%2"..cmds["rfiltq"][1])
+  end
+  
+    -- Repeated Queries
+  function PowerPoll()
+    Send("%1"..cmds["pwrq"][1])
+  end
+  
+  function ErrorStatusPoll()
+    if Properties["Poll Errors"].Value then
+      Send("%1"..cmds["errorq"][1])
+    else
+      LampHrsPoll()
+    end
+  end
+  
+  function LampHrsPoll()
+    if Properties["Poll Lamp"].Value then
+      Send("%1"..cmds["lampq"][1])
+    else
+      InputPoll()
+    end
+  end
+  
+  function InputPoll()
+    if Controls["PJJLinkClass"].Value == 2.0 then
+      Send("%2"..cmds["inptq"][1])
+    else
+      Send("%1"..cmds["inptq"][1])
+    end
+  end
+  
+  function InputTypePoll()
+    if Controls["PJJLinkClass"].Value == 2.0 then
+      Send("%2"..cmds["inlistq"][1])
+    else
+      Send("%1"..cmds["inlistq"][1])
+    end
+  end
+  
+  function MutePoll()
+    Send("%1"..cmds["muteq"][1])
+  end
+  
+  function FreezePoll()
+    Send("%2"..cmds["frezq"][1])
+  end
+  
+  function InputResolutionPoll()
+    if Properties["Poll Resolution"].Value then
+      Send("%2"..cmds["iresq"][1])
+    else
+      FilterPoll()
+    end
+  end
+  
+  function RecommendedResolutionPoll()
+    Send("%2"..cmds["rresq"][1])
+  end
+  
+  function FilterPoll()
+    if Properties["Poll Filters"].Value then
+      Send("%2"..cmds["filterq"][1])
+    end
+  end
+  
+    -- Input Name queries (one execution per update to input list)
+  function SendIfNameUnknown(target, inputNumber)
+    if target.String == "" then
+      CurrentInputNameRequest = target
+      Send("%2"..cmds["inptnq"][1]..inputNumber)
+      return true
+    end
+    return false
+  end
+  
+  function InputNamePoll()
+    if DebugFunction then print("InputNamePoll() called") end
+    for key, array in pairs({ ["RGBName"] = RGBin, ["VideoName"] = Videoin, ["DigitalName"] = Digitalin, ["StorageName"] = Storagein, ["NetworkName"] = Networkin, ["InternalName"] = Internalin }) do
+      for i,inputNumber in ipairs(array) do
+        if SendIfNameUnknown( Controls[key][i], inputNumber) then
+          return 
+        end
+      end
+    end
+  end
+  
+    -- Parsers
+  function DeviceInfoParser(data)
+    if DebugFunction then print("DeviceInfoParser() called") end
+    local cmd = data:match("^%%[12](%w+)")
+    if data:match("=(.+)") then
+      param = data:match("=(.+)")
+    else
+      param = ""
+    end
+    if cmd ~= nil then
+      if Properties["Uppercase Messages"].Value then
+        cmd=string.upper(cmd)
+      else
+        cmd=string.lower(cmd)
+      end
+      -- Intial Connection poll sequence
+      if cmd:find(cmds["classq"][1]) then
+        ClassParser(param)
+        ProjectorNamePoll()
+      elseif cmd:find(cmds["nameq"][1]) then
+        NameParser(param)
+        ManufacturerPoll()
+      elseif cmd:find(cmds["manufq"][1]) then
+        ManufacturerParser(param)
+        ModelPoll()
+      elseif cmd:find(cmds["modelq"][1]) then
+        ModelParser(param)
+        if Controls["PJJLinkClass"].Value == 2.0 then
+          SerialNumberPoll()
+        end
+      elseif cmd:find(cmds["snumq"][1]) then
+        SerialNumberParser(param)
+        SWVersionPoll()
+      elseif cmd:find(cmds["swverq"][1]) then
+        SWVersionParser(param)
+        ReplacementLampPoll()
+      elseif cmd:find(cmds["rlampq"][1]) then
+        ReplacementLampParser(param)
+        ReplacementFilterPoll()
+      elseif cmd:find(cmds["rfiltq"][1]) then
+        ReplacementFilterParser(param)
+        
+      -- Polling Loop Monitor Sequence
+      elseif cmd:find(cmds["pwrq"][1]) then
+        PowerParser(param)
+        if Properties["Power Off Polling"].Value or Power.Boolean then
+          ErrorStatusPoll()
+        end
+      elseif cmd:find(cmds["errorq"][1]) then
+        ErrorStatusParser(param)
+        LampHrsPoll()
+      elseif cmd:find(cmds["lampq"][1]) then
+        LampHrsParser(param)
+        InputPoll()
+      elseif cmd:find(cmds["inptq"][1]) then
+        CurrentInput(param)
+        InputTypePoll()
+      elseif cmd:find(cmds["inlistq"][1]) then
+        InputsParser(param)
+        MutePoll()
+      elseif cmd:find(cmds["muteq"][1]) then
+        MuteParser(param)
+        if Controls["PJJLinkClass"].Value == 2.0 then
+          FreezePoll()
+        end
+      elseif cmd:find(cmds["frezq"][1]) then
+        FreezeParser(param)
+        InputResolutionPoll()
+      elseif cmd:find(cmds["iresq"][1]) then
+        InputResolutionParser(param)
+        RecommendedResolutionPoll()
+      elseif cmd:find(cmds["rresq"][1]) then
+        RecommendedResolutionParser(param)
+        FilterPoll()
+      elseif cmd:find(cmds["filterq"][1]) then
+        FilterHrsParser(param)
+      elseif cmd:find(cmds["inptnq"][1]) then
+        InputNameParser(param)
+      end
+    else
+      print("Unprocessed data: "..data)
+    end
+  end
+  
+  function ClassParser(param)
+    if DebugFunction then print("ClassParser() called") end
+    Controls["PJJLinkClass"].Value = param
+    if Controls["PJJLinkClass"].Value == 2.0 then
+      FilterHrs.IsInvisible = false
+      FilterHrsLabel.IsInvisible = false
+      Freeze.IsInvisible = false
+      Controls.SerialNumber.String = "Unavailable"
+      Controls.DeviceFirmware.String = "Unavailable"
+    else
+      FilterHrs.IsInvisible = true
+      FilterHrsLabel.IsInvisible = true
+      Freeze.IsInvisible = true
+    end
+  end
+  
+  function NameParser(Name)
+    if DebugFunction then print("NameParser() called") end
+    if Name:sub(1,3) == "ERR" or Name == "" then
+      PrjNameFB.String = "Name not available"
+    else
+      PrjNameFB.String = Name
+    end
+  end
+  
+  function ManufacturerParser(Manufacturer)
+    if DebugFunction then print("ManufacturerParser() called") end
+    if Manufacturer == "ERR2" or Manufacturer == "ERR3" or Manufacturer == "" then
+      ManufacturerFB.String = "Manufacturer not available"
+    else
+      ManufacturerFB.String = Manufacturer
+    end
+  end
+  
+  function ModelParser(Model)
+    if DebugFunction then print("ModelParser() called") end
+    if Model == "ERR2" or Model == "" then
+      ModelFB.String = "Model not available"
+    else
+      ModelFB.String = Model
+    end
+  end
+  
+  function SerialNumberParser(SerialNum)
+    if DebugFunction then print("SerialNumberParser() called") end
+    if SerialNum:sub(1,3) == "ERR" or SerialNum == "" then
+      SerialNumber.String = "Unavailable"
+    else
+      SerialNumber.String = SerialNum
+    end
+  end
+  
+  function SWVersionParser(Version)
+    if DebugFunction then print("SWVersionParser() called") end
+    if Version:sub(1,3) == "ERR" or Version == "" then
+      SWVersion.String = "Unavailable"
+    else
+      SWVersion.String = Version
+    end
+  end
+  
+  function ReplacementFilterParser(FilterData)
+    if DebugFunction then print("ReplacementFilterParser() called") end
+    if FilterData:sub(1,3) == "ERR" or FilterData == "" then
+      ReplacementFilter.String = "Unavailable"
+    else
+      ReplacementFilter.String = FilterData
+    end
+  end
+  
+  function ReplacementLampParser(LampData)
+    if DebugFunction then print("ReplacementLampParser() called") end
+    if LampData:sub(1,3) == "ERR" or LampData == "" then
+      ReplacementLamp.String = "Unavailable"
+    else
+      ReplacementLamp.String = LampData
+    end
+  end
+  
+  function LampHrsParser(LampData)
+    if DebugFunction then print("LampHrsParser() called") end
+    if LampData == "ERR1" then
+      Controls.LampHours[1].String = "No Lamp"
+      Controls.LampHours[2].String = "No Lamp"
+      return
+    elseif LampData:sub(1,3) == "ERR" or LampData == "" then
+      Controls.LampHours[1].String = "Unavailable"
+      Controls.LampHours[2].String = "Unavailable"
+      return
+    end
+    LampHours = {}
+    t=0
+    for m in string.gmatch(LampData, "(%d+) (%d)") do
+      t=t+1
+      LampHours[t] = m
+      Controls.LampHours[t].String = LampHours[t]
+    end
+    if t < 2 then
+      Controls.LampHours[2].IsInvisible = true
+      LampHrs2.IsInvisible = true
+    else
+      Controls.LampHours[2].IsInvisible = false
+      LampHrs2.IsInvisible = false
+    end
+  end
+  
+  function FilterHrsParser(FilterData)
+    if DebugFunction then print("FilterHrsParser() called") end
+    if FilterData == "ERR1" then
+      FilterHrs.String = "No Filter"
+    elseif FilterData:sub(1,3) == "ERR" then
+      FilterHrs.String = "Unavailable"
+    else
+      FilterHrs.String = FilterData
+    end
+  end
+  
+  function PowerParser(PowerState)
+    if DebugFunction then print("PowerParser() called") end
+    if PowerState == "0" then
+      PowerStatus = PowerState
+      PowerStatusFB.String = "Projector is OFF"
+      PowerStatusFB.Color = "White"
+      Power.Boolean = false
+    elseif PowerState == "1" then
+      PowerStatus = PowerState
+      PowerStatusFB.String = "Projector is ON"
+      PowerStatusFB.Color = "White"
+      Power.Boolean = true 
+    end
+  end
+  
+  function InputsParser(InputData)
+    if DebugFunction then print("InputsParser() called") end
+    if InputData == InputSwitchResponse then
+      return
+    elseif InputData:sub(1,3) == "ERR" or InputData == "" then
+      print("Error retrieving input list")
+      return
+    end
+    InputSwitchResponse = InputData
+    r, v, d, s, n, internal = 0, 0, 0, 0, 0, 0
+    for Input in string.gmatch(InputData, "(%w+)") do
+      if Input:sub(1,1) == "1" and r < InputCount then
+        r=r+1
+        RGBin[r] = Input
+      elseif Input:sub(1,1) == "2" and v < InputCount then
+        v=v+1
+        Videoin[v] = Input
+      elseif Input:sub(1,1) == "3" and d < InputCount then
+        d=d+1
+        Digitalin[d] = Input
+      elseif Input:sub(1,1) == "4" and s < InputCount then
+        s=s+1
+        Storagein[s] = Input
+      elseif Input:sub(1,1) == "5" and n < InputCount then
+        n=n+1
+        Networkin[n] = Input
+      elseif Input:sub(1,1) == "6" and internal < InputCount then
+        internal=internal+1
+        Internalin[n] = Input
+      else
+        print("Bad Input Number")
+      end
+    end
+    ShowInputs(r, v, d, s, n, internal)
+    for i=1,InputCount do
+      Controls["RGBName"][i].String = ""
+      Controls["VideoName"][i].String = ""
+      Controls["DigitalName"][i].String = ""
+      Controls["StorageName"][i].String = ""
+      Controls["NetworkName"][i].String = ""
+      Controls["InternalName"][i].String = ""
+    end
+    if Controls["PJJLinkClass"].Value == 2.0 then
+      InputNamePoll()
+    end
+  end
+  
+  function MuteParser(MuteData)
+    if DebugFunction then print("MuteParser() called") end
+    local ctrl,state=MuteData:match("^(%d?)(%d?)$")
+    if MuteData:sub(1,3) == "ERR" then
+      print("Error retrieving mute data.")
+    elseif MuteData == "31" then
+      Controls.AVMute[1].Boolean = true
+      Controls.AVMute[2].Boolean = true
+      Controls.AVMute[3].Boolean = true
+    elseif MuteData == "30" then
+      Controls.AVMute[1].Boolean = false
+      Controls.AVMute[2].Boolean = false
+      Controls.AVMute[3].Boolean = false
+    elseif MuteData == "11" then
+      Controls.AVMute[1].Boolean = true
+      Controls.AVMute[2].Boolean = false
+      Controls.AVMute[3].Boolean = false
+    elseif MuteData == "21" then
+      Controls.AVMute[1].Boolean = false
+      Controls.AVMute[2].Boolean = true
+      Controls.AVMute[3].Boolean = false
+    end
+  end
+  
+  function FreezeParser(FreezeData)
+    if DebugFunction then print("FreezeParser() called") end
+    if FreezeData == "1" then
+      Controls.VideoFreeze.Boolean = true
+    elseif FreezeData == "0" then
+      Controls.VideoFreeze.Boolean = false
+    end
+  end
+  
+  function InputNameParser(InputData)
+    if DebugFunction then print("InputNameParser() called") end
+    if InputData == "ERR2" then
+      print("Invalid input name request")
+    elseif InputData:sub(1,3) == "ERR" then
+      print("Error retrieving input name")
+    elseif CurrentInputNameRequest == nil then
+      return
+    else
+      CurrentInputNameRequest.String = InputData
+      InputNamePoll()
+    end
+  end
+  
+  function ErrorStatusParser(ErrorData)
+    if DebugFunction then print("ErrorStatusParser() called") end
+    if ErrorData:sub(1,3) == "ERR" or #ErrorData<6 then
+      print("Error retrieving status infomration")
+    else
+      for i,name in ipairs({"Fan","Lamp","Temperature","Cover","Filter","Other"}) do
+        local errorLevel = tonumber(ErrorData:sub(i,i)) + 1
+        for j=1,3 do
+          Controls[name.."Status"][j].Boolean = j==errorLevel
+        end
+      end
+    end
+  end
+  
+  function InputResolutionParser(InputData)
+    if DebugFunction then print("InputResolutionParser() called") end
+    if InputData:sub(1,3) == "ERR" then
+      Controls["InputResolution"].String = "Unavailable"
+    elseif InputData:sub(1,3) == "-" then
+      Controls["InputResolution"].String = "No Signal Input"
+    elseif InputData:sub(1,3) == "*" then
+      Controls["InputResolution"].String = "Unknown Signal"
+    else
+      Controls["InputResolution"].String = InputData
+    end
+  end
+  
+  function RecommendedResolutionParser(InputData)
+    if DebugFunction then print("InputResolutionParser() called") end
+    if InputData:sub(1,3) == "ERR" then
+      Controls["RecommendedResolution"].String = "Unavailable"
+    else
+      Controls["RecommendedResolution"].String = InputData
+    end
+  end
+  
+  
+  -- Event Handlers
+    -- Socket EventHandler
+  PJLink.EventHandler = function(sock, evt, err)
+    if DebugFunction then print("TCPConnection Handler called") end
+    if evt == TcpSocket.Events.Connected then
+      Heartbeat:Start(PollRate)
+      ConnectionStatus = "Initializing"
+    elseif evt == TcpSocket.Events.Reconnect then
+      ReportStatus("MISSING","Reconnecting")
+      Disconnected()
+    elseif evt == TcpSocket.Events.Data then
+      local line = sock:ReadLine( TcpSocket.EOL.Any )
+      if DebugRx then print("RX: " .. line) end
+      if ConnectionStatus == "Initializing" then
+        local protocol, auth, seed = line:match("(%a+) (%d) (%w+)")
+        if seed then
+          local hash = Crypto.MD5Compute(seed..password)        
+          Authenticate(hash)
+        else
+          Authenticate()
+        end
+      elseif line:find("PJLINK ERRA") then
+        Disconnected()
+        ReportStatus("FAULT","Authentication Error")
+        RetryTimer:Start(PollRate)
+      elseif line:find("^%%") then
+        ReportStatus("OK","")
+        ConnectionStatus = "Authenticated"
+        DeviceInfoParser(line)
+      end
+    elseif evt == TcpSocket.Events.Closed then
+      Disconnected()
+      ReportStatus("MISSING", "Socket Closed")
+      Connect()
+    elseif evt == TcpSocket.Events.Error then
+      Disconnected()
+      ReportStatus("MISSING", "Socket Error")
+    elseif evt == TcpSocket.Events.Timeout then
+      if WarmupTime then
+        return
+      end
+      Disconnected()
+      ReportStatus("MISSING", "Timeout")
+    else
+      Disconnected()
+      ReportStatus("MISSING",err)
+    end
+  end
+  
+    -- Control EventHandlers
+  Power.EventHandler = function()
+    if DebugFunction then print("Power Eventhandler called") end
+    if Power.Boolean == true then
+      Send("%1"..cmds["pwr"][1].."1")
+      PowerStatusFB.String = "Warming up..."
+      PowerStatusFB.Color = "Yellow"
+      WarmupTime = true
+      WarmupTimer:Start(WarmupTimeout)
+    elseif Power.Boolean == false then
+      Send("%1"..cmds["pwr"][1].."0")
+    end 
+  end
+  
+  for i=1,3 do
+    Controls.AVMute[i].EventHandler = function()
+      if DebugFunction then print("AVMute "..i.." Eventhandler called") end
+      if Controls.AVMute[i].Boolean then
+        cmd=1
+      else
+        cmd=0 
+      end
+      Send("%1"..cmds["mute"][1]..i..cmd)
+    end
+  end
+  
+  Controls.VideoFreeze.EventHandler = function()
+    if DebugFunction then print("VideoFreeze Eventhandler called") end
+    if Controls.VideoFreeze.Boolean then
+      Send("%2"..cmds["frez"][1].."1")
+    else
+      Send("%2"..cmds["frez"][1].."0")
+    end
+  end
+  
+  for i=1,InputCount do
+    Controls['RGB'][i].EventHandler = function(InptNum)
+      if DebugFunction then print("RGB "..i.." Eventhandler called") end
+      if Controls["PJJLinkClass"].Value == 2.0 then
+        Send("%2"..cmds["input"][1]..RGBin[i])
+      else
+        Send("%1"..cmds["input"][1]..RGBin[i])
+      end
+    end
+    Controls['Video'][i].EventHandler = function(ctl)
+      if DebugFunction then print("Video "..i.." Eventhandler called") end
+      if Controls["PJJLinkClass"].Value == 2.0 then
+        Send("%2"..cmds["input"][1]..Videoin[i])
+      else
+        Send("%1"..cmds["input"][1].Videoin[i])
+      end
+    end
+    Controls['Digital'][i].EventHandler = function(ctl)
+      if DebugFunction then print("Digital "..i.." Eventhandler called") end
+      if Controls["PJJLinkClass"].Value == 2.0 then
+        Send("%2"..cmds["input"][1]..Digitalin[i])
+      else
+        Send("%1"..cmds["input"][1]..Digitalin[i])
+      end
+    end
+    Controls['Storage'][i].EventHandler = function(ctl)
+      if DebugFunction then print("Storage "..i.." Eventhandler called") end
+      if Controls["PJJLinkClass"].Value == 2.0 then
+        Send("%2"..cmds["input"][1]..Storagein[i])
+      else
+        Send("%1"..cmds["input"][1]..Storagein[i])
+      end
+    end
+    Controls['Network'][i].EventHandler = function(ctl)
+      if DebugFunction then print("Network "..i.." Eventhandler called") end
+      if Controls["PJJLinkClass"].Value == 2.0 then
+        Send("%2"..cmds["input"][1]..Networkin[i])
+      else
+        Send("%1"..cmds["input"][1]..Networkin[i])
+      end
+    end
+    Controls['Internal'][i].EventHandler = function(ctl)
+      if DebugFunction then print("Internal "..i.." Eventhandler called") end
+      if Controls["PJJLinkClass"].Value == 2.0 then
+        Send("%2"..cmds["input"][1]..Internalin[i])
+      else
+        Send("%1"..cmds["input"][1]..Internalin[i])
+      end
+      
+    end
+  end
+  
+  IPAddress.EventHandler = function()
+    if DebugFunction then print("IPAddress Eventhandler called") end
+    Init()
+  end
+  
+  Port.EventHandler = function()
+    if DebugFunction then print("Port Eventhandler called") end
+    Init()
+  end
+  
+  Password.EventHandler = function()
+    if DebugFunction then print("Password Eventhandler called") end
+    Init()
+  end
+  
+    -- Timer EventHandlers
+  Heartbeat.EventHandler = function()
+    if DebugFunction then print("Heartbeat Eventhandler called") end
+    PowerPoll()
+  end
+  
+  WarmupTimer.EventHandler = function()
+    if DebugFunction then print("Heartbeat Eventhandler called") end
+    WarmupTime = false
+    WarmupTimer:Stop()
+  end
+  
+  RetryTimer.EventHandler = function()
+    if DebugFunction then print("RetryAuthentication() called") end
+    if not PJLink.IsConnected then
+      Connect()
+    end
+    RetryTimer:Stop()
+  end
+  
+  -- Start at runtime
+  SetupDebugPrint()
+  Init()
+end

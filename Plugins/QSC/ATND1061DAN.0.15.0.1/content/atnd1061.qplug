@@ -1,0 +1,930 @@
+-- Constants (change each release)
+VERSION = '0.15.0';
+CHANGES = 'Changed channel names';
+
+-- Metering parameters
+MeterThresholds = { 1, 33, 45, 61 };
+MeterPoints = { 0, 0, 0, 0, 0, 0 };
+
+-- Discovery parameters
+DiscoModels = {'ATND-1061', 'ATND-1061DAN', 'ATND1061DAN'};
+DiscoString = 'M-SEARCH * HTTP/1.1\r\nHost: 239.255.255.250:1900\r\nST: urn:schemas-upnp-org:device:ATCUDevice:1\r\nMan: "ssdp:discover"\r\nMX: 3\r\n\r\n';
+DiscoTimeout = 9;
+DiscoInterval = 3;
+
+-- Plugin metadata
+PluginInfo = {
+  Name = 'Audio Technica~ATND1061 v' .. VERSION,
+  Version = VERSION,
+  Id = '325069a0-2497-43b3-b3ab-47e335eb98d6',
+  Description = CHANGES
+}
+
+-- Audio-Technica Color Scheme
+Colors = {
+  Basic = {
+    Primary = { 0x68, 0x99, 0xC6 }, -- Blue
+    Secondary = { 0x7C, 0xAE, 0x90 }, -- BlueGreen
+    Green = { 0x2E, 0xCC, 0x71 },
+    Yellow = { 0xF1, 0xC4, 0x0F },
+    Red = { 0xE7, 0x4C, 0x3C },
+    White = { 0xFF, 0xFF, 0xFF },
+    Black = { 0x00, 0x00, 0x00 },
+  },
+  Signal = {
+    None = { 0xB2, 0xB2, 0xB2 },
+    Green = { 0x4D, 0xB5, 0x6D },
+    Yellow = { 0xE7, 0xBE, 0x22 },
+    Red = { 0xE7, 0x4C, 0x3C }
+  },
+  BG1 = { 0x30, 0x3E, 0x4C },
+  BG2 = { 0x21, 0x2A, 0x34 },
+  BG3 = { 0x68, 0x75, 0x7D },
+  Gray = { 0x56, 0x5D, 0x63 }
+  -- = { 0x4B, 0x55, 0x63 }
+};
+
+-- Fixed channel names
+Channels = {
+  'CH 1',
+  'CH 2',
+  'CH 3',
+  'CH 4',
+  'CH 5',
+  'CH 6'
+};
+
+-- Verbose debug option to see all packets
+function GetProperties() return {
+  {
+    Name = 'Verbose Debug',
+    Type = 'boolean',
+    Value = false
+  }
+}; end;
+
+-- Plugin block appearance in schematic
+function GetColor() return Colors.BG2; end;
+function GetPrettyName() return 'Audio Technica ATND1061 v' .. VERSION; end;
+
+-- Plugin controls
+function GetControls()
+
+  -- Device-global controls
+  local controls = {
+
+    { -- Name display / edit
+      Name = 'Device~Name',
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      PinStyle = 'Both',
+      UserPin = true,
+    },
+
+    { -- Identify button
+      Name = 'Device~Identify',
+      ControlType = 'Button',
+      ButtonType = 'Trigger',
+      PinStyle = 'Both',
+      UserPin = true
+    },
+
+    { -- Connection mode (auto vs. manual)
+      Name = 'Device~Connection Mode',
+      ControlType = 'Text'
+    },
+
+    { -- Device selection (auto connect)
+      Name = 'Device~Select',
+      ControlType = 'Text'
+    },
+
+    { -- Device IP (manual connection)
+      Name = 'Device~IP Address',
+      ControlType = 'Text'
+    },
+
+    { -- Device ID
+      Name = 'Device~Device ID',
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      PinStyle = 'Output',
+      UserPin = true
+    },
+
+    { -- Power save (standby) toggle
+      Name = 'Device~Power Save',
+      ControlType = 'Button',
+      ButtonType = 'Toggle',
+      PinStyle = 'Both',
+      UserPin = true
+    },
+
+    { -- All mute toggle button
+      Name = 'Device~Mute All',
+      ControlType = 'Button',
+      ButtonType = 'Toggle',
+      PinStyle = 'Both',
+      UserPin = true
+    },
+
+    { -- Preset selection
+      Name = 'Device~Preset',
+      ControlType = 'Text',
+      PinStyle = 'Both',
+      UserPin = true
+    },
+
+    { -- Device Status
+      Name = 'Device~Status',
+      ControlType = 'Indicator',
+      IndicatorType = 'Status',
+      PinStyle = 'Output',
+      UserPin = true
+    },
+
+    { -- Audio Ch Position
+      Name = 'Audio Ch Position',
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      PinStyle = 'Output',
+      UserPin = true
+    },
+
+    { -- Camera Ch Position
+      Name = 'Camera Ch Position',
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      PinStyle = 'Output',
+      UserPin = true
+    }
+
+  };
+
+  -- Per-channel controls
+  for i,n in ipairs(Channels) do
+    table.insert(controls, {
+      Name = ('Channels~%s~%s'):format(n, 'Name'),
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      PinStyle = 'Output',
+      UserPin = true
+    });
+    table.insert(controls, {
+      Name = ('Channels~%s~%s'):format(n, 'Mute'),
+      ControlType = 'Button',
+      ButtonType = 'Toggle',
+      PinStyle = 'Both',
+      UserPin = true
+    });
+    table.insert(controls, {
+      Name = ('Channels~%s~%s'):format(n, 'Signal LED'),
+      ControlType = 'Indicator',
+      IndicatorType = 'LED',
+      Count = 4
+    });
+  end;
+
+  return controls;
+
+end;
+
+function GetControlLayout()
+
+  local graphics, layout = {
+    { -- Background
+      Type = 'GroupBox',
+      Fill = Colors.BG3,
+      Position = { 0, 0 },
+      Size = { 675, 171 }
+    },
+
+    --[[ Header ]]--
+    {
+      Type ='GroupBox',
+      Fill = Colors.BG2,
+      Position = { 0, 0 },
+      Size = { 675, 24 }
+    },
+    {
+      Type = 'Svg',
+      Image = 'PHN2ZyB3aWR0aD0iNzgiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCA3OCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwKSI+CjxwYXRoIGQ9Ik03LjAwMjUgMEM1LjYxNzU0IDAgNC4yNjM2OCAwLjQxMDY5IDMuMTEyMTIgMS4xODAxM0MxLjk2MDU3IDEuOTQ5NTggMS4wNjMwNCAzLjA0MzIyIDAuNTMzMDM3IDQuMzIyNzZDMC4wMDMwMzQxMyA1LjYwMjMgLTAuMTM1NjM5IDcuMDEwMjcgMC4xMzQ1NTQgOC4zNjg2MkMwLjQwNDc0NyA5LjcyNjk3IDEuMDcxNjcgMTAuOTc0NyAyLjA1MDk5IDExLjk1NEMzLjAzMDMxIDEyLjkzMzMgNC4yNzgwMyAxMy42MDAzIDUuNjM2MzggMTMuODcwNUM2Ljk5NDc0IDE0LjE0MDYgOC40MDI3MSAxNC4wMDIgOS42ODIyNSAxMy40NzJDMTAuOTYxOCAxMi45NDIgMTIuMDU1NCAxMi4wNDQ0IDEyLjgyNDkgMTAuODkyOUMxMy41OTQzIDkuNzQxMzMgMTQuMDA1IDguMzg3NDYgMTQuMDA1IDcuMDAyNUMxNC4wMDUgNS4xNDUzMiAxMy4yNjcyIDMuMzY0MjEgMTEuOTU0IDIuMDUwOThDMTAuNjQwOCAwLjczNzc2MSA4Ljg1OTY4IDAgNy4wMDI1IDBaTTcuMDAyNSAxMy42NDk5QzUuNjg2MzYgMTMuNjUwOSA0LjM5OTUgMTMuMjYxNCAzLjMwNDc2IDEyLjUzMDhDMi4yMTAwMiAxMS44MDAyIDEuMzU2NTkgMTAuNzYxMyAwLjg1MjQ2NyA5LjU0NTU2QzAuMzQ4MzQ1IDguMzI5OCAwLjIxNjE4NCA2Ljk5MTgxIDAuNDcyNzA4IDUuNzAwOTFDMC43MjkyMzIgNC40MTAwMSAxLjM2MjkxIDMuMjI0MjEgMi4yOTM1NiAyLjI5MzU2QzMuMjI0MjIgMS4zNjI5MSA0LjQxMDAyIDAuNzI5MjI5IDUuNzAwOTIgMC40NzI3MDVDNi45OTE4MiAwLjIxNjE4MSA4LjMyOTggMC4zNDgzNDIgOS41NDU1NyAwLjg1MjQ2NEMxMC43NjEzIDEuMzU2NTkgMTEuODAwMiAyLjIxMDAxIDEyLjUzMDggMy4zMDQ3NkMxMy4yNjE0IDQuMzk5NSAxMy42NTA5IDUuNjg2MzYgMTMuNjQ5OSA3LjAwMjVDMTMuNjQ5OSA4Ljc2NTQ5IDEyLjk0OTUgMTAuNDU2MyAxMS43MDI5IDExLjcwMjlDMTAuNDU2MyAxMi45NDk1IDguNzY1NSAxMy42NDk5IDcuMDAyNSAxMy42NDk5WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTMuMDUxMDMgMTEuOTE5MkgxMC45NTM4TDcuMDAyNDQgMC43NDUyMzlMMy4wNTEwMyAxMS45MTkyWk0xMC40NTg3IDExLjU2OTFINy4wMDI0NEw4LjcyODA1IDYuNjgyMzZMMTAuNDU4NyAxMS41NjkxWk02LjYyNzMgMTEuNTY5MUgzLjU0NjJMNy4wMDI0NCAxLjc5NTYxTDguNTQyOTkgNi4xNTcxN0w2LjYyNzMgMTEuNTY5MVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik01NS40MDQ4IDkuNjM4NDJWMi45MjEwMkg1Ni45MDUzVjUuNTAxOTRDNTcuMDgyNSA1LjI2MzU2IDU3LjMxNzIgNS4wNzM4OCA1Ny41ODc0IDQuOTUwNTdDNTcuODU3NiA0LjgyNzI2IDU4LjE1NDcgNC43NzQzMiA1OC40NTA5IDQuNzk2NjlDNTguNjg1MSA0Ljc4NTkxIDU4LjkxOTEgNC44MjQyOCA1OS4xMzc2IDQuOTA5MzNDNTkuMzU2MiA0Ljk5NDM4IDU5LjU1NDUgNS4xMjQyMyA1OS43MTk5IDUuMjkwNTNDNTkuODg1MiA1LjQ1NjgzIDYwLjAxNCA1LjY1NTkgNjAuMDk3OCA1Ljg3NDkzQzYwLjE4MTYgNi4wOTM5NyA2MC4yMTg2IDYuMzI4MTEgNjAuMjA2NSA2LjU2MjMyVjkuNjAzNDFINTguNzA2VjYuODc3NDNDNTguNzA2IDYuMzc3MjUgNTguNDk1OSA1LjgwNzA1IDU3LjgwMDYgNS44MDcwNUM1Ny4zMzA1IDUuODA3MDUgNTYuOTIwMyA2LjE5NzE5IDU2LjkwMDMgNi44Nzc0M1Y5LjYzODQySDU1LjQwNDhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNjAuNzMxOCA5LjYzODQ0VjQuOTcxNzdINjIuMjMyM1Y1LjUwMTk2QzYyLjQxMTIgNS4yNjQyMSA2Mi42NDY5IDUuMDc1MSA2Mi45MTc4IDQuOTUxOUM2My4xODg2IDQuODI4NyA2My40ODYgNC43NzUzNCA2My43ODI4IDQuNzk2NzFDNjQuMDE3MSA0Ljc4NTkzIDY0LjI1MTEgNC44MjQzIDY0LjQ2OTYgNC45MDkzNUM2NC42ODgyIDQuOTk0NCA2NC44ODY1IDUuMTI0MjUgNjUuMDUxOCA1LjI5MDU1QzY1LjIxNzIgNS40NTY4NSA2NS4zNDU5IDUuNjU1OTIgNjUuNDI5NyA1Ljg3NDk1QzY1LjUxMzUgNi4wOTM5OSA2NS41NTA2IDYuMzI4MTMgNjUuNTM4NSA2LjU2MjM0VjkuNjAzNDNINjQuMDM3OVY2Ljg3NzQ1QzY0LjAzNzkgNi4zNzcyNyA2My44Mjc5IDUuODA3MDcgNjMuMTMyNiA1LjgwNzA3QzYyLjY2MjQgNS44MDcwNyA2Mi4yNTIzIDYuMTk3MjEgNjIuMjMyMyA2Ljg3NzQ1VjkuNjM4NDRINjAuNzMxOFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMC44ODI1IDkuMTI4MjhWNi41NzczN0MyMC44ODI1IDUuMTcxODcgMTkuNzQ3MSA0LjgyNjc0IDE4LjczMTcgNC44MjY3NEMxOC4yMTQ1IDQuODAyMzggMTcuNjk5MiA0LjkwNTQzIDE3LjIzMTIgNS4xMjY4NUMxNy4wMTg2IDUuMjM0ODcgMTYuODQxNSA1LjQwMTYzIDE2LjcyMDkgNS42MDczM0MxNi42MDA0IDUuODEzMDMgMTYuNTQxNCA2LjA0OTAyIDE2LjU1MDkgNi4yODcyN0gxOC4wMDY1QzE4LjAwMzcgNi4xOTgwNiAxOC4wMTkyIDYuMTA5MjMgMTguMDUyMiA2LjAyNjMxQzE4LjA4NTIgNS45NDMzOSAxOC4xMzUgNS44NjgxNSAxOC4xOTgzIDUuODA1MjhDMTguMjYxNiA1Ljc0MjQgMTguMzM3MyA1LjY5MzI0IDE4LjQyMDQgNS42NjA4NkMxOC41MDM2IDUuNjI4NDcgMTguNTkyNSA1LjYxMzU1IDE4LjY4MTcgNS42MTcwM0MxOC43Nzc4IDUuNjA3NjMgMTguODc0NyA1LjYyMDI0IDE4Ljk2NTEgNS42NTM5QzE5LjA1NTYgNS42ODc1NiAxOS4xMzcyIDUuNzQxMzkgMTkuMjAzNyA1LjgxMTNDMTkuMjcwMyA1Ljg4MTIyIDE5LjMyIDUuOTY1MzcgMTkuMzQ5MSA2LjA1NzM3QzE5LjM3ODMgNi4xNDkzOCAxOS4zODYxIDYuMjQ2ODIgMTkuMzcyIDYuMzQyMjlWNi42MzIzOUMxOC43MDY3IDYuNTg2NjEgMTguMDM4OSA2LjY3MTU3IDE3LjQwNjMgNi44ODI0OEMxNy4wOTQ4IDYuOTkyMTkgMTYuODI0NiA3LjE5NDk4IDE2LjYzMjIgNy40NjMzOEMxNi40Mzk5IDcuNzMxNzggMTYuMzM0NyA4LjA1MjgyIDE2LjMzMDkgOC4zODMwMkMxNi4zMzA5IDkuMjkzMzQgMTcuMDMxMSA5Ljc4ODUyIDE3Ljk3NjUgOS43ODg1MkMxOC4yNzkxIDkuODEwOTggMTguNTgyMSA5Ljc0OTU3IDE4Ljg1MjEgOS42MTEwM0MxOS4xMjIxIDkuNDcyNDkgMTkuMzQ4NyA5LjI2MjE5IDE5LjUwNyA5LjAwMzI0QzE5LjUwOTUgOS4yMTQyIDE5LjUyNjIgOS40MjQ3NSAxOS41NTcgOS42MzM0NkgyMC45MTI1QzIwLjg5MiA5LjQ2NTg2IDIwLjg4MiA5LjI5NzEzIDIwLjg4MjUgOS4xMjgyOFpNMTguNTA2NiA4LjgzODE4QzE4LjQxNDMgOC44NDU3MyAxOC4zMjE0IDguODM0MiAxOC4yMzM3IDguODA0M0MxOC4xNDYgOC43NzQzOSAxOC4wNjU0IDguNzI2NzYgMTcuOTk2OSA4LjY2NDM2QzE3LjkyODQgOC42MDE5NiAxNy44NzM0IDguNTI2MTMgMTcuODM1NSA4LjQ0MTU4QzE3Ljc5NzYgOC4zNTcwNCAxNy43Nzc1IDguMjY1NiAxNy43NzY0IDguMTcyOTRDMTcuNzc2NCA3LjQyMjY3IDE4Ljg1MTggNy40MzI2OCAxOS4zNzIgNy40NDI2OEMxOS4zNzcgOC4wMDI4OCAxOS4zNDY5IDguODM4MTggMTguNTA2NiA4LjgzODE4WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTc3LjUyNzggOS4xMjgyN1Y2LjU3NzM1Qzc3LjUyNzggNS4xNzE4NSA3Ni4zOTc0IDQuODI2NzMgNzUuMzgyIDQuODI2NzNDNzQuODY0OCA0LjgwMTk1IDc0LjM0OTQgNC45MDUwMyA3My44ODE1IDUuMTI2ODRDNzMuNjY4OSA1LjIzNDg1IDczLjQ5MTggNS40MDE2MSA3My4zNzEyIDUuNjA3MzFDNzMuMjUwNiA1LjgxMzAyIDczLjE5MTYgNi4wNDkwMSA3My4yMDEyIDYuMjg3MjVINzQuNjQ2N0M3NC42NDMyIDYuMTk4MjkgNzQuNjU4MSA2LjEwOTU3IDc0LjY5MDYgNi4wMjY2NkM3NC43MjMgNS45NDM3NSA3NC43NzIyIDUuODY4NDQgNzQuODM1MiA1LjgwNTQ5Qzc0Ljg5ODIgNS43NDI1NCA3NC45NzM1IDUuNjkzMjkgNzUuMDU2NCA1LjY2MDg2Qzc1LjEzOTMgNS42Mjg0MiA3NS4yMjggNS42MTM0OSA3NS4zMTcgNS42MTcwMUM3NS40MTMgNS42MDc2MSA3NS41MDk5IDUuNjIwMjIgNzUuNjAwNCA1LjY1Mzg4Qzc1LjY5MDkgNS42ODc1NSA3NS43NzI0IDUuNzQxMzggNzUuODM5IDUuODExMjlDNzUuOTA1NSA1Ljg4MTIgNzUuOTU1MiA1Ljk2NTM1IDc1Ljk4NDQgNi4wNTczNkM3Ni4wMTM1IDYuMTQ5MzYgNzYuMDIxNCA2LjI0NjggNzYuMDA3MiA2LjM0MjI3VjYuNjMyMzdDNzUuMzQyIDYuNTg3MjQgNzQuNjc0MyA2LjY3MjE5IDc0LjA0MTUgNi44ODI0NkM3My43MzA4IDYuOTkzNCA3My40NjE0IDcuMTk2NSA3My4yNjkzIDcuNDY0NjRDNzMuMDc3MSA3LjczMjc3IDcyLjk3MTMgOC4wNTMxNiA3Mi45NjYxIDguMzgzQzcyLjk2NjEgOS4yOTMzMiA3My42NzE0IDkuNzg4NSA3NC42MTY3IDkuNzg4NUM3NC45MTk0IDkuODExNTQgNzUuMjIyNiA5Ljc1MDM3IDc1LjQ5MjggOS42MTE3OEM3NS43NjI5IDkuNDczMTkgNzUuOTg5NCA5LjI2MjU3IDc2LjE0NzMgOS4wMDMyMkM3Ni4xNDczIDkuMjE0MjkgNzYuMTY0IDkuNDI1MDIgNzYuMTk3MyA5LjYzMzQ1SDc3LjU0NzhDNzcuNTMwNiA5LjQ2NTYzIDc3LjUyMzkgOS4yOTY5MSA3Ny41Mjc4IDkuMTI4MjdaTTc1LjE2MTkgOC44MzgxNkM3NS4wNjkzIDguODQ1NjkgNzQuOTc2MiA4LjgzNDE4IDc0Ljg4ODIgOC44MDQzMkM3NC44MDAyIDguNzc0NDcgNzQuNzE5MyA4LjcyNjkxIDc0LjY1MDQgOC42NjQ1OEM3NC41ODE1IDguNjAyMjUgNzQuNTI2MSA4LjUyNjQ3IDc0LjQ4NzYgOC40NDE5MUM3NC40NDkxIDguMzU3MzYgNzQuNDI4NCA4LjI2NTgxIDc0LjQyNjYgOC4xNzI5MkM3NC40MjY2IDcuNDIyNjYgNzUuNTAyIDcuNDMyNjYgNzYuMDIyMiA3LjQ0MjY2Qzc1Ljk5NzIgOC4wMDI4NiA3NS45NjcyIDguODM4MTYgNzUuMTM2OSA4LjgzODE2SDc1LjE2MTlaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDcuNjIyIDguODM4MTVDNDYuOTY2OCA4LjgzODE1IDQ2LjcyNjcgOC4yODI5NiA0Ni43MTE3IDcuNjc3NzRINTAuMDE3OUM1MC4wMjUgNy4zNzg3NCA1MC4wMTE2IDcuMDc5NiA0OS45Nzc5IDYuNzgyNDJDNDkuOTU0NSA2LjQ5MjU4IDQ5Ljg3ODIgNi4yMDk0NyA0OS43NTI4IDUuOTQ3MTJDNDkuMzMyNiA1LjEyNjgzIDQ4LjU0NzQgNC44MzE3MiA0Ny42MDcgNC44MzE3MkM0Ny4yNzggNC44MTU2OSA0Ni45NDkzIDQuODcwMDYgNDYuNjQyOSA0Ljk5MTE4QzQ2LjMzNjUgNS4xMTIzMSA0Ni4wNTk1IDUuMjk3NCA0NS44MzA0IDUuNTM0MTFDNDUuNjAxMyA1Ljc3MDgyIDQ1LjQyNTMgNi4wNTM2OSA0NS4zMTQyIDYuMzYzODNDNDUuMjAzMSA2LjY3Mzk4IDQ1LjE1OTQgNy4wMDQyNiA0NS4xODYyIDcuMzMyNjJDNDUuMTg2MiA4Ljg5MzE3IDQ1Ljg4MTQgOS43ODg0OSA0Ny42MDcgOS43ODg0OUM0OC43Nzc0IDkuNzg4NDkgNDkuNzUyOCA5LjQxMzM2IDQ5Ljg4MjggOC4yNjI5NUg0OC40ODIzQzQ4LjQzNCA4LjQ0NzM4IDQ4LjMxOTggOC42MDc3MiA0OC4xNjEzIDguNzEzN0M0OC4wMDI4IDguODE5NjcgNDcuODEwOSA4Ljg2Mzk0IDQ3LjYyMiA4LjgzODE1Wk00Ny42MjIgNS43NjIwNUM0Ny43NDg0IDUuNzY1ODUgNDcuODcyNyA1Ljc5NDk1IDQ3Ljk4NzYgNS44NDc2NEM0OC4xMDI2IDUuOTAwMzMgNDguMjA1NyA1Ljk3NTU0IDQ4LjI5MTEgNi4wNjg4MUM0OC4zNzY0IDYuMTYyMDggNDguNDQyMiA2LjI3MTUyIDQ4LjQ4NDUgNi4zOTA2NkM0OC41MjY4IDYuNTA5OCA0OC41NDQ4IDYuNjM2MjEgNDguNTM3NCA2Ljc2MjQxSDQ2LjczNjdDNDYuNzcxNyA2LjIzNzIyIDQ3LjAxNjggNS43NjIwNSA0Ny42MjIgNS43NjIwNVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0zMy41MzIgNC45NzE4SDMyLjAyNjRWOS42Mzg0N0gzMy41MzJWNC45NzE4WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTMzLjU4MiAyLjkyMTAySDMxLjk3NjRWNC4xMjE0NUgzMy41ODJWMi45MjEwMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik02Ny41NTQxIDQuOTcxOEg2Ni4wNDg2VjkuNjM4NDdINjcuNTU0MVY0Ljk3MThaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNjcuNjA5MiAyLjkyMTAySDY2LjAwMzZWNC4xMjE0NUg2Ny42MDkyVjIuOTIxMDJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzYuNTEzIDQuODMxNjdDMzQuODY3NCA0LjgzMTY3IDMzLjg4NzEgNS44MzIwMiAzMy44ODcxIDcuMzAyNTVDMzMuODg3MSA4Ljc3MzA3IDM0Ljg4NzQgOS43Njg0MyAzNi41MTMgOS43Njg0M0MzOC4xMzg2IDkuNzY4NDMgMzkuMTQ0IDguNzY4MDcgMzkuMTQ0IDcuMzAyNTVDMzkuMTQ0IDUuODM3MDIgMzguMTczNiA0LjgzMTY3IDM2LjUxMyA0LjgzMTY3Wk0zNi41MTMgOC44MzMwOUMzNS41OTI3IDguODMzMDkgMzUuNDQyNiA4LjA0MjgxIDM1LjQ0MjYgNy4yOTc1NUMzNS40NDI2IDYuNTUyMjggMzUuNTkyNyA1Ljc1NyAzNi41MTMgNS43NTdDMzcuNDMzNCA1Ljc1NyAzNy41ODg0IDYuNTUyMjggMzcuNTg4NCA3LjI5NzU1QzM3LjU4ODQgOC4wNDI4MSAzNy40NTM0IDguODM4MSAzNi41MTMgOC44MzgxVjguODMzMDlaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDEuOTg1MSA2LjY4NzM4SDM5LjYwOTJWNy43Mjc3NUg0MS45ODUxVjYuNjg3MzhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDIuNTE1MiA0Ljk3MTc5VjQuMDc2NDdMNDQuMDE1NyAzLjU3NjI5VjQuOTcxNzlINDUuMTE2MVY1Ljk3MjE1SDQ0LjAxNTdWOC4wODc5MUM0NC4wMTU3IDguNzAzMTMgNDQuMTE1OCA4Ljg2ODE4IDQ0LjYzNTkgOC44NjgxOEM0NC43OTYgOC44NjgxOCA0NC45NTYxIDguODY4MTggNDUuMTM2MSA4LjgzMzE3VjkuNjU4NDdDNDQuNzQ4MSA5Ljc0MzYzIDQ0LjM1MjggOS43OTIxOSA0My45NTU3IDkuODAzNTJDNDIuNzg1MyA5LjgwMzUyIDQyLjUzMDIgOS4yMjgzMSA0Mi41MzAyIDguMjE3OTVWNi4wMDIxNkg0MS41MTQ4VjUuMDAxOEw0Mi41MTUyIDQuOTcxNzlaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNTMuNDE0MSA2LjYwNzQxQzUzLjQxNDEgNi4yNDcyOCA1My4yNDQxIDUuNzIyMSA1Mi42NjM5IDUuNzY3MTFDNTIuMDgzNyA1LjgxMjEzIDUyLjAxODYgNi44Nzc1MSA1Mi4wMTg2IDcuMjM3NjRDNTIuMDE4NiA3Ljc3MjgzIDUyLjAxODYgOC44MDgyIDUyLjcwMzkgOC44NDMyMUM1My4yNzkxIDguODc4MjIgNTMuNDM0MSA4LjI5MzAxIDUzLjQzNDEgNy45MzI4OUg1NC45MzQ3QzU0Ljg4NDcgOS4xMjgzMSA1NC4wODk0IDkuNzY4NTQgNTIuNzAzOSA5Ljc2ODU0QzUxLjEzMzMgOS43Njg1NCA1MC40NTgxIDguNTE4MDkgNTAuNDU4MSA3LjI2NzY1QzUwLjQ1ODEgNi4wMTcyIDUxLjIwODMgNC44MTY3NyA1Mi43MDM5IDQuODE2NzdDNTMuOTg5MyA0LjgxNjc3IDU0Ljk0NDcgNS40OTcwMiA1NC45MzQ3IDYuNTkyNDFMNTMuNDE0MSA2LjYwNzQxWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTcxLjAyNTMgNi42MDc0MUM3MS4wMjUzIDYuMjQ3MjggNzAuODYwMyA1LjcyMjEgNzAuMjgwMSA1Ljc2NzExQzY5LjY5OTkgNS44MTIxMyA2OS42MTk4IDYuODc3NTEgNjkuNjI0OCA3LjIzNzY0QzY5LjYyNDggNy43NzI4MyA2OS42MjQ4IDguODA4MiA3MC4zMTAxIDguODQzMjFDNzAuODg1MyA4Ljg3ODIyIDcxLjA0MDMgOC4yOTMwMSA3MS4wNDAzIDcuOTMyODlINzIuNTQwOUM3Mi40OTA5IDkuMTI4MzEgNzEuNzAwNiA5Ljc2ODU0IDcwLjMxNTEgOS43Njg1NEM2OC43NDQ1IDkuNzY4NTQgNjguMDY5MyA4LjUxODA5IDY4LjA2OTMgNy4yNjc2NUM2OC4wNjkzIDYuMDE3MiA2OC44MTk1IDQuODE2NzcgNzAuMzE1MSA0LjgxNjc3QzcxLjYwMDUgNC44MTY3NyA3Mi41NTU5IDUuNDk3MDIgNzIuNTQwOSA2LjU5MjQxTDcxLjAyNTMgNi42MDc0MVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0zMS4zMzEyIDguNzAzMDlWMi45MjEwMkgyOS45MzU3VjUuNTAxOTRDMjkuNzY0IDUuMjQ2NjggMjkuNTIzNCA1LjA0NTM4IDI5LjI0MTggNC45MjE0MkMyOC45NjAzIDQuNzk3NDcgMjguNjQ5MyA0Ljc1NTk1IDI4LjM0NTEgNC44MDE2OUMyNy4wNTk3IDQuOTI2NzQgMjYuNTA0NSA2LjAzMjEzIDI2LjUwNDUgNy4zMDI1OUMyNi41MDQ1IDguNTczMDQgMjcuMTI0NyA5LjgwMzQ4IDI4LjQ3MDIgOS44MDM0OEMyOC43NTk2IDkuODA0MzggMjkuMDQ0NiA5LjczMjQ3IDI5LjI5ODkgOS41OTQzN0MyOS41NTMzIDkuNDU2MjcgMjkuNzY4OCA5LjI1NjQyIDI5LjkyNTcgOS4wMTMyQzI5LjkyNTcgOS4yMzMyOCAyOS45MjU3IDkuNDUzMzUgMjkuOTYwNyA5LjY3ODQzSDMxLjM1NjJDMzEuMzYxMiA5LjMyODMxIDMxLjMzMTIgOS4wMDMxOSAzMS4zMzEyIDguNzAzMDlaTTI4Ljk1MDMgOC43NzgxMUMyOC4zMjUxIDguNzc4MTEgMjcuOTUgOC4xMTc4OCAyNy45NSA3LjI3NzU4QzI3Ljk1IDYuNDM3MjggMjguMzEwMSA1Ljc3NzA0IDI4Ljk1MDMgNS43NzcwNEMyOS41OTA2IDUuNzc3MDQgMjkuOTUwNyA2LjQ0MjI4IDI5Ljk1MDcgNy4yNzc1OEMyOS45NTA3IDguMTEyODggMjkuNTc1NiA4Ljc3ODExIDI4Ljk1MDMgOC43NzgxMVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yNi4xMzkzIDguNzk4MTZWNC45NzE4SDI0LjYzODhWNy45NzI4N0MyNC42NDQgOC4wMjQ0MyAyNC42NDQgOC4wNzYzNyAyNC42Mzg4IDguMTI3OTNDMjQuNTk4NiA4LjMyNDQ5IDI0LjQ5NDIgOC41MDIxMyAyNC4zNDIxIDguNjMyOTRDMjQuMTkgOC43NjM3NSAyMy45OTg3IDguODQwMzIgMjMuNzk4MyA4Ljg1MDYzQzIzLjU5OCA4Ljg2MDkzIDIzLjM5OTggOC44MDQzOSAyMy4yMzUxIDguNjg5ODdDMjMuMDcwNCA4LjU3NTM2IDIyLjk0ODMgOC40MDkzNiAyMi44ODgyIDguMjE3OTZDMjIuODY0MyA4LjEzNjYzIDIyLjg1MDggOC4wNTI1OSAyMi44NDgxIDcuOTY3ODdWNC45NjY4SDIxLjM0NzZWNy45MDI4NUMyMS4zMzgxIDguMTkxMzQgMjEuMzkyOCA4LjQ3ODM0IDIxLjUwNzcgOC43NDMxNEMyMS42NTkxIDkuMDUxNjEgMjEuODkzMSA5LjMxMjA5IDIyLjE4MzUgOS40OTU3M0MyMi40NzQgOS42NzkzNyAyMi44MDk2IDkuNzc4OTggMjMuMTUzMyA5Ljc4MzUyQzIzLjQ0MzUgOS43OTAyNCAyMy43MzExIDkuNzI3NDYgMjMuOTkyMSA5LjYwMDQzQzI0LjI1MzEgOS40NzM0IDI0LjQ4IDkuMjg1NzkgMjQuNjUzOCA5LjA1MzI2TDI0LjcxODggOS42Mzg0NkgyNi4yMTkzQzI2LjE2OTMgOS4zNjMzNyAyNi4xNDkzIDkuMDczMjYgMjYuMTM5MyA4Ljc5ODE2WiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMCI+CjxyZWN0IHdpZHRoPSI3Ny41NzI3IiBoZWlnaHQ9IjE0IiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPgo=',
+      Position = { 10, 5 },
+      Size = { 78, 14 }
+    },
+    {
+      Type = 'Label',
+      Text = 'ATND1061DAN',
+      Position = { 96, 3 },
+      Size = { 88, 16 },
+      IsBold = true,
+      FontSize = 12,
+      HTextAlign = 'Left',
+      Color = Colors.Basic.White
+    },
+    
+
+    --[[ Device panel ]]--
+    {
+      Type ='GroupBox',
+      Fill = Colors.BG1,
+      Position = { 0, 25 },
+      Size = { 248, 145 }
+    },
+    {
+      Type = 'Svg',
+      Image = 'PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDNIMTVWNUgxOVY5SDIxVjVDMjEgMy44OSAyMC4xIDMgMTkgM1pNMTkgMTlIMTVWMjFIMTlDMTkuNTMwNCAyMSAyMC4wMzkxIDIwLjc4OTMgMjAuNDE0MiAyMC40MTQyQzIwLjc4OTMgMjAuMDM5MSAyMSAxOS41MzA0IDIxIDE5VjE1SDE5VjE5Wk01IDE1SDNWMTlDMyAxOS41MzA0IDMuMjEwNzEgMjAuMDM5MSAzLjU4NTc5IDIwLjQxNDJDMy45NjA4NiAyMC43ODkzIDQuNDY5NTcgMjEgNSAyMUg5VjE5SDVWMTVaTTMgNVY5SDVWNUg5VjNINUM0LjQ2OTU3IDMgMy45NjA4NiAzLjIxMDcxIDMuNTg1NzkgMy41ODU3OUMzLjIxMDcxIDMuOTYwODYgMyA0LjQ2OTU3IDMgNVoiIGZpbGw9IndoaXRlIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
+      Position = { 216, 36 },
+      Size = { 18, 18 },
+      ZOrder = 999
+    },
+    {
+      Type = 'Label',
+      Text = 'IP Mode',
+      Position = { 16, 25+36+(32*0) + 4 },
+      Size = { 100, 24 },
+      FontSize = 12,
+      HTextAlign = 'Left',
+      Color = Colors.Basic.White
+    },
+    {
+      Type = 'Label',
+      Text = 'IP Address',
+      Position = { 16, 25+36+(32*1) + 4 },
+      Size = { 100, 24 },
+      FontSize = 12,
+      HTextAlign = 'Left',
+      Color = Colors.Basic.White
+    },
+    {
+      Type = 'Label',
+      Text = 'Device ID',
+      Position = { 16, 25+36+(32*2) + 4 },
+      Size = { 100, 24 },
+      FontSize = 12,
+      HTextAlign = 'Left',
+      Color = Colors.Basic.White
+    },
+
+    { -- Global controls panel
+      Type ='GroupBox',
+      Fill = Colors.BG1,
+      Position = { 249, 25 },
+      Size = { 426, 40 }
+    },
+    {
+      Type = 'Svg',
+      Image = 'PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjM4NzUgNC4yMDgxMVYzLjk1MDc5QzEyLjM4NzUgMy4zMDA4IDEyLjExNjUgMi42Nzc0MyAxMS42MzQxIDIuMjE3ODJDMTEuMTUxNyAxLjc1ODIxIDEwLjQ5NzQgMS41IDkuODE1MTUgMS41QzkuMTMyOTIgMS41IDguNDc4NjMgMS43NTgyMSA3Ljk5NjIyIDIuMjE3ODJDNy41MTM4MSAyLjY3NzQzIDcuMjQyOCAzLjMwMDggNy4yNDI4IDMuOTUwNzlWOS4xNDY0NUwxMi4zODc1IDQuMjA4MTFaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTQuMDk4MSA5LjYyNDM0QzE0LjEwMSAxMC40MjYxIDEzLjg1NiAxMS4yMTA4IDEzLjM5MzYgMTEuODgwN0MxMi45MzEyIDEyLjU1MDUgMTIuMjcxOSAxMy4wNzU4IDExLjQ5ODEgMTMuMzkwOEMxMC43MjQyIDEzLjcwNTggOS44NzAxNyAxMy43OTY3IDkuMDQyNDcgMTMuNjUyQzguMjE0NzggMTMuNTA3NCA3LjQ1MDE3IDEzLjEzMzcgNi44NDQwNiAxMi41Nzc1TDguMTMwMjQgMTEuMzUyMUM4LjU5Mzk5IDExLjc0NzggOS4xOTI2MyAxMS45Njk5IDkuODE1MTMgMTEuOTc3MUMxMC40OTc0IDExLjk3NzEgMTEuMTUxNiAxMS43MTg5IDExLjYzNDEgMTEuMjU5M0MxMi4xMTY1IDEwLjc5OTYgMTIuMzg3NSAxMC4xNzYzIDEyLjM4NzUgOS41MjYyOFY3LjMwODMyTDE1LjUgNC4zNDI4NUwxNC43NDEyIDMuNjE5ODdMMy41IDE0LjM0MjFMNC4yNTg4NCAxNS4wNTI4TDYuMDA4MDIgMTMuMzg2M0M2Ljg3OTM4IDE0LjE4NSA4LjAwNzM5IDE0LjY4MTQgOS4yMTA2MiAxNC43OTU1VjE2LjY4MjZINy4wMzY5OFYxNy44MUgxMi41Njc1VjE2LjY4MjZIMTAuMzkzOVYxNC43OTU1QzExLjczMjMgMTQuNjU5NyAxMi45NzEgMTQuMDU4MyAxMy44NzI5IDEzLjEwNjNDMTQuNzc0NyAxMi4xNTQ0IDE1LjI3NjMgMTAuOTE4OSAxNS4yODE0IDkuNjM2NTZWOC4xNzgzNEgxNC4wOTgxVjkuNjI0MzRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNS42NzM2NCAxMC42NTM3QzUuNTU5NjYgMTAuMzIxMSA1LjQ5ODk0IDkuOTc0MTQgNS40OTM1NiA5LjYyNDM2VjguMTY2MTRINC4yOTc0MlY5LjYyNDM2QzQuMzExNjcgMTAuMjgxMyA0LjQ1NTY0IDEwLjkyOTggNC43MjE4NCAxMS41MzZMNS42NzM2NCAxMC42NTM3WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==',
+      Position = { 269, 37 },
+      Size = { 16, 16 },
+      ZOrder = 1000
+    },
+    {
+      Type = 'Label',
+      Text = 'Power Save',
+      Position = { 358, 35 },
+      Size = { 68, 20 },
+      FontSize = 12,
+      HTextAlign = 'Left',
+      Color = Colors.Basic.White
+    },
+    {
+      Type = 'Label',
+      Text = 'Preset',
+      Position = { 504, 35 },
+      Size = { 40, 20 },
+      FontSize = 12,
+      HTextAlign = 'Left',
+      Color = Colors.Basic.White
+    }
+
+  }, {
+    ['Device~Name'] = {
+      Position = { 8, 33 },
+      Size = { 147, 24 },
+      StrokeWidth = 0,
+      Color = Colors.Gray,
+      FontSize = 14,
+      HTextAlign = 'Left',
+      Padding = 4
+    },
+    ['Device~Identify'] = {
+      Position = { 166, 33 },
+      Size = { 72, 24 },
+      StrokeWidth = 1,
+      StrokeColor = Colors.Basic.White,
+      CornerRadius = 2,
+      Padding = 6,
+      ButtonVisualStyle = 'Flat',
+      Legend = 'Identify',
+      HTextAlign = 'Left',
+      FontSize = 12,
+      Margin = 0,
+      UnlinkOffColor = true,
+      OffColor = Colors.BG1,
+      IconType = 'SVG',
+      Icon = 'PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDNIMTVWNUgxOVY5SDIxVjVDMjEgMy44OSAyMC4xIDMgMTkgM1pNMTkgMTlIMTVWMjFIMTlDMTkuNTMwNCAyMSAyMC4wMzkxIDIwLjc4OTMgMjAuNDE0MiAyMC40MTQyQzIwLjc4OTMgMjAuMDM5MSAyMSAxOS41MzA0IDIxIDE5VjE1SDE5VjE5Wk01IDE1SDNWMTlDMyAxOS41MzA0IDMuMjEwNzEgMjAuMDM5MSAzLjU4NTc5IDIwLjQxNDJDMy45NjA4NiAyMC43ODkzIDQuNDY5NTcgMjEgNSAyMUg5VjE5SDVWMTVaTTMgNVY5SDVWNUg5VjNINUM0LjQ2OTU3IDMgMy45NjA4NiAzLjIxMDcxIDMuNTg1NzkgMy41ODU3OUMzLjIxMDcxIDMuOTYwODYgMyA0LjQ2OTU3IDMgNVoiIGZpbGw9IndoaXRlIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
+      HTextAlign = 'Left'
+    },
+    ['Device~Connection Mode'] = {
+      Position = { 124, 25+36+(32*0) + 4 },
+      Size = { 102, 24 },
+      StrokeWidth = 0,
+      Color = Colors.BG2,
+      FontSize = 12,
+      Style = 'ComboBox',
+      TextColor = Colors.Basic.White
+    },
+    ['Device~Select'] = {
+      Position = { 124, 25+36+(32*1) + 4 },
+      Size = { 102, 24 },
+      StrokeWidth = 0,
+      Color = Colors.BG2,
+      FontSize = 12,
+      Style = 'ComboBox',
+      TextColor = Colors.Basic.White
+    },
+    ['Device~IP Address'] = {
+      Position = { 124, 25+36+(32*1) + 4 },
+      Size = { 102, 24 },
+      StrokeWidth = 0,
+      Color = Colors.BG2,
+      FontSize = 12
+    },
+    ['Device~Device ID'] = {
+      Position = { 124, 25+36+(32*2) + 4 },
+      Size = { 102, 24 },
+      StrokeWidth = 0,
+      Color = Colors.Gray,
+      TextBoxStyle = 'Normal',
+      FontSize = 12
+    },
+    ['Device~Mute All'] = {
+      Position = { 265, 33 },
+      Size = { 78, 24 },
+      StrokeWidth = 1,
+      StrokeColor = Colors.Basic.White,
+      ButtonVisualStyle = 'Flat',
+      Margin = 0,
+      FontSize = 12,
+      Legend = '       All Mute',
+      Color = Colors.Basic.Red,
+      UnlinkOffColor = true,
+      OffColor = Colors.BG1,
+      IconType = 'Svg',
+      Icon = 'PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjM4NzUgNC4yMDgxMVYzLjk1MDc5QzEyLjM4NzUgMy4zMDA4IDEyLjExNjUgMi42Nzc0MyAxMS42MzQxIDIuMjE3ODJDMTEuMTUxNyAxLjc1ODIxIDEwLjQ5NzQgMS41IDkuODE1MTUgMS41QzkuMTMyOTIgMS41IDguNDc4NjMgMS43NTgyMSA3Ljk5NjIyIDIuMjE3ODJDNy41MTM4MSAyLjY3NzQzIDcuMjQyOCAzLjMwMDggNy4yNDI4IDMuOTUwNzlWOS4xNDY0NUwxMi4zODc1IDQuMjA4MTFaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTQuMDk4MSA5LjYyNDM0QzE0LjEwMSAxMC40MjYxIDEzLjg1NiAxMS4yMTA4IDEzLjM5MzYgMTEuODgwN0MxMi45MzEyIDEyLjU1MDUgMTIuMjcxOSAxMy4wNzU4IDExLjQ5ODEgMTMuMzkwOEMxMC43MjQyIDEzLjcwNTggOS44NzAxNyAxMy43OTY3IDkuMDQyNDcgMTMuNjUyQzguMjE0NzggMTMuNTA3NCA3LjQ1MDE3IDEzLjEzMzcgNi44NDQwNiAxMi41Nzc1TDguMTMwMjQgMTEuMzUyMUM4LjU5Mzk5IDExLjc0NzggOS4xOTI2MyAxMS45Njk5IDkuODE1MTMgMTEuOTc3MUMxMC40OTc0IDExLjk3NzEgMTEuMTUxNiAxMS43MTg5IDExLjYzNDEgMTEuMjU5M0MxMi4xMTY1IDEwLjc5OTYgMTIuMzg3NSAxMC4xNzYzIDEyLjM4NzUgOS41MjYyOFY3LjMwODMyTDE1LjUgNC4zNDI4NUwxNC43NDEyIDMuNjE5ODdMMy41IDE0LjM0MjFMNC4yNTg4NCAxNS4wNTI4TDYuMDA4MDIgMTMuMzg2M0M2Ljg3OTM4IDE0LjE4NSA4LjAwNzM5IDE0LjY4MTQgOS4yMTA2MiAxNC43OTU1VjE2LjY4MjZINy4wMzY5OFYxNy44MUgxMi41Njc1VjE2LjY4MjZIMTAuMzkzOVYxNC43OTU1QzExLjczMjMgMTQuNjU5NyAxMi45NzEgMTQuMDU4MyAxMy44NzI5IDEzLjEwNjNDMTQuNzc0NyAxMi4xNTQ0IDE1LjI3NjMgMTAuOTE4OSAxNS4yODE0IDkuNjM2NTZWOC4xNzgzNEgxNC4wOTgxVjkuNjI0MzRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNS42NzM2NCAxMC42NTM3QzUuNTU5NjYgMTAuMzIxMSA1LjQ5ODk0IDkuOTc0MTQgNS40OTM1NiA5LjYyNDM2VjguMTY2MTRINC4yOTc0MlY5LjYyNDM2QzQuMzExNjcgMTAuMjgxMyA0LjQ1NTY0IDEwLjkyOTggNC43MjE4NCAxMS41MzZMNS42NzM2NCAxMC42NTM3WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==',
+      HTextAlign = 'Left'
+    },
+    ['Device~Power Save'] = {
+      Position = { 436, 35 },
+      Size = { 34, 20 },
+      StrokeWidth = 1,
+      StrokeColor = Colors.Basic.White,
+      ButtonVisualStyle = 'Flat',
+      Color = Colors.Gray,
+      UnlinkOffColor = true,
+      OffColor = Colors.BG2,
+      Legend = 'ON',
+      Margin = 0
+    },
+    ['Device~Preset'] = {
+      Style = 'ComboBox',
+      Position = { 559, 33 },
+      Size = { 102, 24 },
+      StrokeWidth = 0,
+      Color = Colors.Basic.Primary,
+      CornerRadius = 12,
+      FontSize = 12,
+      TextColor = { 255, 255, 255 }
+    },
+    ['Device~Status'] = {
+      Position = { 489, 4 },
+      Size = { 182, 16 },
+      FontSize = 12
+    },
+    ['Audio Ch Position'] = {
+      Style = 'None'
+    },
+    ['Camera Ch Position'] = {
+      Style = 'None'
+    }
+  };
+
+  -- Channel panels
+  for i,n in ipairs(Channels) do
+    table.insert(graphics, {
+      Type = 'GroupBox',
+      Fill = Colors.BG1,
+      Position = { 249 + 71 * (i-1), 66 },
+      Size = { 70, 104 }
+    });
+    table.insert(graphics, {
+      Type = 'GroupBox',
+      Fill = Colors.BG2,
+      Position = { 249 + 71 * (i-1), 66 },
+      Size = { 70, 18 }
+    });
+    table.insert(graphics, {
+      Type = 'Label',
+      Text = n,
+      Color = Colors.Basic.White,
+      Position = { 249 + 71 * (i-1), 66 },
+      Size = { 70, 18 },
+      IsBold = true
+    });
+    table.insert(graphics, {
+      Type = 'GroupBox',
+      Fill = Colors.BG2,
+      Position = { 249 + 71 * (i-1) + 2, 66 + 45 },
+      Size = { 66, 55 },
+      CornerRadius = 2
+    });
+    layout[('Channels~%s~%s'):format(n, 'Name')] = {
+      Position = { 249 + 71 * (i-1) + 5, 66 + 22 },
+      Size = { 60, 18 },
+      Color = Colors.Gray,
+      StrokeWidth = 0,
+      FontSize = 10
+    };
+    layout[('Channels~%s~%s'):format(n, 'Mute')] = {
+      Position = { 249 + 71 * (i-1) + 8, 66 + 54 },
+      Size = { 54, 18 },
+      Color = Colors.Basic.Red,
+      Legend = 'Mute',
+      FontSize = 10,
+      IsBold = true,
+      CornerRadius = 4,
+      StrokeWidth = 1,
+      StrokeColor = Colors.Basic.White,
+      ButtonVisualStyle = 'Flat',
+      UnlinkOffColor = true,
+      OffColor = Colors.BG2
+    };
+    for j=1,4 do
+      layout[('Channels~%s~%s %d'):format(n, 'Signal LED', j)] = {
+        Position = { 249 + 71 * (i-1) + 11 + 13 * (j-1), 66 + 81 },
+        Size = { 9, 9 },
+        Margin = 0,
+        CornerRadius = 5,
+        StrokeWidth = 0,
+        UnlinkOffColor = true,
+        OffColor = Colors.Signal.None,
+        Color = (j == 4 and Colors.Signal.Red
+             or (j == 3 and Colors.Signal.Yellow
+             or Colors.Signal.Green))
+      }
+    end;
+  end;
+
+  return layout, graphics;
+
+end;
+
+--[[ Runtime ]]--
+if(not Controls) then return; end;
+json = require('rapidjson');
+
+-- Utility functions
+function contains(t, v)
+  for _,c in pairs(t) do
+    if(c == v) then return true; end;
+  end;
+  return false;
+end;
+
+-- Control helper
+Ctls = {};
+for n,c in pairs(Controls) do
+  local t = Ctls;
+  for parent in n:gmatch('([^~]+)~') do
+    if(not t[parent]) then t[parent] = {}; end;
+    t = t[parent];
+  end;
+  t[n:match('([^~]+)$')] = c;
+end;
+
+-- [[ GUI Helpers ]] --
+
+-- Connection mode select
+local connectionModes = { 'Discovery', 'Manual' };
+Ctls.Device['Connection Mode'].Choices = connectionModes;
+if(not contains(connectionModes, Ctls.Device['Connection Mode'].String)) then
+  Ctls.Device['Connection Mode'].String = connectionModes[1];
+end;
+
+function connModeSwitch()
+  local manual = Ctls.Device['Connection Mode'].String == 'Manual';
+  Ctls.Device['IP Address'].IsInvisible = not manual;
+  Ctls.Device['Select'].IsInvisible = manual;
+end; connModeSwitch();
+Ctls.Device['Connection Mode'].EventHandler = connModeSwitch;
+
+-- Power save graphic
+function powerSwitch()
+  local onSVG = 'PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyMCI+PHBhdGggZD0iTTcsM0gyN2E3LDcsMCwwLDEsNyw3aDBhNyw3LDAsMCwxLTcsN0g3YTcsNywwLDAsMS03LTdIMEE3LDcsMCwwLDEsNywzWiIgc3R5bGU9ImZpbGw6I2QyZTBlZCIvPjxwYXRoIGQ9Ik0yNiwyMEExMCwxMCwwLDEsMCwxNiwxMCwxMCwxMCwwLDAsMCwyNiwyMFoiIHN0eWxlPSJmaWxsOiM2ODk5YzY7ZmlsbC1ydWxlOmV2ZW5vZGQiLz48L3N2Zz4=';
+  local offSVG = 'PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNiAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMzYiIHk9IjE3IiB3aWR0aD0iMzQiIGhlaWdodD0iMTQiIHJ4PSI3IiB0cmFuc2Zvcm09InJvdGF0ZSgtMTgwIDM2IDE3KSIgZmlsbD0iI0U3RTdFNyIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEwIC04LjU5MDg2ZS0wN0M0LjQ3NzE1IC0xLjMzMzU1ZS0wNiAxLjM4MDk3ZS0wNiA0LjQ3NzE1IDguODk2MzZlLTA3IDEwQzMuOTgzMDRlLTA3IDE1LjUyMjggNC40NzcxNSAyMCAxMCAyMEMxNS41MjI4IDIwIDIwIDE1LjUyMjggMjAgMTBDMjAgNC40NzcxNSAxNS41MjI4IC0zLjg0NjI2ZS0wNyAxMCAtOC41OTA4NmUtMDdaIiBmaWxsPSIjQjJCMkIyIi8+Cjwvc3ZnPgo=';
+  Ctls.Device['Power Save'].Style = json.encode({
+    DrawChrome = false,
+    Legend = '',
+    IconData = Ctls.Device['Power Save'].Boolean and onSVG or offSVG
+  });
+end; powerSwitch();
+
+-- Button styling
+function muteDisplay()
+  for i,n in ipairs(Channels) do
+    Ctls.Channels[n].Mute.Style = json.encode({
+      DrawChrome = true,
+      Legend = 'Mute',
+      StrokeColor = Ctls.Channels[n].Mute.Boolean and '#E74C3C' or '#FFFFFF'
+    });
+  end;
+end; muteDisplay();
+
+function muteAllDisplay()
+  Ctls.Device['Mute All'].Style = json.encode({
+    DrawChrome = true,
+    Legend = '       All Mute',
+    StrokeColor = Ctls.Device['Mute All'].Boolean and '#E74C3C' or '#FFFFFF'
+  });
+end; muteAllDisplay();
+
+
+-- [[ Discovery ]] --
+
+Discovered = {};
+DiscoHandler = function(_, packet)
+  if(not packet.Data:match('ATCUDevice')) then return; end;
+  local devHash = Crypto.MD5Compute(packet.Data);
+  if(Discovered[devHash]) then Discovered[devHash].timeout = DiscoTimeout; return; end;
+  local devInfoURL = packet.Data:match('LOCATION: ([^\r\n]+)');
+  HttpClient.Download({
+    Url = devInfoURL,
+    EventHandler = function(t,c,d,e)
+      if(c ~= 200) then return; end;
+      local model = d:match('modelName>([^<]+)');
+      if(contains(DiscoModels, model)) then
+        Discovered[devHash] = {
+          name = d:match('friendlyName>([^<]+)'),
+          timeout = DiscoTimeout, -- 9
+          host = packet.Address
+        };
+        refreshDiscoChoices();
+      end;
+    end;
+  })
+end;
+
+DiscoSockets = {};
+for i,n in pairs(Network.Interfaces()) do
+  print('Discovered networking interface ' .. i .. ': '.. n.Address);
+  DiscoSockets[n.Address] = UdpSocket.New();
+  DiscoSockets[n.Address].EventHandler = DiscoHandler;
+end;
+
+-- Discovery choices
+function refreshDiscoChoices()
+  local discovered = {};
+  for _,d in pairs(Discovered) do
+    local duplicate = false;
+    for __,dd in pairs(Discovered) do
+      if(dd.host == d.host and d ~= dd) then duplicate = true; end;
+    end;
+    table.insert(discovered, json.encode({
+      Text = ('%s - %s'):format(d.host, d.name),
+      Color = duplicate and 'red' or nil,
+      Host = d.host,
+      Name = d.name
+    }));
+  end; table.sort(discovered);
+  Ctls.Device['Select'].Choices = discovered;
+end;
+
+DiscoTimer = Timer.New();
+function DiscoStep()
+
+  -- expire old devices
+  local stillValid = {};
+  for h,d in pairs(Discovered) do
+    d.timeout = d.timeout - DiscoInterval;
+    if(d.timeout > 0) then stillValid[h] = d; end;
+  end; Discovered = stillValid;
+  refreshDiscoChoices();
+  
+  -- SSDP discover new devices
+  for ip,sock in pairs(DiscoSockets) do
+    local ok, err = pcall(sock.Send, sock, '239.255.255.250', 1900, DiscoString);
+    if(not ok and err:match('closed')) then
+      print('Opening socket on ' .. ip);
+      local ok, err = pcall(sock.Open, sock, ip);
+      if(ok) then -- pcall bypasses emulation bug
+        pcall(sock.JoinMulticast, sock, '239.255.255.250', ip);
+      else
+        print('Failed to open socket on ' .. ip, err);
+      end;
+    end;
+  end;
+  
+end; DiscoStep();
+DiscoTimer.EventHandler = DiscoStep;
+DiscoTimer:Start(DiscoInterval);
+
+-- Auto / manual connection
+function reconnect();
+  if(Sock.IsConnected) then Sock:Disconnect(); end;
+  if(Ctls.Device['IP Address'].String == '') then
+    SockStatus = 'IP missing';
+  else
+    Sock:Connect(Ctls.Device['IP Address'].String, 17300);
+    SockStatus = TcpSocket.Events.Reconnect;
+  end;
+end;
+Ctls.Device['IP Address'].EventHandler = reconnect;
+
+Ctls.Device['Select'].EventHandler = function(c)
+  local s = json.decode(c.String);
+  print(('# Switching to %s at %s'):format(s.Name, s.Host));
+  Ctls.Device['IP Address'].String = s.Host;
+  reconnect();
+  c.String = s.Host;
+end;
+
+
+-- [[ Control ]] --
+
+-- Power save
+Ctls.Device['Power Save'].EventHandler = function(c)
+  powerSwitch(); -- GUI element
+  send('s_powersave', '%d', c.Value);
+end;
+
+-- Identify
+Ctls.Device['Identify'].EventHandler = function()
+  if(not Sock.IsConnected) then return; end;
+  send('identify');
+end;
+
+-- Preset select
+Ctls.Device['Preset'].EventHandler = function(c)
+  for id,name in ipairs(PRESETS) do
+    if(name == c.String) then
+      send('call_preset', '%d', id);
+    end;
+  end;
+end;
+
+-- Individual mutes
+MuteDirty = {};
+for i,n in ipairs(Channels) do
+  Ctls.Channels[n].Mute.EventHandler = function(c)
+    muteDisplay();
+    MuteDirty[i] = true;
+    send('g_input_gain_level', '%d', i-1);
+  end;
+end;
+
+-- Mute all
+Ctls.Device['Mute All'].EventHandler = function(c)
+  muteAllDisplay();
+  send('s_mute', '%d', c.Value);
+end;
+
+-- [[ TCP Socket ]] -- 
+
+Sock = TcpSocket.New();
+Sock.ReconnectTimeout = 1;
+Sock.ReadTimeout = 7;
+
+Sock.EventHandler = function(_, evt)
+  print('# Socket ' .. evt:lower());
+  SockStatus = evt;
+end;
+
+Sock.Connected = function()
+  SockStatus = TcpSocket.Events.Connected;
+  print('# Connected to ATND-1061');
+  DEVICEID = false;
+  DEVICENAME = false;
+  PRESETS = false;
+  CURRENT_PRESET = false;
+  MUTE_ALL = false;
+  CHANNEL_NAMES = {};
+end;
+
+function send(c, p, ...)
+  local pkt = c .. ' S 0000 00 NC';
+  if(p) then pkt = pkt .. ' ' .. p:format(...); end;
+  if(Properties['Verbose Debug'].Value) then print('<< ' .. pkt); end;
+  Sock:Write(pkt .. ' \r');
+end;
+
+-- [[ Polling ]] --
+CHANNEL_NAMES = {};
+RapidChannel = 0;
+RapidTimer = Timer.New();
+RapidTimer.EventHandler = function()
+  if(not Sock.IsConnected) then return; end;
+  RapidChannel = RapidChannel % 6 + 1;
+  --if(not CHANNEL_NAMES[RapidChannel-1]) then
+    send('g_input_channel_settings', '%d', RapidChannel-1);
+  --end;
+end;
+RapidTimer:Start(1/6);
+
+PollTimer = Timer.New();
+PollTimer.EventHandler = function()
+  if(not Sock.IsConnected) then return; end;
+  send('g_deviceid');
+  send('g_permission');
+  if(not PRESETS) then send('g_name_bank'); end;
+  if(not MUTE_ALL) then send('g_mute'); end;
+  if(PRESETS and not CURRENT_PRESET) then send('g_preset_number'); end;
+  send('g_network');
+end;
+PollTimer:Start(3);
+
+-- [[ Feedback ]] --
+Sock.Data = function()
+
+  local function read() return Sock:ReadLine(TcpSocket.EOL.Any); end;
+
+  for line in read do
+
+    if(Properties['Verbose Debug'].Value) then print('>> ' .. line); end;
+
+    if(line:match('^g_input_gain_level ')) then
+      local current = line:match('g_input_gain_level (.*)');
+      local chan = current:match(' (%d),') + 1;
+      local devState = current:match(',,,(%d),,,') == '1';
+      local ctlState = Ctls.Channels[Channels[chan]].Mute.Boolean;
+      if(devState ~= ctlState) then
+        if(MuteDirty[chan]) then
+          local new = ('s_input_gain_level S ' .. current .. '\r'):gsub(',,,%d,,,', ',,,%%d,,,'):format(ctlState and 1 or 0);
+          Sock:Write(new);
+          MuteDirty[chan] = nil;
+        end;
+      end;
+
+    elseif(line:match('^g_input_channel_settings ')) then
+      local chan = line:match(' (%d),');
+      local name = line:match(',"([^"]+)",');
+      CHANNEL_NAMES[tonumber(chan)] = name;
+      print(('> Got channel %s name: %s'):format(chan, name));
+      Ctls.Channels[Channels[chan+1]].Name.String = name;
+
+    elseif(line:match('^g_permission ')) then
+      DEVICENAME = line:match(' "([^"]+)",');
+      print('> Got device name: ' .. DEVICENAME);
+      Ctls.Device['Name'].String = DEVICENAME;
+
+    elseif(line:match('^g_deviceid ')) then
+      DEVICEID = tonumber(line:match('([0-9a-fA-F]+) $'), 16);
+      print('> Got device ID: ' .. DEVICEID);
+      Ctls.Device['Device ID'].String = ('%d'):format(DEVICEID);
+
+    elseif(line:match('^g_network ')) then
+      local nIp, nPort = line:match('NC [^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,([^,]+),([^,]+)');
+      if(nPort ~= NotificationPort) then
+        NotificationSocket:Close();
+        NotificationSocket:Open('0.0.0.0', tonumber(nPort));
+        NotificationPort = nPort;
+        print('# Listening for notifications on port ' .. NotificationPort);
+      end;
+      if(nIp ~= NotificationAddress) then
+        for _,n in pairs(Network.Interfaces()) do
+          pcall(NotificationSocket.JoinMulticast, NotificationSocket, nIp, n.Address);
+        end;
+        NotificationAddress = nIp;
+        print('# Listening for notifications at ' .. NotificationAddress);
+      end;
+    
+    elseif(line:match('^g_name_bank')) then
+      if(not PRESETS) then PRESETS = {}; end;
+      local num,name = line:match('(%d+),"(.+)" ?$');
+      print(num,name, bitstring.hexstream(line));
+      PRESETS[tonumber(num)] = name;
+      local choices = {};
+      for _,name in ipairs(PRESETS) do table.insert(choices, name); end;
+      Ctls.Device['Preset'].Choices = choices;
+
+    elseif(line:match('^g_preset_number')) then
+      CURRENT_PRESET = tonumber(line:match('(%d+) ?$'));
+      if(PRESETS[CURRENT_PRESET]) then
+        Ctls.Device['Preset'].String = PRESETS[CURRENT_PRESET];
+      else
+        Ctls.Device['Preset'].String = string.format('Preset %d', CURRENT_PRESET);
+      end;
+
+    elseif(line:match('^g_mute')) then
+      local muteEnabled = tonumber(line:match('(%d) ?$'));
+      MUTE_ALL = muteEnabled == '1';
+      Ctls.Device['Mute All'].Boolean = MUTE_ALL;
+      muteAllDisplay();
+
+
+    else
+      print('> ' .. line);
+    end;
+
+  end;
+end;
+
+-- [[ Notifications ]] --
+NotificationSocket = UdpSocket.New();
+NotificationSocket.EventHandler = function(_, packet)
+
+  if(Properties['Verbose Debug'].Value) then print('M> ' .. packet.Data); end;
+
+  if(packet.Address == Ctls.Device['IP Address'].String) then
+
+    if(packet.Data:match('^MD')) then MulticastStatus = os.time(); end;
+
+    if(packet.Data:match('^MD level_meter_notice')) then
+      local meters = { packet.Data:match('MD level_meter_notice %d+ %d+ NC ' .. string.rep('([-0-9]+),', 6)) };
+      for channel, v in ipairs(meters) do
+        for i, control in ipairs(Ctls.Channels[Channels[channel]]['Signal LED']) do
+          control.Boolean = (tonumber(v) >= MeterThresholds[i]);
+        end;
+      end;
+
+    elseif(packet.Data:match('^MD recall_preset_notice')) then
+      local presetNo = packet.Data:match('MD recall_preset_notice %d+ %d+ NC (%d+)');
+      Ctls.Device['Preset'].String = PRESETS[tonumber(presetNo)];
+      print('> Preset ' .. presetNo .. ' was recalled.');
+
+    elseif(packet.Data:match('^MD input_gain_level_notice')) then
+      local channel, muted = packet.Data:match('NC (%d+),%d+,%d+,%d+,([01])');
+      Ctls.Channels[Channels[channel+1]]['Mute'].Boolean = (muted == '1');
+      muteDisplay();
+
+    elseif(packet.Data:match('^MD camera_control_notice')) then
+      local audio, camera = packet.Data:match('NC 1,(%d+),%d+,%d+,(%d+)');
+      if(audio) then Controls['Audio Ch Position'].String = audio; end;
+      if(camera) then Controls['Camera Ch Position'].String = camera; end;
+
+    elseif(packet.Data:match('^MD powersave_notice')) then
+      local powerSaving = packet.Data:match('NC ([01])');
+      Ctls.Device['Power Save'].Boolean = powerSaving == '1';
+      powerSwitch();
+
+    elseif(packet.Data:match('^MD mute_notice')) then
+      local muteEnabled = packet.Data:match('NC ([01])');
+      MUTE_ALL = muteEnabled == '1';
+      Ctls.Device['Mute All'].Boolean = MUTE_ALL;
+      muteAllDisplay();
+
+    else
+      print('M>> ' .. packet.Data);
+
+    end;
+
+  end;
+end;
+
+-- [[ Power Save Disable ]] --
+PSDisplay = Timer.New();
+PSDisplay.EventHandler = function()
+
+  for _,c in ipairs({
+    Ctls.Device['Preset'],
+    Ctls.Device['Mute All'],
+    Ctls.Device['Identify'],
+    Ctls.Device['Connection Mode'],
+    Ctls.Device['Select'],
+    Ctls.Device['IP Address']
+  }) do c.IsDisabled = Ctls.Device['Power Save'].Boolean; end;
+
+  for _,c in pairs(Ctls.Channels) do
+    for _,ctl in pairs(c) do
+      ctl.IsDisabled = Ctls.Device['Power Save'].Boolean;
+    end;
+  end;
+
+end;
+PSDisplay:Start(0.1);
+
+-- Start connection
+reconnect();
+
+StatusTimer = Timer.New();
+StatusTimer.EventHandler = function()
+  if(SockStatus == TcpSocket.Events.Reconnect) then
+    Ctls.Device['Status'].Value = 5;
+    Ctls.Device['Status'].String = 'connecting';
+  elseif(SockStatus ~= TcpSocket.Events.Connected) then
+    Ctls.Device['Status'].Value = 2;
+    Ctls.Device['Status'].String = (
+      SockStatus == 'IP missing' and SockStatus or SockStatus:lower()
+    );
+  else
+    if(os.time() - (MulticastStatus or 0) > 3) then
+      Ctls.Device['Status'].Value = 1;
+      Ctls.Device['Status'].String = 'no multicast';
+    else
+      Ctls.Device['Status'].Value = 0;
+      Ctls.Device['Status'].String = 'connected';
+    end;
+  end;
+end;
+StatusTimer:Start(0.5);
+

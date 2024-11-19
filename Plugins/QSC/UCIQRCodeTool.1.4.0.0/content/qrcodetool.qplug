@@ -1,0 +1,266 @@
+--[[ BEGIN DIGITAL SIGNATURE
+vZohpQlcoGatdULUHdMh3t8dmsDyyr8ey2ejQJVRckDZRfTgI5BHNSThkWt9ZRWyADykdVqDdJHvu3CBNNxY92LkGso/0Euk7GhSB6SuJRQU0wxPXxX3pWvylEtVkDCyDZPIFyU8G8Qkfkm842AOUXZDdW/ITjb8ksXZ9I+KJOAyq699KU6Nlq9EKGpvNgkkWC1X+KWEswMlNKYOV+vnEreEQPeSHC6EEa13yF6t7zlnzhnAGKhctPX4o344v1Dex/TcmLagSFIe2w88q9XWJEcKkWKs2ZKBtLD2bWHZiPaOkA1cHt6X8E31FFdaYhFLzQLb3/n52RHCCq6Bx4MMAw==
+END DIGITAL SIGNATURE ]]
+-- UCI QR Code Tool
+-- by QSC
+-- May 2020
+
+PluginInfo = {
+    Name = "Tools~UCI QR Code Tool v1.4",
+    Version = "1.4",
+    BuildVersion = "1.4.0.0",
+    Id = "5db9d5f2-6954-46b6-ac11-cf3da88576ce",
+    Author = "QSC",
+    Description = "Compiled from Visual Studio Code",
+}
+
+local Colors = {
+  White = {255,255,255},
+  Clear = {0,0,0,0},
+  MainGB = {230,230,230},
+  InnerGB = {255,255,255},
+  Text = {51,51,51},
+}
+
+function GetColor(props)
+  return { 204, 204, 204 }
+end
+
+function GetPrettyName(props)
+  return "UCI QR Code Tool\r" .. PluginInfo.Version
+end
+
+local pagenames = {"Setup","QR Codes"}
+
+function GetPages(props) --optional function if plugin has multiple pages
+  pages = {}
+  for ix,name in ipairs(pagenames) do
+    table.insert(pages,{name = pagenames[ix]})
+  end
+  return pages
+end
+
+function GetProperties()
+  props = {}
+  table.insert(props,{Name = "Debug Print",Type = "enum",Choices = {"None", "UCIs", "Function Calls","Tx","Rx", "All"},Value = "None"})
+  return props
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value==false then props["Debug Print"].IsHidden=true end
+  return props
+end
+
+function GetControls(props)
+  ctrls = {}
+  -- Setup page
+  table.insert(ctrls,{Name = "NetworkInterface",ControlType = "Text",PinStyle = "Output",UserPin = true,Count = 1})
+  table.insert(ctrls,{Name = "UCIDevice",ControlType = "Text",PinStyle = "Output",UserPin = true,Count = 1})
+  -- QR Codes page
+  table.insert(ctrls,{Name = "UCIName",ControlType = "Text",PinStyle = "Output",UserPin = true,Count = 20})
+  table.insert(ctrls,{Name = "QRCode",ControlType = "Button",ButtonType = "Trigger",UserPin = false,Count = 20})
+  return ctrls
+end
+
+function GetControlLayout(props)
+  layout   = {}
+  graphics = {}
+  local CurrentPage = pagenames[props["page_index"].Value]
+  -- Position Function to create a new row per every 5 devices
+  local function GetIPos(qty, rowlen, base, ofs)
+    local row,col = (qty-1)//(rowlen),(qty-1)%rowlen
+    return { base.x + col*ofs.x, base.y + row*ofs.y }
+  end
+  
+  if CurrentPage == "Setup" then
+    -- Non-control graphics
+    -- GroupBoxes
+    table.insert(graphics,{Type = "GroupBox",Fill = Colors.MainGB,CornerRadius = 0,StrokWidth = 0,Position = {0,0},Size = {309,142}})
+    table.insert(graphics,{Type = "GroupBox",Fill = Colors.InnerGB,CornerRadius = 0,StrokWidth = 0,Position = {6,22},Size = {296,112}})
+    -- Text Elements
+    table.insert(graphics,{Type = "Text",Text = "Setup",Font = "Roboto",FontStyle = "Bold",FontSize = 18,FontColor = Colors.Text,HTextAlign = "Left",Fill = Colors.Clear,Position = {6,0},Size = {150,22}})
+    table.insert(graphics,{Type = "Text",Text = "Version "..PluginInfo.Version,FontSize = 9,FontColor = Colors.Text,HTextAlign = "Right",Fill = Colors.Clear,Position = {228,122},Size = {73,12}})
+    table.insert(graphics,{Type = "Text",Text = "Network Interface",FontSize = 14,FontColor = Colors.Text,Fill = Colors.Clear,HTextAlign = "Center",Position = {85,29},Size = {146,18}})
+    table.insert(graphics,{Type = "Text",Text = "UCI Device",FontSize = 14,FontColor = Colors.Text,Fill = Colors.Clear,HTextAlign = "Center",Position = {85,70},Size = {146,18}})
+    -- Controls
+    layout["NetworkInterface"] = {PrettyName = "Setup~Network Interface",Style = "ComboBox",FontSize = 12,Position = {85,47},Size = {146,16}}
+    layout["UCIDevice"] = {PrettyName = "Setup~UCI Device",Style = "ComboBox",FontSize = 12,Position = {85,88},Size = {146,18}}
+  elseif CurrentPage == "QR Codes" then
+    -- Non-control graphics
+    -- GroupBoxes
+    table.insert(graphics,{Type = "GroupBox",Fill = Colors.MainGB,CornerRadius = 0,StrokWidth = 0,Position = {0,0},Size = {515,568}})
+    table.insert(graphics,{Type = "GroupBox",Fill = Colors.InnerGB,CornerRadius = 0,StrokWidth = 0,Position = {6,22},Size = {502,538}})
+    -- Text Elements
+    table.insert(graphics,{Type = "Text",Text = "QR Codes",Font = "Roboto",FontStyle = "Bold",FontSize = 18,FontColor = Colors.Text,HTextAlign = "Left",Fill = Colors.Clear,Position = {6,0},Size = {150,22}})
+    table.insert(graphics,{Type = "Text",Text = "Version "..PluginInfo.Version,FontSize = 9,FontColor = Colors.Text,HTextAlign = "Right",Fill = Colors.Clear,Position = {433,548},Size = {73,12}})
+    -- Controls
+    for i=1,20 do
+      layout["UCIName "..i] = {PrettyName = string.format("QR Codes~UCI %i Name",i),Style = "Text",TextBoxStyle = "NoBackground",TextColor = Colors.Text,FontSize = 10,Position = GetIPos(i,5,{x=7,y=132},{x=100,y=132}),Size = {100,16},IsReadOnly = true}
+      layout["QRCode "..i] = {PrettyName = string.format("QR Codes~UCI %i QR Code",i),Style = "Button",ButtonStyle = "Trigger",ButtonVisualStyle = "Flat",Color = Colors.White,UnlinkOffColor = true,OffColor = Colors.White,StrokeColor = Colors.White,Position = GetIPos(i,5,{x=7,y=23},{x=100,y=132}),Size = {100,100},IsReadOnly = true}
+    end
+  end
+  return layout, graphics
+end
+
+function GetComponents(props)
+  return {
+    {
+      Name = "nic_storage", 
+      Type = "scriptable_controls", 
+      Properties = {
+        ["config"] = '[{"Name":"Core","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"Emul","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"lastIP","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"lastname","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0}]'
+      }
+    }
+  }
+end
+
+--Start event based logic
+if Controls then
+  -- Control aliases
+  NIC = Controls.NetworkInterface
+  Device = Controls.UCIDevice
+  Interface = Controls.UCIName
+  Code = Controls.QRCode
+  
+  -- Constants
+  json = require('rapidjson')
+  UCIFile = io.open("design/ucis.json","r")
+  UCIs = json.decode(UCIFile:read("*all"))
+  Blank = "{\"DrawChrome\":false}"
+  maxSize = 500000
+  
+  -- Variables and Tables
+  DebugUCI = false
+  DebugFunction = false
+  DebugTx = false
+  DebugRx = false
+  DebugPrint = Properties["Debug Print"].Value
+  IPAddress = ""
+  DesignName = ""
+  NICs = {}
+  validNIC = false
+  DeviceChoices = {"iOS App","Web UCI"}
+  e = System.IsEmulating
+  nic_storage = nic_storage[tostring(e and "Emul" or "Core")]
+  
+  -- Helper functions
+  -- A function to determine common print statement scenarios for troubleshooting
+  function SetupDebugPrint()
+    if DebugPrint == "UCIs" then
+      DebugUCI = true
+    elseif DebugPrint == "Function Calls" then
+      DebugFunction = true
+    elseif DebugPrint == "Tx" then
+      DebugTx = true
+    elseif DebugPrint == "RX" then
+      DebugRx = true
+    elseif DebugPrint == "All" then
+      DebugUCI,DebugFunction,DebugTx,DebugRx = true,true,true,true
+    end
+  end
+  
+  -- Setup ComboBoxes
+  function Choices()
+    if DebugFunction then print("Choices() Called") end
+    local design = Design.GetStatus()
+    DesignName = design.DesignName
+    Device.Choices = DeviceChoices
+    if Device.String =="" then Device.String = "Web UCI" end
+    if NIC.String == "" then 
+      NIC.String = "Select Network Interface"
+    else
+      -- if users switch between emulation and running, we need to check that our NIC is still valid
+      if not string.find(nic_storage.String,NIC.String) then
+        NIC.String = "Select Network Interface"
+        nic_storage.String = ""
+      else
+        SetIP()
+      end
+    end
+  end
+  
+  -- Get Network Interfaces
+  function GetNICs()
+    if DebugFunction then print("GetNICs() Called") end
+    local nics = Network.Interfaces()
+    if #nics > 0 then
+      for i,item in ipairs(nics) do
+        table.insert(NICs,{Text = item.Interface,Address = item.Address})
+      end
+    else
+      NICs.String = "No NICs found!"
+      nic_storage.String = ""
+    end
+    NIC.Choices = NICs
+  end
+  
+  -- Flush QR Codes on restart
+  function ClearQR()
+    if DebugFunction then print("ClearQR() Called") end
+    for k,v in pairs(Code) do
+      v.Legend = Blank
+      Interface[tonumber(k)].String = ""
+    end
+  end
+  
+  -- Get number and name of UCIs in design
+  function GetUCIs()
+    if DebugFunction then print("GetUCIs() Called") end
+    for k,v in pairs(UCIs.Ucis) do
+      Interface[tonumber(k)].String = v.Name
+      if DebugUCI then print("UCIs\r",k,v) end
+      if NIC.String ~= "Select Network Interface" then
+        if NIC.String ~= "No NICs found!" then
+          GetQRCodes(k, IPAddress, v.Name, v.FileName)
+        end
+      end
+    end
+  end
+  
+  -- Generate QR Codes once a NIC is chosen
+  function GetQRCodes(index, ip, name, file)
+    if DebugFunction then print("GetQRCodes() Called") end
+    local url = ""
+    if Device.String == "Web UCI" then
+      url = string.format("http://%s/uci-viewer/?file=%s&directory=/designs/current_design/UCIs/", ip, file)
+    else
+      url = string.format("qsys://?design=%s&page=%s",DesignName,name)
+    end
+    if DebugTx then print("Tx: ",url) end
+    svg = QRCode.GenerateSVG(url)
+    local ctl = Code[index]
+    legend = {
+      DrawChrome = false,
+      IconData = Crypto.Base64Encode(svg)
+    }
+    ctl.Legend = json.encode(legend)
+    -- ctl.String = json.encode( { Protocol = "Image", SvgData = svg })
+  end
+  
+  -- EventHandlers
+  
+  -- When NIC is selected
+  function SetIP()
+    if DebugFunction then print("SetIP() Called") end
+    local nic = NIC.String
+    nic_storage.String = nic
+    local nicDecode = json.decode(nic)
+    if nicDecode["Text"] ~= nil then
+      IPAddress = nicDecode["Address"]
+    end
+    GetUCIs()
+  end
+  
+  -- Initialization Function
+  function Initialization()
+    if DebugFunction then print("Initialization() Called") end
+    SetupDebugPrint()
+    ClearQR()
+    GetNICs()
+    Choices()
+    NIC.EventHandler = SetIP
+    Device.EventHandler = GetUCIs
+  end
+  
+  Initialization()
+end

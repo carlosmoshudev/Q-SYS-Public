@@ -1,0 +1,1785 @@
+<html><head><style type="text/css">
+    body {
+  font-family: "-apple-system","Segoe UI","Roboto","Ubuntu","Droid Sans","Helvetica Neue",sans-serif;
+}
+h1, h2, h3, h4, h5, h6 { 
+  font-weight: 600; display: block; 
+}
+h1 { 
+  border-bottom: solid #ccc 1px; 
+  margin-top: 36px; 
+  padding-bottom: 10px; 
+}
+h1:first-child { margin-top: 0px; }
+h1 { font-size: 1.8em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.4em; }
+h4 { font-size: 1.3em; }
+h5 { font-size: 1.2em; }
+h6 { font-size: 1.1em; }
+ul { list-style: square; }
+
+table { 
+  border: solid #ccc 1px; 
+  border-spacing: 0px;
+  border-collapse: collapse;
+}
+th { border-bottom: solid #ccc 1px; background-color: #eee; }
+th, td { padding: 12px; border: solid #ccc 1px; }
+
+    </style><meta charset="UTF-8"></head><body><h1 id="birddog-ptz-camera-family-quickstart-install-guide">BirdDog PTZ Camera Family Quickstart Install Guide</h1>
+<p><img src="data:image/png;base64,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15EkcdXcE+cShxGM4GjiOanoADO+8nuULppM3No3DXEtMS4JIfymt2cgkDkiWHcUQhdHMIKTAf8PiXmv375BNO4AAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMTEtMjJUMDE6MzQ6NDIrMDA6MDCKt8UlAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTExLTIyVDAxOjM0OjE3KzAwOjAw4TJcWgAAABp0RVh0ZXhpZjpCaXRzUGVyU2FtcGxlADgsIDgsIDgS7T4nAAAAEXRFWHRleGlmOkNvbG9yU3BhY2UAMQ+bAkkAAAAhdEVYdGV4aWY6RGF0ZVRpbWUAMjAyMjowMjoxNCAxMjozMjo0ORm+k8YAAAATdEVYdGV4aWY6RXhpZk9mZnNldAAxNzjc1lZ+AAAAFHRFWHRleGlmOkltYWdlTGVuZ3RoADE0Mvf7jS0AAAATdEVYdGV4aWY6SW1hZ2VXaWR0aAA1MDCp7JFUAAAAGnRFWHRleGlmOlNvZnR3YXJlAEdJTVAgMi4xMC4yMAYQhsIAAAAkdEVYdGV4aWY6dGh1bWJuYWlsOkJpdHNQZXJTYW1wbGUAOCwgOCwgOCAb9FMAAAAcdEVYdGV4aWY6dGh1bWJuYWlsOkNvbXByZXNzaW9uADb5ZXBXAAAAHXRFWHRleGlmOnRodW1ibmFpbDpJbWFnZUxlbmd0aAA3Mpk4LoYAAAAddEVYdGV4aWY6dGh1bWJuYWlsOkltYWdlV2lkdGgAMjU2iAb6FAAAACh0RVh0ZXhpZjp0aHVtYm5haWw6SlBFR0ludGVyY2hhbmdlRm9ybWF0ADMwNKxHz2gAAAAvdEVYdGV4aWY6dGh1bWJuYWlsOkpQRUdJbnRlcmNoYW5nZUZvcm1hdExlbmd0aAA0OTQ4Gt/DEAAAACp0RVh0ZXhpZjp0aHVtYm5haWw6UGhvdG9tZXRyaWNJbnRlcnByZXRhdGlvbgA2EhWKGgAAACB0RVh0ZXhpZjp0aHVtYm5haWw6U2FtcGxlc1BlclBpeGVsADPh181aAAAAG3RFWHRpY2M6Y29weXJpZ2h0AFB1YmxpYyBEb21haW62kTFbAAAAInRFWHRpY2M6ZGVzY3JpcHRpb24AR0lNUCBidWlsdC1pbiBzUkdCTGdBEwAAABV0RVh0aWNjOm1hbnVmYWN0dXJlcgBHSU1QTJ6QygAAAA50RVh0aWNjOm1vZGVsAHNSR0JbYElDAAAAAElFTkSuQmCC" alt="html:maxwidth(250,px)" style="width: undefined; height: undefined"></p>
+<p><strong>Version:</strong> 1.0.0.0</p>
+<p><strong>Date:</strong> 2023-11-22</p>
+<p><strong>Authors:</strong> Kevin Lam</p>
+<h1 id="overview">Overview</h1>
+<p>BirdDog PTZ Cameras are known for their high-quality pan-tilt-zoom functionality, designed primarily for professional video production and broadcasting applications. These cameras typically feature advanced imaging sensors, precise motor control for smooth movements, and versatile zoom capabilities, allowing users to capture dynamic shots with ease. BirdDog PTZ Cameras are often praised for their integration capabilities, supporting various video protocols and offering IP-based connectivity for seamless integration into existing production setups. These cameras are favored in settings such as live events, conferences, and broadcast studios for their reliability, flexibility, and superior video performance. </p>
+<p>The Q-SYS plugin will integrate the BirdDog PTZ Camera Family. Found out more <a href="https://birddog.tv/ptz-range/">here</a></p>
+<h1 id="features">Features</h1>
+<ul>
+<li>Control and Feedback of the BirdDog PTZ Camera Family</li>
+<li>Model selection</li>
+<li>Simple or Advanced Mode selection</li>
+<li>Dynamic Controls based on Model selection</li>
+<li>Setup Page<ul>
+<li>IP Address</li>
+<li>HostName</li>
+<li>Firmware Version</li>
+<li>Serial Number</li>
+<li>Format</li>
+<li>Hardware Version</li>
+<li>MCU Version</li>
+<li>Hardware Status</li>
+<li>Connection Status</li>
+<li>Reboot</li>
+<li>Restart</li></ul></li>
+<li>Control Page<ul>
+<li>Pan Left</li>
+<li>Pan Right</li>
+<li>Tilt Up</li>
+<li>Tilt Down</li>
+<li>Move Up Left</li>
+<li>Move Down Left</li>
+<li>Move Up Right</li>
+<li>Move Down Right</li>
+<li>Speed Control</li>
+<li>Pan Speed</li>
+<li>Tilt Speed</li>
+<li>Zoom Tele</li>
+<li>Zoom Wide</li>
+<li>Zoom Speed</li>
+<li>Focus In</li>
+<li>Focus Out</li>
+<li>Tele Convert Mode</li>
+<li>Focus Mode</li>
+<li>FreeD On/Off</li>
+<li>FreeD IP Address</li>
+<li>FreeD Port</li>
+<li>OSD Menu On/Off</li>
+<li>Reset Image</li>
+<li>Preset Selection</li>
+<li>Preset Speed</li>
+<li>Preset Label</li>
+<li>Preset Save</li>
+<li>Preset Recall</li></ul></li>
+<li>Exposure Page (Advanced Mode)<ul>
+<li>Exposure Mode</li>
+<li>Slow Shutter Enable</li>
+<li>Slow Shutter Limit</li>
+<li>Gain Point</li>
+<li>Gain Point Position</li>
+<li>Auto Exposure Response</li>
+<li>Gain Limit</li>
+<li>Gain Level</li>
+<li>Backlight</li>
+<li>Spotlight</li>
+<li>Shutter Min Speed</li>
+<li>Shutter Max Speed</li>
+<li>Shutter Speed</li>
+<li>Iris Level</li>
+<li>Compensation Enable</li>
+<li>Compensation Level</li>
+<li>High Sensitivity</li>
+<li>Brightness Level</li>
+<li>Shutter Control Overwrite</li>
+<li>Shutter Speed Overwrite</li></ul></li>
+<li>White Balance Page (Advanced Mode)<ul>
+<li>White Balance Mode</li>
+<li>Speed</li>
+<li>Offset</li>
+<li>Red Gain</li>
+<li>Blue Gain</li>
+<li>Color Temp</li>
+<li>Matrix</li>
+<li>Level</li>
+<li>Phase</li>
+<li>Select</li>
+<li>Red Blue</li>
+<li>Red Green</li>
+<li>Green Red</li>
+<li>Green Blue</li>
+<li>Blue Red</li>
+<li>Blue Green</li></ul></li>
+<li>Picture Page (Advanced Mode)<ul>
+<li>Backlight Compensation</li>
+<li>Chroma Suppress</li>
+<li>Two DNR</li>
+<li>Three DNR</li>
+<li>Noise Reduction</li>
+<li>Sharpness</li>
+<li>ND Filter</li>
+<li>Effect</li>
+<li>Flip</li>
+<li>Color/Saturation</li>
+<li>Gamma</li>
+<li>Hue</li>
+<li>Hightlight Compensation</li>
+<li>Hightlight Compensation Mask</li>
+<li>Contrast</li>
+<li>Wide Dynamic Range</li>
+<li>Low Latency</li>
+<li>IR Cut Filter</li>
+<li>Mirror</li>
+<li>Stabilizer</li></ul></li>
+<li>Color Matrix Page (Advanced Mode)<ul>
+<li>Color Gain</li>
+<li>Hue Phase</li>
+<li>Blue Gain</li>
+<li>Blue Hue</li>
+<li>Cyan Gain</li>
+<li>Cyan Hue</li>
+<li>Green Gain</li>
+<li>Green Hue</li>
+<li>Magenta Gain</li>
+<li>Magenta Hue</li>
+<li>Red Gain</li>
+<li>Red Hue</li>
+<li>Yellow Gain</li>
+<li>Yellow Hue</li></ul></li>
+<li>Advanced Page (Advanced Mode)<ul>
+<li>Advanced Settings<ul>
+<li>Brightness</li>
+<li>Brightness Compensation</li>
+<li>Gamma Offset</li>
+<li>High Resolution</li>
+<li>Compensation Level</li>
+<li>Video Enhancement</li></ul></li>
+<li>External Settings<ul>
+<li>External Aux</li>
+<li>External Rain Wiper</li>
+<li>External V12v Out</li></ul></li>
+<li>Gamma Settings<ul>
+<li>Black Gamma Level</li>
+<li>Offset</li>
+<li>Black Level</li>
+<li>Setting</li>
+<li>Black Level Range</li>
+<li>Pattern</li>
+<li>Pattern Fine</li>
+<li>Level</li>
+<li>Visibility Enhancer</li>
+<li>Effect</li></ul></li>
+<li>Device Settings<ul>
+<li>Analog Audio In Gain</li>
+<li>Analog Audio Out Gain</li>
+<li>Analog Audio Output Select</li></ul></li></ul></li>
+<li>Encoding Page (Advanced Mode)<ul>
+<li>Stream To Network</li>
+<li>Video Format</li>
+<li>Video Sample Rate</li>
+<li>NDI Audio</li>
+<li>NDI Group Enable</li>
+<li>NDI Group Name</li>
+<li>Screen Saver Mode</li>
+<li>Tally Mode</li>
+<li>Stream Name</li></ul></li>
+</ul>
+<h1 id="setup">Setup</h1>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before configuring the plugin:</p>
+<ul>
+<li>The camera(s) must be connected to a network and have a valid IP address in a subnet which the Q-SYS core can communicate with.</li>
+<li>The IP address can be obtained or configured from the BirdDog camera using NDI Tools software, see <a href="https://ndi.video/tools/ndi-core-suite/">NDI Tools</a> product page.</li>
+<li>Ensure the IP Address will not change. Static or MAC reserve your camera on the network.</li>
+</ul>
+<h2 id="configuration-overview">Configuration Overview</h2>
+<ol>
+<li><p>Drag the plugin into your schematic.</p></li>
+<li><p>Select the plugin and configure the properties. See properties below.</p></li>
+<li><p>Press F5 to save your design to the Core and run it. (Or, press F6 to emulate your design.)</p></li>
+<li><p>In your schematic, double-click the plugin to open the component's control panel.</p></li>
+<li><p>In the Setup page, enter the camera's IP Address.</p></li>
+<li><p>Upon successful connection, the Connection status should show "OK" and device information populated.</p></li>
+</ol>
+<h2 id="properties">Properties</h2>
+<table>
+<thead>
+<tr>
+<th id="**property**"><strong>Property</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>Choose camera model that the plugin is communicating with</td>
+<td>P200 / PF120, P100, P110, P120, X120, P200, P240, P400, P4K, A200, A300</td>
+</tr>
+<tr>
+<td>Mode</td>
+<td><strong>Simple</strong> - Setup &amp; Control Pages <strong>Advanced</strong> - All plugin Pages for increased control</td>
+<td>Simple / Simple, Advanced</td>
+</tr>
+</tbody>
+</table>
+<h2 id="controls">Controls</h2>
+<h3 id="setup-page">Setup Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP Address</td>
+<td>Used to input the IP address of the converter.</td>
+<td>Text Entry</td>
+<td></td>
+</tr>
+<tr>
+<td>HostName</td>
+<td>Hostname of the converter</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Firmware Version</td>
+<td>Firmware version of the converter</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Serial Number</td>
+<td>Serial Number of the converter.</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Format</td>
+<td>Format of the converter.</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Hardware Version</td>
+<td>Hardware Version of the converter.</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>MCU Version</td>
+<td>MCU Version of the converter.</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Hardware Status</td>
+<td>Hardware Status of the converter.</td>
+<td>Text Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Connection Status</td>
+<td>Hardware Status of the converter.</td>
+<td>Status Indicator</td>
+<td></td>
+</tr>
+<tr>
+<td>Reboot</td>
+<td>Reboots the converter</td>
+<td>Button (Trigger)</td>
+<td></td>
+</tr>
+<tr>
+<td>Restart</td>
+<td>Restarts the NDI stream</td>
+<td>Button (Trigger)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="control-page">Control Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pan Left</td>
+<td>Pan Camera Left</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Pan Right</td>
+<td>Pan Camera Right</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Tilt Up</td>
+<td>Tilt Camera Up</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Tilt Down</td>
+<td>Tilt Camera Down</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Move Up Left</td>
+<td>Move Camera Up Left</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Move Down Left</td>
+<td>Move Camera Down Left</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Move Up Right</td>
+<td>Move Camera Up Right</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Move Down Right</td>
+<td>Move Camera Down Right</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Speed Control</td>
+<td>Select Speed Control setting</td>
+<td>ComboBox</td>
+<td>Standard, Advanced</td>
+</tr>
+<tr>
+<td>Pan Speed</td>
+<td>Adjust Pan Speed</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Tilt Speed</td>
+<td>Adjust Tilt Speed</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Zoom Speed</td>
+<td>Adjust Zoom Speed</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Zoom Tele</td>
+<td>Zoom In</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Zoom Wide</td>
+<td>Zoom Out</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Focus In</td>
+<td>Focus In</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Focus Out</td>
+<td>Focus Out</td>
+<td>Button (Momentary)</td>
+<td></td>
+</tr>
+<tr>
+<td>Focus Mode</td>
+<td>Select Focus mode setting</td>
+<td>ComboBox</td>
+<td>Auto, Manual</td>
+</tr>
+<tr>
+<td>Tele Convert Mode</td>
+<td>Set tele convert mode</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Menu</td>
+<td>Trigger OSD Menu On/Off</td>
+<td>Button (Trigger)</td>
+<td></td>
+</tr>
+<tr>
+<td>FreeD On</td>
+<td>Enables/disables FreeD</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>FreeD Off</td>
+<td>Enables/disables FreeD</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>FreeD IP Address</td>
+<td>Sets the FreeD IP Address</td>
+<td>Text Entry</td>
+<td></td>
+</tr>
+<tr>
+<td>FreeD Port</td>
+<td>Sets the FreeD Port</td>
+<td>Text Entry</td>
+<td></td>
+</tr>
+<tr>
+<td>Reset Image</td>
+<td>Resets image settings</td>
+<td>Button (Trigger)</td>
+<td></td>
+</tr>
+<tr>
+<td>Preset Select</td>
+<td>Select Preset saving setting</td>
+<td>ComboBox</td>
+<td>Camera, Birddog</td>
+</tr>
+<tr>
+<td>Preset Speed</td>
+<td>Adjust Preset Speed</td>
+<td>Knob (Meter)</td>
+<td>0 - 21</td>
+</tr>
+<tr>
+<td>Preset Label</td>
+<td>Sets the Label for Preset x</td>
+<td>Text Entry</td>
+<td></td>
+</tr>
+<tr>
+<td>Preset Save</td>
+<td>Saves Preset x</td>
+<td>Button (Trigger)</td>
+<td></td>
+</tr>
+<tr>
+<td>Preset Recall</td>
+<td>Recalls Preset x</td>
+<td>Button (Trigger)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="exposure-page">Exposure Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exposure Mode</td>
+<td>Select Exposure Mode</td>
+<td>ComboBox</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Slow Shutter Enable</td>
+<td>When set to “On,” the slow shutter functions automatically in low light conditions</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Slow Shutter Limit</td>
+<td>Limit the shutter speed reduction</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Gain Point</td>
+<td>Set gain point on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Gain Point Position</td>
+<td>Set gain point between 0dB and the gain limit</td>
+<td>Knob (Meter)</td>
+<td>1 - 13</td>
+</tr>
+<tr>
+<td>Auto Exposure Response</td>
+<td>Reduce exposure response speed</td>
+<td>Knob (Meter)</td>
+<td>1 - 48</td>
+</tr>
+<tr>
+<td>Gain Limit</td>
+<td>Limit automatic setting of gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Gain Level</td>
+<td>Set Gain Level</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Backlight</td>
+<td>Set Backlight compensation on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Spotlight</td>
+<td>Set Spotlight compensation on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Shutter Min Speed</td>
+<td>Adjust minimum shutter speed</td>
+<td>Knob (Meter)</td>
+<td>16 - 33</td>
+</tr>
+<tr>
+<td>Shutter Max Speed</td>
+<td>Adjust maximum shutter speed</td>
+<td>Knob (Meter)</td>
+<td>20 - 33</td>
+</tr>
+<tr>
+<td>Shutter Speed</td>
+<td>Set Shutter Speed</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Iris Level</td>
+<td>Set Iris Level</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Compensation Enable</td>
+<td>Set exposure compensation on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Compensation Level</td>
+<td>Set Compensation Level</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>High Sensitivity</td>
+<td>Set high sensitivity on/off to increase max gain</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Brightness Level</td>
+<td>Set Brightness Level when mode is Bright</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Shutter Control Overwrite</td>
+<td>Set optional shutter speed for use</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Shutter Speed Overwrite</td>
+<td>Adjust Shutter speed when Shutter Control Overwrite is On</td>
+<td>Knob (Meter)</td>
+<td>30 - 110</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white-balance-page">White Balance Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>White Balance Mode</td>
+<td>Select White Balance Mode</td>
+<td>ComboBox</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Set White Balance Speed</td>
+<td>Knob (Meter)</td>
+<td>1 - 5</td>
+</tr>
+<tr>
+<td>Offset</td>
+<td>Set White Balance Offset</td>
+<td>Knob (Meter)</td>
+<td>0 - 14</td>
+</tr>
+<tr>
+<td>Red Gain</td>
+<td>Set Red Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Blue Gain</td>
+<td>Set Blue Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Color Temp</td>
+<td>Set Color Temperature</td>
+<td>Knob (Meter)</td>
+<td>2800 - 6500</td>
+</tr>
+<tr>
+<td>Matrix</td>
+<td>Set matrix on/off to unlock Controls below</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Level</td>
+<td>Set White Balance Level</td>
+<td>Knob (Meter)</td>
+<td>0 - 14</td>
+</tr>
+<tr>
+<td>Phase</td>
+<td>Set White Balance Phase</td>
+<td>Knob (Meter)</td>
+<td>0 - 14</td>
+</tr>
+<tr>
+<td>Select</td>
+<td>Select matrix setting</td>
+<td>ComboBox</td>
+<td>FL LIGHT, STD, OFF, HIGH SAT</td>
+</tr>
+<tr>
+<td>Red Blue</td>
+<td>Set Red Blue value</td>
+<td>Knob (Meter)</td>
+<td>-99 - 99</td>
+</tr>
+<tr>
+<td>Red Green</td>
+<td>Set Red Green value</td>
+<td>Knob (Meter)</td>
+<td>-99 - 99</td>
+</tr>
+<tr>
+<td>Green Red</td>
+<td>Set Green Red value</td>
+<td>Knob (Meter)</td>
+<td>-99 - 99</td>
+</tr>
+<tr>
+<td>Green Blue</td>
+<td>Set Green Blue value</td>
+<td>Knob (Meter)</td>
+<td>-99 - 99</td>
+</tr>
+<tr>
+<td>Blue Red</td>
+<td>Set Blue Red value</td>
+<td>Knob (Meter)</td>
+<td>-99 - 99</td>
+</tr>
+<tr>
+<td>Blue Green</td>
+<td>Set Blue Green value</td>
+<td>Knob (Meter)</td>
+<td>-99 - 99</td>
+</tr>
+</tbody>
+</table>
+<h3 id="picture-page">Picture Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backlight Compensation</td>
+<td>Set backlight compensation on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Chroma Suppress</td>
+<td>Select chroma suppress mode</td>
+<td>ComboBox</td>
+<td>OFF, LOW, MEDIUM, HIGH</td>
+</tr>
+<tr>
+<td>Two DNR</td>
+<td>Set 2D noise reduction</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Three DNR</td>
+<td>Set 3D noise reduction</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Noise Reduction</td>
+<td>Set noise reduction</td>
+<td>Knob (Meter)</td>
+<td>0 - 5</td>
+</tr>
+<tr>
+<td>Sharpness</td>
+<td>Set sharpness</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>ND Filter</td>
+<td>Set ND Filter</td>
+<td>Knob (Meter)</td>
+<td>0 - 3</td>
+</tr>
+<tr>
+<td>Effect</td>
+<td>Select White Balance Mode</td>
+<td>ComboBox</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Flip</td>
+<td>Set flip on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Color/Saturation</td>
+<td>Set color or saturation value</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Gamma</td>
+<td>Set Gamma level</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Hue</td>
+<td>Set Hue level</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Hightlight Compensation</td>
+<td>Select Hightlight Compensation mode</td>
+<td>ComboBox</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Hightlight Compensation Mask</td>
+<td>Set Hightlight Compensation Mask value</td>
+<td>Knob (Meter)</td>
+<td>0 - 15</td>
+</tr>
+<tr>
+<td>Contrast</td>
+<td>Set Contrast value</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Wide Dynamic Range</td>
+<td>Set Wide Dynamic Range value</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Low Latency</td>
+<td>Set low latency mode on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>IR Cut Filter</td>
+<td>Select IR Cut Filter mode</td>
+<td>ComboBox</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Mirror</td>
+<td>Set Mirror on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Stabilizer</td>
+<td>Set Stabilizer on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="color-matrix-page">Color Matrix Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Color Gain</td>
+<td>Set Color Gain</td>
+<td>Knob (Meter)</td>
+<td>0 - 255</td>
+</tr>
+<tr>
+<td>Hue Phase</td>
+<td>Set Hue Phase</td>
+<td>Knob (Meter)</td>
+<td>0 - 255</td>
+</tr>
+<tr>
+<td>Blue Gain</td>
+<td>Set Blue Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Blue Hue</td>
+<td>Set Blue Hue</td>
+<td>Knob (Meter)</td>
+<td>0 - 64</td>
+</tr>
+<tr>
+<td>Cyan Gain</td>
+<td>Set Cyan Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Cyan Hue</td>
+<td>Set Cyan Hue</td>
+<td>Knob (Meter)</td>
+<td>0 - 64</td>
+</tr>
+<tr>
+<td>Green Gain</td>
+<td>Set Green Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Green Hue</td>
+<td>Set Green Hue</td>
+<td>Knob (Meter)</td>
+<td>0 - 64</td>
+</tr>
+<tr>
+<td>Magenta Gain</td>
+<td>Set Magenta Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Magenta Hue</td>
+<td>Set Magenta Hue</td>
+<td>Knob (Meter)</td>
+<td>0 - 64</td>
+</tr>
+<tr>
+<td>Red Gain</td>
+<td>Set Red Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Red Hue</td>
+<td>Set Red Hue</td>
+<td>Knob (Meter)</td>
+<td>0 - 64</td>
+</tr>
+<tr>
+<td>Yellow Gain</td>
+<td>Set Yellow Gain</td>
+<td>Knob (Meter)</td>
+<td>Model Dependent</td>
+</tr>
+<tr>
+<td>Yellow Hue</td>
+<td>Set Yellow Hue</td>
+<td>Knob (Meter)</td>
+<td>0 - 64</td>
+</tr>
+</tbody>
+</table>
+<h3 id="advanced-page">Advanced Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Adv Brightness</td>
+<td>Set Brightness Level</td>
+<td>Knob (Meter)</td>
+<td>0 - 6</td>
+</tr>
+<tr>
+<td>Adv Gamma Offset</td>
+<td>Set Gamma Offset</td>
+<td>Knob (Meter)</td>
+<td>-16 - 64</td>
+</tr>
+<tr>
+<td>Adv Brightness Compensation</td>
+<td>Select Brightness Compensation mode</td>
+<td>ComboBox</td>
+<td>VERY DARK, DARK, STANDARD, BRIGHT</td>
+</tr>
+<tr>
+<td>Adv Compensation Level</td>
+<td>Select Compensation Level mode</td>
+<td>ComboBox</td>
+<td>LOW, MID, HIGH</td>
+</tr>
+<tr>
+<td>High Resolution</td>
+<td>Set High Resolution on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Video Enhancement</td>
+<td>Set Video Enhancement on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>External Aux</td>
+<td>Set External Aux on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>External Rain Wiper</td>
+<td>Set External Rain Wiper on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>External V12v Out</td>
+<td>Set External V12v Out on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Black Gamma Level</td>
+<td>Set Black Gamma Level</td>
+<td>Knob (Meter)</td>
+<td>0 - 14</td>
+</tr>
+<tr>
+<td>Gamma Offset</td>
+<td>Set Gamma Offset</td>
+<td>Knob (Meter)</td>
+<td>-64 - 64</td>
+</tr>
+<tr>
+<td>Black Level</td>
+<td>Set Black Level</td>
+<td>Knob (Meter)</td>
+<td>0 - 96</td>
+</tr>
+<tr>
+<td>Gamma Setting</td>
+<td>Select Gamma setting</td>
+<td>ComboBox</td>
+<td>PATTERN, STANDARD, STRAIGHT</td>
+</tr>
+<tr>
+<td>Black Level Range</td>
+<td>Select Black Level Range mode</td>
+<td>ComboBox</td>
+<td>LOW, MID, HIGH</td>
+</tr>
+<tr>
+<td>Pattern</td>
+<td>Set Pattern value</td>
+<td>Knob (Meter)</td>
+<td>0 - 512</td>
+</tr>
+<tr>
+<td>Pattern Fine</td>
+<td>Set Pattern Fine value</td>
+<td>Knob (Meter)</td>
+<td>0 - 9</td>
+</tr>
+<tr>
+<td>Gamma Level</td>
+<td>Set Gamma Level</td>
+<td>Knob (Meter)</td>
+<td>0 - 14</td>
+</tr>
+<tr>
+<td>Visibility Enhancer</td>
+<td>Set Visibility Enhancer on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Effect</td>
+<td>Set Effect value</td>
+<td>Knob (Meter)</td>
+<td>-3 - 3</td>
+</tr>
+<tr>
+<td>Analog Audio In Gain</td>
+<td>Set Analog Audio In Gain</td>
+<td>Knob (Meter)</td>
+<td>0 - 100</td>
+</tr>
+<tr>
+<td>Analog Audio Out Gain</td>
+<td>Set Analog Audio In Gain</td>
+<td>Knob (Meter)</td>
+<td>0 - 100</td>
+</tr>
+<tr>
+<td>Analog Audio Output Select</td>
+<td>Select Analog Audio Output mode</td>
+<td>ComboBox</td>
+<td>DecodeLoop, DecodeComms</td>
+</tr>
+</tbody>
+</table>
+<h3 id="encoding-page">Encoding Page</h3>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**function**"><strong>Function</strong></th>
+<th id="**type**"><strong>Type</strong></th>
+<th id="**default_/_range**"><strong>Default / Range</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stream To Network</td>
+<td>Set stream to network on/off</td>
+<td>Button (Toggle)</td>
+<td>0 - 1</td>
+</tr>
+<tr>
+<td>Video Format</td>
+<td>Current video format and sets the format</td>
+<td>ComboBox</td>
+<td>Auto, 2160p23.97, 2160p24, 2160p25, 2160p29.97, 2160p30, 1080p60, 1080p59.94, 1080p50, 1080ip60, 1080ip59.94, 1080ip50, 1080p30, 1080p29.97, 1080p25, 1080p24, 1080p23.97, 720p60, 720p59.94, 720p50</td>
+</tr>
+<tr>
+<td>Video Sample Rate</td>
+<td>Current video sample rate and sets the rate</td>
+<td>ComboBox</td>
+<td>420, 422</td>
+</tr>
+<tr>
+<td>NDI Audio</td>
+<td>Selects the muting of the NDI audio</td>
+<td>ComboBox</td>
+<td>NDIAudioAnalog, NDIAudioMute</td>
+</tr>
+<tr>
+<td>Screen Saver Mode</td>
+<td>Sets the screensaver mode</td>
+<td>ComboBox</td>
+<td>BirdDogSS, BlackSS, CaptureSS</td>
+</tr>
+<tr>
+<td>Tally Mode</td>
+<td>Selects the tally mode</td>
+<td>ComboBox</td>
+<td>TallyOn, TallyOff</td>
+</tr>
+<tr>
+<td>NDI Group Enable</td>
+<td>Set the visibility of the device to other devices that belong to the same NDI group</td>
+<td>ComboBox</td>
+<td>NDIGroupEn, NDIGroupDis</td>
+</tr>
+<tr>
+<td>NDI Group Name</td>
+<td>Set the NDI group name</td>
+<td>Text Entry</td>
+<td></td>
+</tr>
+<tr>
+<td>Stream Name</td>
+<td>Sets the Stream Name</td>
+<td>Text Entry</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="control-pins">Control Pins</h2>
+<table>
+<thead>
+<tr>
+<th id="**control**"><strong>Control</strong></th>
+<th id="**direction**"><strong>Direction</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connection Status</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~IP Address</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>System~HostName</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~Firmware Version</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~Serial Number</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~Format</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~Hardware Version</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~MCU Version</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~Hardware Status</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>System~Reboot</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>System~Restart</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Pan Left</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Pan Right</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Tilt Up</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Tilt Down</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Move Up Left</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Move Down Left</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Move Up Right</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Move Down Right</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Speed Control</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Pan Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Tilt Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Zoom Tele</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Zoom Wide</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Zoom Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Focus Mode</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Focus In</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Focus Out</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Tele Convert Mode</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Reset Image</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~FreeD On</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~FreeD Off</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~FreeD IP Address</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~FreeD Port</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Menu On/Off</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Preset Select</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Preset Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Preset x Label</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Camera Controls~Preset x Save</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Camera Controls~Preset x Recall</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>Exposure~Exposure Mode</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Slow Shutter Enable</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Slow Shutter Limit</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Gain Point</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Gain Point Position</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Auto Exposure Response</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Gain Limit</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Gain Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Backlight</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Spotlight</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Shutter Min Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Shutter Max Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Shutter Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Iris Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Compensation Enable</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Compensation Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~High Sensitivity</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Brightness Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Shutter Control Overwrite</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Exposure~Shutter Speed Overwrite</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~White Balance Mode</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Speed</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Offset</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Red Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Blue Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Color Temp</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Matrix</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Phase</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Select</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Red Blue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Red Green</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Green Red</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Green Blue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Blue Red</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>White Balance~Blue Green</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Backlight Compensation</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Chroma Suppress</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Two DNR</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Three DNR</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Noise Reduction</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Sharpness</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~ND Filter</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Effect</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Flip</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Color/Saturation</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Gamma</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Highlight Compensation</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Highlight Compensation Mask</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Contrast</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Wide Dyanmic Range</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Low Latency</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~IR Cut Filter</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Mirror</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Picture~Stabilizer</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Color Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Hue Phase</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Blue Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Blue Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Cyan Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Cyan Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Green Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Green Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Magenta Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Magenta Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Red Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Red Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Yellow Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Color Matrix~Yellow Hue</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Advanced~Brightness</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Advanced~Brightness Compensation</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Advanced~Gamma Offset</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Advanced~High Resolution</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Advanced~Compensation Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Advanced~Video Enhancement</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>External~Ext Aux</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>External~Ext Rain Wiper</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>External~Ext V12v Out</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Black Gamma Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Offset</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Black Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Settings</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Black Level Range</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Pattern</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Pattern Fine</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Level</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Visibility Enhancer</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Gamma~Effect</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Audio~Analog Audio In Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Audio~Analog Audio Out Gain</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Audio~Analog Audio Output Select</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~Stream To Network</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~Video Format</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~Video Sample Rate</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~NDI Audio</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~NDI Group Enable</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~NDI Group Name</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~Screen Saver Mode</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~Tally Mode</td>
+<td>Input/Output</td>
+</tr>
+<tr>
+<td>Encoding~Stream Name</td>
+<td>Input/Output</td>
+</tr>
+</tbody>
+</table>
+<h1 id="faq">FAQ</h1>
+<p><strong>How much does this plugin cost?</strong><br>
+This plugin is sponsored by BirdDog and is FREE of charge</p>
+<p><strong>What hardware will this work on?</strong></p>
+<ul>
+<li>PF120</li>
+<li>P100</li>
+<li>P110</li>
+<li>P120</li>
+<li>X120</li>
+<li>P200</li>
+<li>P240</li>
+<li>P400</li>
+<li>P4K</li>
+<li>A200</li>
+<li>A300</li>
+</ul>
+<p><strong>Who do I contact for plugin support?</strong><br>
+Contact BirdDog for support on this plugin. Details <a href="https://birddog.tv/ticket/">here</a></p>
+<h1 id="change-log">Change Log</h1>
+<h2 id="version-1000---22-nov-2023">Version #1.0.0.0 - 22-NOV-2023</h2>
+<ul>
+<li>Initial Version</li>
+</ul></body></html>
