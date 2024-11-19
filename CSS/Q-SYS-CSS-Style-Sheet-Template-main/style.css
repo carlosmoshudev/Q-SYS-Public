@@ -1,0 +1,316 @@
+/* 
+  * CSS Including Icon Styles
+ * Based on CSS Created by K. Rhodus - QSC
+ * Version 1.1
+ * Antonio Vargas 2024
+
+  Look here for new icons to add (for -qsc-icon-font: material):
+  https://fonts.google.com/icons
+
+  And here for new icons to add (for -qsc-icon-font: foundation):
+  https://zurb.com/playground/foundation-icon-fonts-3
+
+  Just copy the new name on the -qsc-icon parameter and create a class name for it
+  .class-name {-qsc-icon: "icon_example";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+  */
+
+ /*
+ @import url("QSC_Icons_Foundation");
+ @import url("QSC_Icons_Material");
+*/
+
+/* 
+Variables inside :root could be used to asign to properties
+var(--icon-color-off);
+*/
+:root {
+    --icon-align: center;
+    --text-align: center;
+
+    --button-color-off: rgb(217, 209, 198);
+    --text-color-off:rgb(101, 34, 45); 
+    --icon-color-off: rgb(101, 34, 45); 
+    --border-color-off: rgb(217, 209, 198);
+
+    --button-color-on: rgb(101, 34, 45);
+    --text-color-on: rgb(217, 209, 198);
+    --icon-color-on: rgb(217, 209, 198);
+    --border-color-on: rgb(101, 34, 45);
+    
+    --label-color-primary:rgb(74, 73, 73);
+    --label-color-secondary: rgb(217, 209, 198); 
+    
+    --icon-colored: rgb(101, 34, 45);
+    /*https://cssgradient.io/*/
+    --fader-gradient: linear-gradient(0deg, rgb(5, 5, 5) 10%, rgb(235, 162, 5) 70%, rgb(255, 25, 0) 100%);
+    --base-var: rgb(255, 209, 214);
+    --end-var: rgb(255, 255, 255);
+}
+
+.icon-output {-qsc-icon: "output";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-input {-qsc-icon: "input";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-save {-qsc-icon: "save";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-server {-qsc-icon: "dns";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-projection-screen {-qsc-icon: "projection-screen";-qsc-icon-font:foundation;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-minus-circle {-qsc-icon: "minus-circle";-qsc-icon-font:foundation;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-done {-qsc-icon: "done";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-info {-qsc-icon: "info";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-layers {-qsc-icon: "layers";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-touch {-qsc-icon: "touch_app";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-logout {-qsc-icon: "logout";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-display {-qsc-icon: "tv";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-eq {-qsc-icon: "graphic_eq";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-videocam {-qsc-icon: "videocam";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-laptop {-qsc-icon: "laptop";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-cast {-qsc-icon: "cast";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-tv {-qsc-icon: "tv";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-hdmi {-qsc-icon: "settings_input_hdmi";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-ethernet {-qsc-icon: "settings_ethernet";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-groups {-qsc-icon: "groups";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-power {-qsc-icon: "power_settings_new";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-reply {-qsc-icon: "reply";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-home {-qsc-icon: "home";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-keyboard {-qsc-icon: "keyboard_alt";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-light {-qsc-icon: "lightbulb";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-ac {-qsc-icon: "ac_unit";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-setup {-qsc-icon: "construction";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-mic {-qsc-icon: "mic";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-mic_off {-qsc-icon: "mic_off";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-person {-qsc-icon: "person";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-close {-qsc-icon: "close";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-cancel {-qsc-icon: "cancel";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-videowall {-qsc-icon: "window";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-rec {-qsc-icon: "fiber_manual_record";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-switcher {-qsc-icon: "share";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-muted {-qsc-icon: "volume_off";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-unmuted {-qsc-icon: "volume_up";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-more {-qsc-icon: "expand_more";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-play {-qsc-icon: "play_arrow";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-play-circle {-qsc-icon: "play_circle";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-video {-qsc-icon: "video_library";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-chromecast {-qsc-icon: "chromecast_device";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-chromecast-alt {-qsc-icon: "chromecast_2";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.wifi {-qsc-icon: "wifi";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.video-call {-qsc-icon: "video_call";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.videoconference-1 {-qsc-icon: "contact_phone";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.videoconference-2 {-qsc-icon: "contacts";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-split {-qsc-icon: "call_split";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-pause {-qsc-icon: "pause";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-stop {-qsc-icon: "stop";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+.icon-loop {-qsc-icon: "repeat";-qsc-icon-font:material;-qsc-icon-color:var(--icon-color);-qsc-icon-align:var(--icon-align);}
+
+/*
+Keep coping icons that you are interested of from the Icons_Materials and Icons_Foundation style files
+*/
+
+
+
+.project-button
+{
+    background-color: var(--button-color-off);
+    border: 1px;
+    color: var(--text-color-off);
+    -qsc-icon-color: var(--icon-color-off);
+    border-color: var(--border-color-on);
+    font-family: 'Montserrat';
+}
+
+.project-button:value(1)
+{
+    background-color: var(--button-color-on);
+    border: 1px;
+    color: var(--text-color-on);
+    -qsc-icon-color: var(--icon-color-on);
+    border-color: var(--border-color-on);
+    font-family: 'Montserrat';
+}
+
+.console-image
+{
+    border: 2px;
+}
+
+.console-image:value(1)
+{
+    border: 2px;
+    color: var(--text-color-on);
+    -qsc-icon-color: var(--icon-color-on);
+    border-color: var(--border-color-on);
+    font-family: 'Montserrat';    
+}
+
+.menu-button
+{
+    background-color: transparent;
+    color: var(--text-color-off);
+    stroke: var(--button-color-off);
+    border-color: var(--button-color-off);
+    -qsc-icon-color: var(--text-color-off);
+    font-family: 'Montserrat';
+    border: none;
+}
+
+.menu-button:value(1)
+{
+    background-color: var(--button-color-on);
+    color: var(--text-color-on);
+    -qsc-icon-color: var(--icon-color-on);
+    font-family: 'Montserrat';
+    border: none;
+}
+
+.slider
+{
+    background-color: var(--button-color-off);
+
+}
+
+.tm-cap {
+    background-color: transparent;
+    border: 0px red;
+    background-image: url(images/fader_white.png);
+    margin: 0% 0% 0% 0%;
+  } 
+
+  .tm-cap-horizontal {
+    background-color: transparent;
+    border: 0px red;
+    background-image: url(images/fader_white_horizontal.png);
+    margin: 0% 0% 0% 0%;
+  } 
+  
+
+.fader-slot { background-color: gray; opacity: 0.1; border-radius: 20px; width: 200px; }
+
+.fader-slot:value(1) { background: var(--fader-gradient); /* linear-gradient(0deg, rgba(34,193,195,1) 10%, rgba(253,187,45,1) 85%, rgba(253,66,45,1) 100%); */ }
+
+  .slider-realistic{
+    -qsc-render-style: layer;
+    -qsc-fader-slot-class: fader-slot;
+    -qsc-fader-slot-width: 8vw;
+    -qsc-fader-cap-class: tm-cap;
+    -qsc-fader-cap-width: 82vw;
+    -qsc-fader-cap-height: 65vw;
+    /*background-image: url(tm-bg.png);*/
+    border: 0px transparent;
+  }
+
+  .slider-realistic-horizontal{
+    -qsc-render-style: layer;
+    -qsc-fader-slot-class: fader-slot;
+    -qsc-fader-slot-width: 1vw;
+    -qsc-fader-cap-class: tm-cap-horizontal;
+    -qsc-fader-cap-width: 15vw;
+    -qsc-fader-cap-height: 15vw;
+    /*background-image: url(tm-bg.png);*/
+    border: 0px transparent;
+  }
+
+
+.project-label-primary
+{
+    color: var(--label-color-primary);
+    font-family: 'Montserrat';
+    border: none;
+    background: none;    
+}
+
+.project-label-secondary
+{
+    color: var(--label-color-secondary);
+    font-family: 'Montserrat';
+    border: none;
+    background: none;    
+}
+
+.icon-button-colored
+{
+    -qsc-icon-color: var(--icon-colored);
+    border: none;
+    background: none;    
+}
+
+.icon-button-white
+{
+    -qsc-icon-color: white;
+    border: none;
+    background: none;    
+}
+
+.icon-button-red
+{
+    -qsc-icon-color: red;
+}
+
+
+.mute-button
+{
+    background-color: rgb(97, 242, 145); 
+    color: var(--text-color-off);
+    -qsc-icon-color: var(--icon-color-off);
+    border-color: var(--border-color-on);
+    font-family: 'Montserrat';
+    -qsc-icon: "volume";
+}
+
+.mute-button:value(1) {
+    background-color: rgb(179, 0, 0); 
+    color: var(--text-color-on);
+    border-color: var(--border-color-on);
+    -qsc-icon-color: white;
+    -qsc-icon: "volume-strike";
+}
+
+.subs-pista
+{
+    content: "SUBS PISTA\aON"
+}
+
+.subs-pista:value(1)
+{
+    content: "SUBS PISTA\aOFF"
+}
+
+.power-button-off
+{
+    -qsc-icon-color: white;
+    background-color: darkred;
+}
+
+.power-button-on
+{
+    -qsc-icon-color: white;
+    background-color: green;
+}
+
+.transparent
+{
+    border: none;
+    background: none;
+    font-family: 'Montserrat';  
+}
+
+.on-off-text
+{
+    content: "OFF";
+}
+
+.on-off-text:value(1)
+{
+    content: "ON"
+}
+
+
+
+
+page{
+    /*  to left 
+        to right
+        to top  
+        to bottom
+        to top left
+        to bottom right 
+    */
+    /*background: linear-gradient(to top left,var(--base-var), var(--end-var));*/
+    background-image: url('images/background4.jpg'); 
+}
