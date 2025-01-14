@@ -1,0 +1,1416 @@
+--[[
+    Written by: Matt Summerson
+    Illuminated Integration
+    matt@ii.systems
+
+    Controls for Panasonic Cameras
+        Should work for most models of PTZ cameras
+        Utilizes HTTP communication to cameras for control and image preview
+
+    Changelog:
+        v0.1 Initial build
+        v0.2-0.5 small bugfixes to correct errors
+        v0.6 Adds folders for pins
+
+    To Do:
+      Pin Folders for Position, Speed, Movement, etc Controls - Done 7.5
+      Add Ip Address and Status to Plugin Layout
+      Make Home and Privacy work (saves too!)
+      Page for Setup and status?
+      Picture controls? Saturation, brightness, gain, sharpness, etc
+        On its own page?
+]]
+
+PluginInfo = {
+        Name = "Illuminated Integration~Panasonic PTZ Cameras",
+        Version = '0.6',
+        Id = "b2bfc065-37d8-46dc-b8a0-573a2f6762a8",
+        Description = "QSYS Plugin for PTZ control of most Panasonic PTZ cameras",
+        ShowDebug = true
+}
+
+    local Colors = {
+        White = {255,255,255},
+        OverallGrpbxFill = {250,250,250},
+        GrpbxFill = {239,239,239},
+        Black = {16,16,16},
+        Red = {255,0,0},
+        Green = {0,195,129},
+        Blue = {0,136,196},
+        BlueToo = {25,148,202},
+        Gray = {183,183,183},
+        LiteBlue = {128,195,226},
+        LiteGray = {210,210,210},
+        GrayText = {102,102,102},
+        Yellow = {255,255,0},
+        GrayTextBoxes = {216,216,216},
+        OffYellow = {123,120,62},
+        Sheen = {136,136,130},
+        MellowYellow = {243,219,102},
+
+    }
+
+    function GetPrettyName(props)
+        return "Panasonic PTZ Camera Control v" .. PluginInfo.Version
+    end
+
+    function GetProperties()
+        -- Here for future use if adding models is needed
+        return {
+            {
+                Name = "Preset Count",
+                Type = "integer",
+                Min = 1,
+                Max = 16,
+                Value = 8
+            }
+        }
+    end
+
+    function GetColor(props)
+        -- held here for future block color coordination based on selected model
+        return Colors.LiteBlue
+    end
+
+    function GetControls(props)
+        ctls = {
+            -- IP Address for Camera
+            {
+                Name = "IP",
+                ControlType = "Text",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            -- Camera Status
+            {
+                Name = "Status",
+                ControlType = "Indicator",
+                IndicatorType = "Status",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            -- Preset Buttons
+            {
+                Name = "Preset",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = props['Preset Count'].Value
+            },
+
+            -- Recorded Indicator
+            {
+                Name = "Recorded",
+                ControlType = "Indicator",
+                IndicatorType = "Led",
+                Pinstyle = "Output",
+                Count = 1
+            },
+
+            -- Power Button
+            {
+                Name = "Power",
+                ControlType = "Button",
+                ButtonType = "Toggle",
+                Userpin = true,
+                PinStlye = "Both",
+                Count = 1
+            },
+
+            -- Movement Buttons
+            {
+                Name = "Up",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Arrow Up',
+                PrettyName = 'Movement~Up',
+                Count = 1
+            },
+
+            {
+                Name = "Down",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Arrow Down',
+                PrettyName = 'Movement~Down',
+                Count = 1
+            },
+
+            {
+                Name = "Left",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Arrow Left',
+                PrettyName = 'Movement~Left',
+                Count = 1
+            },
+
+            {
+                Name = "Right",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Arrow Right',
+                PrettyName = 'Movement~Right',
+                Count = 1
+            },
+
+            -- Zoom Buttons
+
+            {
+                Name = "Zin",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Zoom In',
+                PrettyName = 'Movement~Zoom In',
+                Count = 1
+            },
+
+            {
+                Name = "Zout",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Zoom Out',
+                PrettyName = 'Movement~Zoom Out',
+                Count = 1
+            },
+
+            -- Focus Buttons
+
+            {
+                Name = "focusIn",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Plus',
+                PrettyName = 'Movement~Focus In',
+                Count = 1
+            },
+
+            {
+                Name = "focusOut",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = true,
+                PinStyle = "Both",
+                Icon = 'Minus',
+                PrettyName = 'Movement~Focus Out',
+                Count = 1
+            },
+
+            {
+                Name = "AF",
+                ControlType = "Button",
+                ButtonType = "Toggle",
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Movement~Auto Focus',
+                Count = 1
+            },
+
+            -- Movement Speed Controls
+
+            {
+                Name = "PanSpeed",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 1,
+                Max = 49,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Speed~Pan Speed',
+                Count = 1
+            },
+
+            {
+                Name = "TiltSpeed",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 1,
+                Max = 49,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Speed~Tilt Speed',
+                Count = 1
+            },
+
+            {
+                Name = "ZoomSpeed",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 1,
+                Max = 49,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Speed~Zoom Speed',
+                Count = 1
+            },
+
+            {
+                Name = "FocusSpeed",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 1,
+                Max = 49,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Speed~Focus Speed',
+                Count = 1
+            },
+
+            {
+              Name = "SpeedTable",
+              ControlType = 'Text',
+              TextType = 'ComboBox',
+              UserPin = true,
+              PinStyle = "Both",
+              PrettyName = 'Speed~Speed Table',
+              Count = 1
+            },
+
+            {
+              Name = 'PresetSpeed',
+              ControlType = 'Knob',
+              ControlUnit = 'Integer',
+              UserPin = true,
+              PinStyle = 'Both',
+              PrettyName = 'Speed~Preset Speed',
+              Count = 1
+            },
+
+            -- PTZF Position
+            {
+                Name = "PanPosition",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 0,
+                Max = 65535,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Position~Pan Position (Dec)',
+                Count = 1
+            },
+
+            {
+                Name = "TiltPosition",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 0,
+                Max = 65535,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Position~Tilt Position (Dec)',
+                Count = 1
+            },
+
+            {
+                Name = "ZoomPosition",
+                ControlType = "Knob",
+                ControlUnit = "Integer",
+                Min = 1365,
+                Max = 4095,
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Position~Zoom Position (Dec)',
+                Count = 1
+            },
+
+            {
+                Name = "Coordinates",
+                ControlType = "Text",
+                UserPin = true,
+                PinStyle = "Both",
+                PrettyName = 'Position~Coordinates (Hex)',
+                Count = 1
+            },
+
+            -- Camera Orientation
+            {
+                Name = "Orientation",
+                ControlType = "Text",
+                TextType = "ComboBox",
+                Choices = {"Desktop", "Hanging"},
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            -- Home and Privacy buttons
+            {
+                Name = "Home",
+                ControlType = "Button",
+                ButtonType = "Trigger",
+                Icon = "Home",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            {
+                Name = "Save Home",
+                ControlType = "Button",
+                ButtonType = "Trigger",
+                Legend = "Save\nHome",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            {
+                Name = "Privacy",
+                ControlType = "Button",
+                ButtonType = "Trigger",
+                Icon = "Prohibited",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            {
+                Name = "Save Privacy",
+                ControlType = "Button",
+                ButtonType = "Trigger",
+                Legend = "Save\nPriv",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            -- Tally Button
+            {
+                Name = "Tally",
+                ControlType = "Button",
+                ButtonType = "Toggle",
+                UserPin = true,
+                PinStyle = "Both",
+                Count = 1
+            },
+
+            -- Image
+            {
+                Name = "Image Button",
+                ControlType = "Button",
+                ButtonType = "Momentary",
+                UserPin = false,
+                Count = 1
+            }
+        }
+    return ctls
+    end
+
+    function GetPages()
+      local pages = {
+        {name = 'Controls'},
+        {name = 'Setup'}
+      }
+
+      return pages
+    end
+
+    function GetControlLayout(props)
+      
+      if props['page_index'].Value == 1 then
+        local controls = {
+            ['Zout'] = {
+                Position = {73,38},
+                Size = {32,32}                
+            },
+            ['Up'] = {
+                Position = {105,38},
+                Size = {32,32}
+            },
+            ['Zin'] = {
+                Position = {137,38},
+                Size = {32,32}
+            },
+            ['Left'] = {
+                Position = {73,70},
+                Size = {32,32}
+            },
+            ['Down'] = {
+                Position = {105,70},
+                Size = {32,32}
+            },
+            ['Right'] = {
+                Position = {137,70},
+                Size = {32,32}
+            },
+            ['PanPosition'] = {
+                Position = {121,105},
+                Size = {86,16}
+            },
+            ['TiltPosition'] = {
+                Position = {121,121},
+                Size = {86,16}
+            },
+            ['ZoomPosition'] = {
+                Position = {121,137},
+                Size = {86,16}
+            },
+            ['Coordinates'] = {
+                Position = {121,153},
+                Size = {86,16}
+            },
+            ['Home'] = {
+                Position = {329,17},
+                Size = {32,32},
+                Color = {0,159,60}
+            },
+            ['Save Home'] = {
+                Position = {381,17},
+                Size = {32,32},
+                Color = {223,0,36},
+                Legend = "Save Home"
+            },
+            ['Privacy'] = {
+                Position = {329,49},
+                Size = {32,32},
+                Color = {255,255,255}
+            },
+            ['Save Privacy'] = {
+                Position = {381,49},
+                Size = {32,32},
+                Color = {223,0,36},
+                Legend = "Save Privacy"
+            },
+            ['PanSpeed'] = {
+                Position = {329,86},
+                Size = {136,16}
+            },
+            ['TiltSpeed'] = {
+                Position = {329,102},
+                Size = {136,16}
+            },
+            ['ZoomSpeed'] = {
+                Position = {329,118},
+                Size = {136,16}
+            },
+            ['SpeedTable'] = {
+                Position = {329,134},
+                Size = {136,16}
+            },
+            ['PresetSpeed'] = {
+                Position = {329,150},
+                Size = {136,16}
+            },
+            ['Orientation'] = {
+                Position = {329,166},
+                Size = {136,16}
+            },
+            ['AF'] = {
+                Position = {105,201},
+                Size = {36,36},
+                Legend = "AF",
+                FontStyle = "Bold",
+                FontSize = 18
+            },
+            ['focusIn'] = {
+                Position = {153,201},
+                Size = {36,36}
+            },
+            ['focusOut'] = {
+                Position = {189,201},
+                Size = {36,36},
+            },
+            ['FocusSpeed'] = {
+                Position = {329,211},
+                Size = {136,16}
+            },
+            ['Recorded'] = {
+                Position = {451,274},
+                Size = {24,24}
+            },
+        }
+
+        if props['Preset Count'].Value <= 8 then
+            
+            controls['Zout'] = {
+                Position = {61,382},
+                Size = {32,32}
+            }
+            controls['Zin'] = {
+                Position = {420,382},
+                Size = {32,32}
+            }
+            controls['Up'] = {
+                Position = {241,382},
+                Size = {32,32}
+            }
+            controls['Left'] = {
+                Position = {61,480},
+                Size = {32,32}
+            }
+            controls['Right'] = {
+                Position = {421,480},
+                Size = {32,32}
+            }
+            controls['Down'] = {
+                Position = {241,570},
+                Size = {32,32}
+            }
+            controls['Tally'] = {
+              Position = {61,340},
+              Size = {391,16}
+            }
+            controls['Image Button'] = {
+              Position = {61,382},
+              Size = {391,220},
+              ZOrder = 1
+          }
+        else
+
+            controls['Zout'] = {
+                Position = {61,414},
+                Size = {32,32}
+            }
+            controls['Zin'] = {
+                Position = {420,414},
+                Size = {32,32}
+            }
+            controls['Up'] = {
+                Position = {241,414},
+                Size = {32,32}
+            }
+            controls['Left'] = {
+                Position = {61,512},
+                Size = {32,32}
+            }
+            controls['Right'] = {
+                Position = {421,512},
+                Size = {32,32}
+            }
+            controls['Down'] = {
+                Position = {241,602},
+                Size = {32,32}
+            }
+            controls['Tally'] = {
+              Position = {61,372},
+              Size = {391,16}
+            }
+            controls['Image Button'] = {
+              Position = {61,414},
+              Size = {391,220},
+              ZOrder = 1
+          }
+
+        end
+
+        for i = 1,props['Preset Count'].Value do
+            if i <= 8 then
+                y = 266
+                x = 146 + (32 * (i - 1))
+            elseif i > 8 then
+                y = 298
+                x = 146 + (32 * (i - 9))
+            end
+            controls[('Preset %d'):format(i)] = {
+                Position = {x,y},
+                Size = {32,32},
+                Margin = 1,
+                UserPin = true,
+                PinStyle = 'Both',
+                Style = 'Button',
+                PrettyName = ('Preset~%d'):format(i),
+                Legend = ('P%d'):format(i)
+            }
+        end
+
+        local graphics = {
+            {
+              Type = 'GroupBox',
+              Position = {30,12},
+              Size = {450,174},
+              HTextAlign = 'Left',
+              Text = 'Pan/Tilt/Zoom',
+              StrokeWidth = 1,
+              CornerRadius = 8
+            },
+            {
+              Type = 'Label',
+              Position = {43,105},
+              Size = {78,16},
+              Text = "Pan Position",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {43,121},
+              Size = {78,16},
+              Text = "Tilt Position",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {43,137},
+              Size = {78,16},
+              Text = "Zoom Position",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {43,153},
+              Size = {78,16},
+              Text = "Coordinates",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,17},
+              Size = {78,32},
+              Text = "Home",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,49},
+              Size = {78,32},
+              Text = "Privacy",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,86},
+              Size = {78,16},
+              Text = "Pan Speed",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,102},
+              Size = {78,16},
+              Text = "Tilt Speed",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,118},
+              Size = {78,16},
+              Text = "Zoom Speed",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,134},
+              Size = {78,16},
+              Text = "Speed Table",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,150},
+              Size = {78,16},
+              Text = "Preset Speed",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'Label',
+              Position = {251,166},
+              Size = {78,16},
+              Text = "Orientation",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'GroupBox',
+              Position = {30,193},
+              Size = {450,52},
+              HTextAlign = 'Left',
+              Text = 'Focus',
+              StrokeWidth = 1,
+              CornerRadius = 8
+            },
+            {
+              Type = 'Label',
+              Position = {251,211},
+              Size = {78,16},
+              Text = "Focus Speed",
+              HTextAlign = 'Left'
+            },
+
+            {
+              Type = 'Label',
+              Position = {43,277},
+              Size = {62,16},
+              Text = "Preset",
+              HTextAlign = 'Left'
+            },
+            {
+              Type = 'GroupBox',
+              Position = {444,252},
+              Size = {36,52},
+              HTextAlign = 'Center',
+              Text = 'Saved',
+              StrokeWidth = 1,
+              CornerRadius = 8
+            }
+        }
+
+        if props['Preset Count'].Value <=8 then
+          table.insert(graphics,
+          {
+            Type = 'GroupBox',
+            Position = {30,252},
+            Size = {407,52},
+            HTextAlign = 'Left',
+            Text = 'In Camera Presets',
+            StrokeWidth = 1,
+            CornerRadius = 8
+          })
+          table.insert(graphics,
+          {
+            Type = 'Label',
+            Position = {243,324},
+            Size = {27,16},
+            Text = "Tally",
+            HTextAlign = 'Center'
+          })
+          table.insert(graphics,
+          {
+            Type = 'GroupBox',
+            Position = {30,313},
+            Size = {450,312},
+            HTextAlign = 'Left',
+            Text = 'Preview',
+            StrokeWidth = 1,
+            CornerRadius = 8
+          })
+        else
+          table.insert(graphics,
+          {
+            Type = 'GroupBox',
+            Position = {30,252},
+            Size = {407,84},
+            HTextAlign = 'Left',
+            Text = 'In Camera Presets',
+            StrokeWidth = 1,
+            CornerRadius = 8
+          })
+          table.insert(graphics,
+          {
+            Type = 'Label',
+            Position = {243,356},
+            Size = {27,16},
+            Text = "Tally",
+            HTextAlign = 'Center'
+          })
+          table.insert(graphics,
+          {
+            Type = 'GroupBox',
+            Position = {30,345},
+            Size = {450,312},
+            HTextAlign = 'Left',
+            Text = 'Preview',
+            StrokeWidth = 1,
+            CornerRadius = 8
+          })
+        end
+        return controls, graphics
+
+      elseif props['page_index'].Value == 2 then
+        -- Setup items go here
+        -- IP Address
+        -- Status
+        -- 
+      end
+    end
+if(not Controls) then return; end;
+
+--- General Panasonic PTZ Camera control Code ------
+-- Matt Summerson -- matt@illuminated-integration.com
+-- v0.1 03.31.2021
+
+Up = Controls.Up
+Down = Controls.Down
+Left = Controls.Left
+Right = Controls.Right
+In = Controls.Zin
+Out = Controls.Zout
+Fin = Controls.focusIn
+Fout = Controls.focusOut
+AF = Controls.AF
+PanSpeed = Controls.PanSpeed
+TiltSpeed = Controls.TiltSpeed
+ZoomSpeed = Controls.ZoomSpeed
+FocusSpeed = Controls.FocusSpeed
+Param = ''
+Param2 = ''
+Param3 = ''
+Param4 = ''
+
+blank = "{\"DrawChrome\":false}"
+Controls["Image Button"].Legend = blank
+maxsize = 500000
+
+
+-- Timers
+imageTimer = Timer.New()
+--imageTimer:Start(1)
+
+PositionFetch = Timer.New()
+--PositionFetch:Start(10)
+
+-- HTTP Callback function   -- General callback for most commands.  Preset record/recall and image capture use different.
+function done(tbl, code, data, err, headers)
+print(string.format( "HTTP response from '%s': Return Code=%i; Error=%s", tbl.Url, code, err or "None" ) )
+print("Headers:")
+for hName,Val in pairs(headers) do
+print(string.format( "\t%s = %s", hName, Val ) )
+end
+print( "\rHTML Data: "..data )
+end
+
+
+-- HTTP Send Function   -- General send function for most commands.  Preset record/recall and image capture use different.
+function send ()
+  HttpClient.Download { Url = "http://"..IP.."/cgi-bin/aw_ptz?cmd=%23" .. Command .. Param .. Param2 .. Param3 .. Param4 .. "&res=1" , EventHandler = done }
+  print ("http://"..IP.."/cgi-bin/aw_ptz?cmd=%23" .. Command .. Param .. Param2 .. Param3 .. Param4 .. "&res=1")
+  end
+
+
+
+
+-- Initialization function
+
+function initialize()
+  IP = Controls.IP.String
+  Command = ""
+  Param = ""
+  SetCurrentState()
+  if Controls.Power.Boolean then
+    imageTimer:Start(1)
+    PositionFetch:Start(10)
+  else
+    imageTimer:Stop()
+    PositionFetch:Stop()
+    Controls.Status.Value = 0
+    Controls.Status.String = "Powered Off"
+  end
+  Controls["Image Button"].Legend = blank
+end
+
+function SetCurrentState()
+  if Controls.SpeedTable.String == "Slow" then
+    Command = "PST"
+    Param = 0
+  elseif Controls.SpeedTable.String == "Fast" then
+    Command = "PST"
+    Param = 2
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+  
+  
+
+
+end
+
+
+initialize()
+Controls.IP.EventHandler = initialize
+
+-- Speed Table Initialization
+
+speedtable = {1,276,302,328,354,380,405,431,457,483,509,535,560,586,612,638,664,690,715,741,767,793,819,845,870,896,922,948,974,999}
+Controls.SpeedTable.Choices = {"Slow", "Fast"}
+
+
+
+  
+  
+-- Tally Functions
+function Tally(state)
+print(state)
+  if state == 1 then
+    Command = "DA"
+    Param = 1
+  else
+    Command = "DA"
+    Param = 0
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+Controls.Tally.EventHandler = function()
+  if Controls.Tally.Boolean then
+    Tally(1)
+  else Tally(0)
+  end
+end
+
+-- Power Functions
+function power (state)
+  if state == 1 then
+    Command = "O"
+    Param = "f"
+    Param2 = ""
+    Param3 = ""
+    Param4 = ""
+    send()
+  else
+    Command = "O"
+    Param = "n"
+    Param2 = ""
+    Param3 = ""
+    Param4 = ""
+    send()
+  end
+end
+
+Controls.Power.EventHandler = function (ctl)
+  if ctl.Boolean == true then
+    power(0)
+    imageTimer:Start(1)
+    PositionFetch:Start(10)
+  else power(1)
+    imageTimer:Stop()
+    PositionFetch:Stop()
+    Controls.Status.Value = 0
+    Controls.Status.String = "Powered Off"
+    Controls["Image Button"].Legend = blank
+  end
+end
+
+-- Speed Table Functions
+Controls.SpeedTable.EventHandler = function(ctl)
+  if ctl.String == "Slow" then
+    Command = "PST"
+    Param = 0
+  elseif ctl.String == "Fast" then
+    Command = "PST"
+    Param = 2
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+Controls.PresetSpeed.EventHandler = function(ctl)
+  Command = "UPVS"
+  Param = speedtable[ctl.Value]
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+
+-- Movement Functions
+
+Left.EventHandler = function (ctl)
+  Command = "P"
+  if ctl.Boolean == true then
+    Param = string.format('%02i', (50-Controls.PanSpeed.String))
+    Param2 = ""
+    Param3 = ""
+    Param4 = ""
+    send()
+  else
+    Param = "50"
+    Param2 = ""
+    Param3 = ""
+    Param4 = ""
+    send()
+    Timer.CallAfter(queryPosition,0.25)
+    clearPresetButtons()
+  end
+end
+
+Right.EventHandler = function (ctl)
+Command = "P"
+  if ctl.Boolean == true then
+    Param = string.format('%02i', (Controls.PanSpeed.String+50))
+  else
+    Param = "50"
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+  Timer.CallAfter(queryPosition,0.25)
+  clearPresetButtons()
+end
+
+Down.EventHandler = function (ctl)
+Command = "T"
+  if ctl.Boolean == true then
+    Param = string.format('%02i', (50-Controls.TiltSpeed.String))
+  else
+    Param = "50"
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+  Timer.CallAfter(queryPosition,0.25)
+  clearPresetButtons()
+end
+
+Up.EventHandler = function (ctl)
+Command = "T"
+  if ctl.Boolean == true then
+    Param = string.format('%02i', (Controls.TiltSpeed.String+50))
+  else
+    Param = "50"
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+  Timer.CallAfter(queryPosition,0.25)
+  clearPresetButtons()
+end
+
+Out.EventHandler = function (ctl)
+Command = "Z"
+  if ctl.Boolean == true then
+    Param = string.format('%02i', (50-Controls.ZoomSpeed.String))
+  else
+    Param = "50"
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+  Timer.CallAfter(queryPosition,0.25)
+  clearPresetButtons()
+end
+
+In.EventHandler = function (ctl)
+Command = "Z"
+  if ctl.Boolean == true then
+    Param = string.format('%02i', (Controls.ZoomSpeed.String+50))
+  else
+    Param = "50"
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+  Timer.CallAfter(queryPosition,0.25)
+  clearPresetButtons()
+end
+
+-- Focus Functions
+
+AF.EventHandler = function()
+  if AF.Boolean then
+    Command = "D1"
+    Param = 1
+  else
+    Command = "D1"
+    Param = 0
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+Fin.EventHandler = function()
+  Command = "F"
+  if Fin.Boolean then
+    Param = string.format('%02i', Controls.FocusSpeed.String + 50)
+  else 
+  Param = '50'
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+Fout.EventHandler = function()
+  Command = "F"
+  if Fout.Boolean then
+    Param = string.format('%02i', 50 - Controls.FocusSpeed.String)
+  else
+    Param = '50'
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+-- Press and Hold Preset Save and Recall
+
+function sendPreset(command, preset)
+  HttpClient.Download { Url = "http://"..IP.."/cgi-bin/aw_ptz?cmd=%23" .. command .. preset .. "&res=1" , EventHandler = presetDone }
+  if command == "M" then
+    print('recorded preset ' .. preset)
+  else print('recalled preset ' .. preset)
+  end
+end
+
+function presetDone(tbl, code, data, err, headers)
+  if code == 200 then
+    preset = string.sub(data, 2,-1)
+    preset = tonumber(preset)
+    setPresetButton(preset)
+  else  
+  Controls.Status.Value = 1
+  Controls.Status.String = "Preset command failed"
+  end
+end
+
+
+Hold = Timer.New()
+
+for i, v in ipairs(Controls.Preset) do
+  v.EventHandler = function()
+    if v.Boolean then
+      Hold:Start(2)
+      flag = 0
+    else 
+      Hold:Stop()
+      Controls.Recorded.Boolean = false
+      Execute(i)
+    end
+  end
+end
+
+Hold.EventHandler = function()
+  flag = 1
+  Controls.Recorded.Boolean = true
+end
+
+function Execute(preset)
+  if flag == 1 then
+    RecordPreset(preset)
+  elseif flag == 0 then
+    RecallPreset(preset)
+  end
+  Timer.CallAfter(queryPosition,5)
+end
+
+function RecordPreset(i)
+    Command="M"
+    Param=string.format('%02i', (i))
+    Param2 = ""
+    Param3 = ""
+    Param4 = ""
+    sendPreset(Command, Param)
+end
+  
+function RecallPreset(i)
+  Command="R"
+  Param=string.format('%02i', (i))
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+    sendPreset(Command, Param)
+end
+  
+function setPresetButton(preset)
+  for b, v in ipairs(Controls.Preset) do
+    v.Color = Controls.OffColor.String
+  end
+  Controls.Preset[preset].Color = Controls.OnColor.String
+end
+
+function clearPresetButtons()
+  for b, v in ipairs(Controls.Preset) do
+    v.Color = Controls.OffColor.String
+  end
+end  
+  
+  
+-- Image Button Fetch
+
+
+
+imageTimer.EventHandler = function()
+  imageFetch()
+end
+
+
+function imageDone(tbl, code, d, e)                                                -- Http event handler
+  if code == 200 then
+    length = string.len(d)
+    if length > maxsize then
+      Controls.Status.Value = 1
+      Controls.Status.String = ("Image to large. Image should be less than 500KB. Image selected is "..(math.floor((length/1000) * (10^2) + 0.5) / (10^2)).." KB.")
+      Controls["Image Button"].Legend = blank
+    else
+      --print("Image Encoded")
+      Controls["Image Button"].Legend = "{\"DrawChrome\":false,\"IconData\":\""..Qlib.base64_enc(d).."\"}"
+      Controls.Status.Value = 0
+      Controls.Status.String = ((math.floor((length/1000) * (10^2) + 0.5) / (10^2)).." KB Download Complete")
+    end
+  else
+    Controls.Status.Value = 2
+    Controls.Status.String = ("Download failed. Code "..code)
+    Controls["Image Button"].Legend = blank
+  end
+end
+
+function imageFetch()                                   -- Download button handler
+  Controls.Status.Value = 0
+  Controls.Status.String = ("Downloading Image")
+  HttpClient.Download { Url = "http://" .. Controls.IP.String .. "/cgi-bin/camera?resolution=1280&quality=1&page=1533251894398", 
+                        User = "admin",
+                        Password = "Administrator1",
+                        EventHandler = imageDone }
+end
+
+
+
+-- Current Position Fetch
+
+
+function queryPosition(store, preset)
+  Command = "APC"
+  Param = ""
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  sendposition()
+  Command = "AXZ"      
+  Param = ""
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  sendzoom()
+end
+
+
+function sendposition ()
+  HttpClient.Download { Url = "http://"..IP.."/cgi-bin/aw_ptz?cmd=%23"..Command..Param.."&res=1" , EventHandler = doneposition }
+  print ("http://"..IP.."/cgi-bin/aw_ptz?cmd=%23"..Command..Param.."&res=1")
+  end
+  
+  function sendzoom ()
+  HttpClient.Download { Url = "http://"..IP.."/cgi-bin/aw_ptz?cmd=%23"..Command..Param.."&res=1" , EventHandler = donezoom }
+  print ("http://"..IP.."/cgi-bin/aw_ptz?cmd=%23"..Command..Param.."&res=1")
+  end
+   
+  function doneposition(tbl, code, data, err, headers)
+pan_hex = string.sub(data,4,7)
+tilt_hex = string.sub(data,8,11)
+
+Controls.PanPosition.Value = tonumber(pan_hex, 16)
+Controls.TiltPosition.Value = tonumber(tilt_hex, 16)
+
+end
+
+function donezoom(tbl, code, data, err, headers)
+zoom_hex = data:match("axz(.+)")
+
+Controls.ZoomPosition.Value = tonumber(zoom_hex, 16)
+
+Controls.Coordinates.String = pan_hex .. "," .. tilt_hex .. "," .. zoom_hex     -- Always requesting both sets of data so let's only write to the coordinates field once per query instead of two
+end
+
+
+--  Camera Orientation Controls
+orientations = {"Hanging","Desktop"}
+Controls.Orientation.Choices = orientations
+
+Controls.Orientation.EventHandler = function()
+  Command = "INS"
+  if Controls.Orientation.String == "Hanging" then
+    Param = 1
+  elseif Controls.Orientation.String == "Desktop" then
+    Param = 0
+  end
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+
+-- Need to store positions from presets into table for recall.  Need to query current zoom position, determine zoom in or out, decide pan/tilt first or zoom first.
+-- Need to populate Controls.PresetPositions
+-- Need to write color controls for supported items across camera models
+-- Maybe do several models
+
+
+
+
+
+
+function PTmove()
+    Command = "APS"
+    Param = string.format('%s', (string.format('%04X', Controls.PanPosition.Value)))
+    Param2 = string.format('%s', (string.format('%04X', Controls.TiltPosition.Value)))
+    Param3 = string.format('%s', (string.format('%02X',Controls.PresetSpeed.String)))
+    if Controls.SpeedTable.String == "Slow" then
+      Param4 = '0'
+    else
+      Param4 = '2'
+    end
+    send()
+end
+
+function zoomMove()
+  Command = "AXZ"
+  Param = string.format('%s', (string.format('%03X', Controls.ZoomPosition.Value)))
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+function PTMoveCoord(pan,tilt)
+    Command = "APS"
+    Param = pan
+    Param2 = tilt
+    Param3 = string.format('%s', (string.format('%02X',Controls.PresetSpeed.String)))
+    if Controls.SpeedTable.String == "Slow" then
+      Param4 = '0'
+    else
+      Param4 = '2'
+    end
+    send()
+  end
+  
+function ZMoveCoord(zoom)
+  Command = "AXZ"
+  Param = zoom
+  Param2 = ""
+  Param3 = ""
+  Param4 = ""
+  send()
+end
+
+Controls.Coordinates.EventHandler = function(ctl)
+  pan, tilt, zoom = ctl.String:match('(.-),(.-),(.+)')
+  PTMoveCoord(pan,tilt)
+  ZMoveCoord(zoom)
+  Timer.CallAfter(queryPosition,5)
+end
+
+Controls.TiltPosition.EventHandler = function()
+  PTmove()
+end
+
+Controls.PanPosition.EventHandler = function()
+  PTmove()
+end
+
+Controls.ZoomPosition.EventHandler = function()
+  zoomMove()
+end
