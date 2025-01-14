@@ -1,0 +1,820 @@
+-- Fohhn-Net Device Dante Plugin
+-- by Fohhn Audio AG
+-- June 2024
+-- licensed under the MIT License, see LICENSE for more information
+-- Read README.md before use
+
+PluginInfo = {
+  Name = "Fohhn~Fohhn-Net Device Plugin",
+  Version = "0.7",
+  Id = "c75c4471-2479-4e68-b4f6-041db179f26e",
+  Author = "Fohhn",
+  Description = "Plugin for Fohhn-Net Devices"
+}
+
+FOHHN_DEVICES = { 
+  [1] = "MA-4.100",
+  [2] = "MA-4.600",
+  [3] = "MA-2.1200",
+  [4] = "DLI-130",
+  [5] = "DLI-230",
+  [6] = "DLI-330",
+  [7] = "DLI-430",
+  [8] = "DFM-100",
+  [9] = "DFM-110",
+  [10] = "DFM-400",
+  [11] = "DI-2.2000",
+  [12] = "DI-2.4000",
+  [13] = "DI-4.1000",
+  [14] = "DI-4.2000", 
+  [15] = "FV-100",
+  [16] = "FV-200", 
+  [17] = "AM-4.4",
+  [18] = "LX-10 ASX",
+  [19] = "LX-20 ASX",
+  [20] = "LX-60 ASX",
+  [21] = "AS-06 ASX",
+  [22] = "AS-10 ASX",
+  [23] = "AS-22 ASX",
+  [24] = "AAX-2.300", 
+}
+
+NumOutputChannels = 4
+ErrorFlags = {}
+ErrorFlagsDli= { "Fault", "AudioFault", "PilotToneFault" }
+ErrorFlagsDfm= { "Fault", "AudioFault", "PilotToneFault" }
+ErrorFlagsFv= { "Fault", "AudioFault" }
+ErrorFlags2ChAmp = { "Protect1", "Protect2" }
+ErrorFlags4ChAmp = { "Protect1", "Protect2", "Protect3", "Protect4" }
+ErrorFlagsAirea = { "Fault", "AudioFault" }
+
+function Config(props)
+  selectedModel = props["Model"].Value
+  if selectedModel == FOHHN_DEVICES[1] then
+    NumOutputChannels = 4
+    ErrorFlags = ErrorFlags4ChAmp
+  elseif selectedModel == FOHHN_DEVICES[2] then
+    NumOutputChannels = 4
+    ErrorFlags = ErrorFlags4ChAmp
+  elseif selectedModel == FOHHN_DEVICES[3] then
+    NumOutputChannels = 2 
+    ErrorFlags = ErrorFlags2ChAmp
+  elseif selectedModel == FOHHN_DEVICES[4] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDli
+  elseif selectedModel == FOHHN_DEVICES[5] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDli
+  elseif selectedModel == FOHHN_DEVICES[6] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDli
+  elseif selectedModel == FOHHN_DEVICES[7] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDli
+  elseif selectedModel == FOHHN_DEVICES[8] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDfm
+  elseif selectedModel == FOHHN_DEVICES[9] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDfm
+  elseif selectedModel == FOHHN_DEVICES[10] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsDfm
+  elseif selectedModel == FOHHN_DEVICES[11] then
+    NumOutputChannels = 2 
+    ErrorFlags = ErrorFlags2ChAmp
+  elseif selectedModel == FOHHN_DEVICES[12] then
+    NumOutputChannels = 2 
+    ErrorFlags = ErrorFlags2ChAmp
+  elseif selectedModel == FOHHN_DEVICES[13] then
+    NumOutputChannels = 4 
+    ErrorFlags = ErrorFlags4ChAmp
+  elseif selectedModel == FOHHN_DEVICES[14] then
+    NumOutputChannels = 4 
+    ErrorFlags = ErrorFlags4ChAmp
+  elseif selectedModel == FOHHN_DEVICES[15] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsFv
+  elseif selectedModel == FOHHN_DEVICES[16] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsFv
+  elseif selectedModel == FOHHN_DEVICES[17] then
+    NumOutputChannels = 8 
+    ErrorFlags = ErrorFlags4ChAmp
+  elseif selectedModel == FOHHN_DEVICES[18] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsAirea
+  elseif selectedModel == FOHHN_DEVICES[19] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsAirea
+  elseif selectedModel == FOHHN_DEVICES[20] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsAirea
+  elseif selectedModel == FOHHN_DEVICES[21] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsAirea
+  elseif selectedModel == FOHHN_DEVICES[22] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsAirea
+  elseif selectedModel == FOHHN_DEVICES[23] then
+    NumOutputChannels = 1 
+    ErrorFlags = ErrorFlagsAirea
+  elseif selectedModel == FOHHN_DEVICES[24] then
+    NumOutputChannels = 2 
+    ErrorFlags = ErrorFlagsAirea
+  end
+end
+
+
+function GetColor(props) 
+  return {255, 134, 43}
+end
+
+function GetPrettyName(props)
+  return "Fohhn " .. props["Model"].Value .. " Id:" .. props["Fohhn-Net ID"].Value 
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value == false then
+    props["Debug Print"].IsHidden = true
+  end  
+  return props
+end
+
+function GetProperties()
+  local props = {}
+
+  table.insert(props, {
+    Name = "Model",
+    Type = "enum",	
+    Choices = FOHHN_DEVICES,
+    Value = FOHHN_DEVICES[1],
+  })
+
+  table.insert(props, {
+    Name = "Fohhn-Net ID",
+    Type = "integer",
+    Value = 1,
+    Min = 1,
+    Max = 254,	        
+  })
+
+  table.insert(props, {
+    Name = "Debug Print",
+    Type = "enum",
+    Choices = {"None", "Errors", "All"},
+    Value = "None"
+  })
+
+  return props
+end
+
+
+function GetPins(props)
+  local pins = {}
+  table.insert(pins, {
+    Name = "Fohhn-Net Port",
+    Direction = "input",
+    Domain = "serial"
+  })
+  return pins
+end
+
+
+function GetControls(props)
+  local ctrls = {}
+
+
+  Config(props)
+
+  table.insert(ctrls, {
+    Name = "Online",
+    ControlType = "Indicator",
+    IndicatorType = "Led",
+    PinStyle = "Output",
+    UserPin = true,
+    Count = 1
+  })
+
+
+  for k, v in pairs(ErrorFlags) do
+    table.insert(
+    ctrls,
+    {
+      Name = v,
+      ControlType = "Indicator",
+      IndicatorType = "Led",
+      PinStyle = "Output",
+      UserPin = true,
+      Count = 1
+    }
+    )
+  end
+
+  for i = 1,NumOutputChannels do
+    table.insert(ctrls, {
+      Name = "VolumeCh" .. i ,
+      ControlType = "Knob",
+      ControlUnit = "Float",
+      Min = -80.0,
+      Max = 12.0,
+      Units = "dB",
+      PinStyle = "Both",
+      Count = 1,
+      UserPin = true
+    })
+
+    table.insert(ctrls, {
+      Name = "MuteCh" .. i,
+      ControlType = "Button",
+      ButtonType = "Toggle",
+      PinStyle = "Both",
+      Count = 1,
+      UserPin = true
+    })
+  end
+
+
+
+  table.insert(ctrls, {
+    Name = "Standby",
+    ControlType = "Button",
+    ButtonType = "Toggle",
+    PinStyle = "Both",
+    Count = 1,
+    UserPin = true
+  })
+
+  table.insert(ctrls, {
+    Name = "Preset",
+    ControlType = "Text",
+    PinStyle = "Both",
+    Count = 1,
+    UserPin = true
+  })
+
+  table.insert(ctrls, {
+    Name = "PresetName",
+    ControlType = "Indicator",
+    IndicatorType = "Text",
+    PinStyle = "Output",
+    UserPin = true,
+    Count = 1
+  })
+
+  return ctrls
+end
+
+function GetControlLayout(props)
+  local layout = {}
+  local graphics = {}
+
+
+  Config(props)
+
+  table.insert(
+  graphics,
+  {
+    Type = "Text",
+    Text = "Online",
+    Position = {25, 5},
+    Size = {95, 16},
+    FontSize = 14,
+    HTextAlign = "Left"
+  }
+  )
+
+  for k, v in pairs(ErrorFlags) do
+    table.insert(
+    graphics,
+    {
+      Type = "Text",
+      Text = v,
+      Position = {25, 25 + (20 * (k - 1))},
+      Size = {95, 16},
+      FontSize = 14,
+      HTextAlign = "Left"
+    }
+    )
+  end
+
+
+
+  table.insert(graphics, {
+    Type = "Text",
+    Text = "Preset",
+    Position = {200, 10},
+    Size = {50, 16},
+    FontSize = 14,
+    HTextAlign = "Left"
+  })
+
+  for i = 1,NumOutputChannels do
+    table.insert(graphics, {
+      Type = "Text",
+      Text = "CH" .. i,
+      Position = {10 + (50 * (i-1)), 120},
+      Size = {40, 16},
+      FontSize = 14,
+      HTextAlign = "Left"
+    }) 
+  end
+
+
+  layout["Online"] = {
+    PrettyName = "Online",
+    Style = "Led",
+    Position = {5, 5},
+    Size = {16, 16},
+    Color = {0, 255, 0}
+  }
+
+  for k, v in pairs(ErrorFlags) do
+    layout[v] = {
+      PrettyName = v,
+      Style = "Led",
+      Position = {5, 25 + (20 * (k - 1))},
+      Size = {16, 16},
+      OffColor = {63, 0, 0},
+      Color = {255, 0, 0}
+    }
+
+  end
+
+
+  for i = 1,NumOutputChannels do
+    layout["VolumeCh" .. i] = {
+      PrettyName = "VolumeCh" .. i,
+      Style = "Fader",
+      Position = {4 + (50 * (i-1)) , 140},
+      Size = {40, 150}
+    }
+
+    layout["MuteCh" .. i] = {
+      PrettyName = "MuteCh" .. i,
+      Legend = "Mute",
+      Style = "Button",
+      ButtonStyle = "Toggle",
+      Color = {255, 0, 0},
+      Position = {5 + (50 * (i-1)), 290},
+      Size = {40, 24}
+    }
+
+  end
+
+
+  layout["Standby"] = {
+    PrettyName = "Standby",
+    Legend = "Standby",
+    Style = "Button",
+    ButtonStyle = "Toggle",
+    Color = {255, 0, 0},
+    Position = {240, 80},
+    Size = {60, 24}
+  }
+
+  layout["Preset"] = {
+    PrettyName = "Preset",
+    Style = "Text Field",
+    Position = {260, 5},
+    Size = {40, 24}
+  }
+
+  layout["PresetName"] = {
+    PrettyName = "PresetName",
+    Style = "Text Field",
+    Position = {200, 40},
+    Size = {100, 24}
+  }
+
+  return layout, graphics
+end
+
+
+
+DebugPrintErrors = false
+DebugPrintInfo = false
+
+if Controls then
+
+  function debug_info(s)
+    if (DebugPrintInfo) then
+      print(s)    
+    end
+  end
+
+  function debug_error(s)
+    if (DebugPrintErrors) then
+      print(s)    
+    end   
+  end
+
+  DeviceName = Properties["Model"].Value
+  Id = Properties["Fohhn-Net ID"].Value
+  SerialPort = SerialPorts[1] 
+  Config(Properties)
+
+  busy = false
+  wait = false
+
+  DebugPrint = Properties["Debug Print"].Value
+  if DebugPrint == "Errors" then
+    DebugPrintErrors = true
+  elseif DebugPrint == "All" then
+    DebugPrintInfo = true
+    DebugPrintErrors = true
+  end
+
+
+  volume = {}
+  for i = 1,NumOutputChannels do
+    volume[i] = {
+      gain = -80.0,
+      mute = true,
+      update = false,
+      readback = true,
+    }
+  end
+
+  readControls = {
+    update = true,
+    readback = true,
+  }
+
+  standby = {
+    standby = true,
+    update = false,
+    readback = true,
+  }
+
+  preset = {
+    number = 1,
+    name = "",
+    update = false,
+    readback = true,
+  }
+
+  retryErrorFlags = {}
+  for i = 1,8 do
+    retryErrorFlags[i] = 2
+  end
+
+  Controls.Online.Value = false
+
+
+  Controls.Standby.Value = true
+  Controls.Standby.EventHandler = function(source)
+    standby.standby = Controls.Standby.Value
+    standby.update = true
+    sendCommand()
+  end
+
+  Controls.PresetName.String = ""
+  Controls.Preset.String = ""
+  Controls.Preset.EventHandler = function(source)
+    local number = tonumber(Controls.Preset.String)
+    if(number ~= nil) then
+      if number >= 1 and number <= 100 then
+	preset.number = number
+	preset.update = true
+	sendCommand()
+      end
+    end	
+  end
+
+  for i = 1,NumOutputChannels do
+    Controls["VolumeCh" .. i].Value = -80.0
+    Controls["VolumeCh" .. i].EventHandler = function(source)
+      volume[i].gain = Controls["VolumeCh" .. i].Value
+      volume[i].mute = Controls["MuteCh" .. i].Value
+      volume[i].update = true
+      sendCommand()
+    end
+    Controls["MuteCh" .. i].Value = true
+    Controls["MuteCh" .. i].EventHandler = function(source)
+      volume[i].gain = Controls["VolumeCh" .. i].Value
+      volume[i].mute = Controls["MuteCh" .. i].Value
+      volume[i].update = true
+      sendCommand()
+    end
+  end
+
+  pollTimer = Timer.New()
+  timeoutTimer = Timer.New()
+  wait = false
+  busy = false
+  delayed = false  
+  online = false
+  currentData = nil
+
+  pollTimer.EventHandler = function()
+    if not wait then	
+      readControls.update = true	
+      sendCommand()
+    end
+  end
+
+  timeoutTimer.EventHandler = function()
+    timeoutTimer:Stop()
+
+    if not wait then
+      return
+    end
+
+    if currentData ~= nil then
+      currentData.update = true
+    end
+
+    wait = false
+    debug_error("timeout timer")
+    Log.Error("timeout")
+    Controls.Online.Value = false
+
+    online = false
+  end
+
+  function round(x)
+    if(x > 0) then
+      return math.floor(x + 0.5)
+    else
+      return math.ceil(x - 0.5)
+    end
+  end
+
+  function volumeString(id, channel, volume, mute)
+    local gain = round(volume * 10.0)
+    local flags = 1
+    if (mute == 1) then 
+      flags = 0
+    end          
+    return "SET VOL " .. id .. " " .. channel .. " " .. gain .. " " .. flags
+  end
+
+  function standbyString(id, standby)
+    standby = math.floor(standby)    
+    return "SET STANDBY " .. id .. " " .. standby
+  end
+
+  function loadPresetString(id, preset)
+    preset = math.floor(preset)    
+    return "SET PRESET " .. id .. " " .. preset
+  end
+
+  function readControlsString(id)    
+    return "GET STAT " .. id 
+  end
+
+  function readVolumeString(id, channel)    
+    return "GET VOL " .. id .. " " .. channel
+  end
+
+  function readStandbyString(id)        
+    return "GET STANDBY " .. id
+  end
+
+  function readPresetString(id)    
+    return "GET PRESET " .. id 
+  end
+
+  function parseStandby(reply, standbyToggle)
+    if reply == "0" then
+      standbyToggle.Value = false
+    else
+      standbyToggle.Value = true
+    end
+  end
+
+  function parsePreset(reply, presetEdit, presetNameLabel)
+    local splitPos = reply:find(" ")
+    presetEdit.String = tostring(tonumber(string.sub(reply, 1, splitPos)))
+    local name = string.sub(reply, splitPos, string.len(reply))
+    name = string.gsub(name, "%c+", "")
+    name = string.gsub(name, "^%s+", "")
+    name = string.gsub(name, "%s+$", "") 
+    presetNameLabel.String = name
+  end
+
+  function parseControls(reply)
+    local flags = {}
+    for substring in reply:gmatch("%S+") do
+      table.insert(flags, substring)
+    end
+    for k, v in pairs(ErrorFlags) do
+      if flags[k] == "0" then
+	Controls[v].Value = false
+	retryErrorFlags[k] = 2
+      else	  
+	retryErrorFlags[k] = retryErrorFlags[k] - 1
+	if retryErrorFlags[k] < 0 then
+	  retryErrorFlags[k] = 2
+	  Controls[v].Value = true
+	  debug_error(v)
+	  Log.Error(v)	  
+	end
+      end
+    end
+  end
+
+  function parseVolume(reply, volumeFader, muteButton)
+    local values = {}
+    for substring in reply:gmatch("%S+") do
+      table.insert(values, substring)
+    end 
+    volumeFader.Value = tonumber(values[1] / 10.0)
+    if (values[2]  == "1") then
+      muteButton.Value = false
+    else
+      muteButton.Value = true
+    end
+  end
+
+
+  function resetBusyFlag()
+    busy = false
+  end
+
+  function sendCommand()
+    if not delayed then
+      sendCommandTimed()
+    end
+  end
+
+  function 	sendCommandTimed()
+    if wait or busy then
+      if(wait) then
+	debug_info("waiting for reply")		
+      end
+      if(busy)then
+	debug_info("device busy")		
+      end
+      if(online) then
+	delayed = true		  
+	Timer.CallAfter(sendCommandTimed, 0.1)
+      else
+	delayed = false
+      end	  	 
+      return		
+    end
+    delayed = false
+
+    local deviceBusyTime = nil
+    local requestString = nil
+
+    if standby.readback then
+      requestString = readStandbyString(Id)
+      currentData = standby		
+      goto send
+    elseif standby.update then	
+      requestString = standbyString(Id, standby.standby)		
+      currentData = standby		
+      goto send
+    elseif preset.readback then
+      requestString = readPresetString(Id)
+      currentData = preset		
+      goto send
+    elseif preset.update then	
+      requestString = loadPresetString(Id, preset.number)
+      busy = true	
+      deviceBusyTime = 1.2
+      currentData = preset		
+      goto send
+    end
+
+    for i = 1,NumOutputChannels do	
+      if volume[i].readback then
+	requestString = readVolumeString(Id, i)
+	currentData = volume[i]
+	goto send	
+      elseif volume[i].update then	    
+	requestString = volumeString(Id, i, volume[i].gain, volume[i].mute)
+	currentData = volume[i]      
+	goto send
+      end	  
+    end
+
+    if requestString == nil then
+      requestString = readControlsString(Id)
+      currentData = readControls
+    end
+
+
+    ::send::
+    if requestString ~= nil then      
+      if SerialPort.IsOpen then 
+	wait = true
+	debug_info("TX: " .. requestString)
+	currentData.update = false
+	SerialPort:Write(requestString .."\r\n" )             
+	timeoutTimer:Start(15)
+	if deviceBusyTime ~= nil then
+	  Timer.CallAfter(resetBusyFlag, deviceBusyTime)
+	end
+      end
+    end
+  end
+
+  function readbackPending()
+    local pend = false
+    for i = 1,NumOutputChannels do
+      if volume[i].readback then
+	pend = true
+      end
+    end
+    if preset.readback then
+      pend = true
+    end
+    if standby.readback then
+      pend = true
+    end
+    return pend
+  end
+
+  function startReadback()
+    for i = 1,NumOutputChannels do
+      volume[i].readback  = true			
+    end
+    preset.readback = true
+  end
+
+  SerialPort.Data = function()
+    timeoutTimer:Stop()
+    local rx = SerialPort:ReadLine(SerialPorts.EOL.CrLf )  
+    debug_info("RX: " .. rx)
+
+    if(rx == "TIMEOUT")then
+      wait = false
+      online = false
+      Controls.Online.Value = false
+      currentData = nil
+      return
+    else
+      if online == false then
+	debug_info("device (" .. DeviceName .. ", ID " .. Id .. ") is online")
+	Log.Message("device (" .. DeviceName .. ", ID " .. Id .. ") is online")
+      end
+      online = true
+      Controls.Online.Value = true
+    end
+
+    if currentData == readControls then
+      wait = false
+      parseControls(rx)
+    end
+
+    if currentData.readback then
+
+
+      if (currentData == standby) then
+	parseStandby(rx, Controls.Standby)
+      elseif (currentData == preset) then	  
+	parsePreset(rx, Controls.Preset, Controls.PresetName)
+      end
+
+      for i = 1,NumOutputChannels do
+	if  currentData == volume[i] then
+	  parseVolume(rx, Controls["VolumeCh" .. i],Controls["MuteCh" .. i])  
+	end
+      end
+
+      wait = false
+      currentData.readback = false;
+    else
+      if (currentData == preset) then
+	startReadback()
+      end
+      if(rx == "OK")then
+	wait = false
+      end
+    end
+
+    currentData = nil
+    if readbackPending() then
+      sendCommand()
+    end
+  end
+
+  function ConnectionError(port, message)
+    local msg = message or "Timeout"
+    debug_error("Connection Error: " .. msg)
+  end
+
+  function OpenSerialPort()
+    if SerialPort.IsOpen then
+      Disconnect()
+    end
+    SerialPort:Open(9600, 8, "N")
+  end
+
+  function Connected()
+    debug_info("virtual port connected")
+    sendCommand()
+    pollTimer:Start(10)
+  end
+
+  SerialPort.Connected = Connected
+  SerialPort.Error = ConnectionError
+  SerialPort.Closed = ConnectionError
+  SerialPort.Timeout = ConnectionError
+
+  Timer.CallAfter(OpenSerialPort, 1)
+end

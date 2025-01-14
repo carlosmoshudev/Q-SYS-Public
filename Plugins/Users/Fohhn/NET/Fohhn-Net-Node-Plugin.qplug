@@ -1,0 +1,298 @@
+-- Fohhn-Net Node Plugin
+-- by Fohhn Audio AG
+-- June 2024
+-- licensed under the MIT License, see LICENSE for more information
+-- Read README.md before use
+
+PluginInfo = {
+  Name = "Fohhn~Fohhn-Net Node Plugin",
+  Version = "0.8",
+  Id = "eebd446b-b227-4c6d-be30-435850c62485",
+  Author = "Fohhn",
+  Description = "Plugin for Fohhn NA-4, ABX-6 and X-16 Fohhn-Net Output"
+}
+
+FOHHN_DEVICES = { 
+  [1] = "NA-4",
+  [2] = "ABX-6",
+  [3] = "X-16",
+}
+
+DeviceCount = 4
+
+function Config(props)
+  DeviceCount = props["Device count"].Value  
+end
+
+function GetColor(props) 
+  return {255, 134, 43}
+end
+
+function GetPrettyName(props)
+  return "Fohhn " .. props["Model"].Value .. " " ..  props["IP Address"].Value 
+end
+
+function RectifyProperties(props)
+  if props.plugin_show_debug.Value == false then
+    props["Debug Print"].IsHidden = true
+  end  
+  return props
+end
+
+
+function GetProperties()
+  local props = {}
+
+  table.insert(props, {
+    Name = "Model",
+    Type = "enum",	
+    Choices = FOHHN_DEVICES,
+    Value = FOHHN_DEVICES[1],
+  })
+
+  table.insert(props, {
+    Name = "IP Address",
+    Type = "string",
+    Value = "192.168.1.4"
+  })
+
+  table.insert(props, {
+    Name = "Device count",
+    Type = "integer",
+    Value = 4,
+    Min = 1,
+    Max = 20,
+  })
+
+  table.insert(props, {
+    Name = "Debug Print",
+    Type = "enum",
+    Choices = {"None", "Errors", "All"},
+    Value = "None"
+  })
+
+  return props
+end
+
+function GetPins(props)
+  local pins = {}
+
+  Config(props)
+
+  for i = 1,DeviceCount do
+    table.insert(pins, {
+      Name = "Fohhn-Net Port" .. i,
+      Direction = "output",
+      Domain = "serial"
+    })
+
+  end
+  return pins
+end
+
+function GetControls(props)
+  local ctrls = {}
+
+  Config(props)
+
+  table.insert(ctrls, {
+    Name = "Online",
+    ControlType = "Indicator",
+    IndicatorType = "Led",
+    PinStyle = "Output",
+    UserPin = true,
+    Count = 1
+  })
+
+  return ctrls
+end
+
+function GetControlLayout(props)
+  local layout = {}
+  local graphics = {}
+
+  table.insert(
+  graphics,
+  {
+    Type = "Text",
+    Text = "Online",
+    Position = {25, 5},
+    Size = {95, 16},
+    FontSize = 14,
+    HTextAlign = "Left"
+  }
+  )
+
+  layout["Online"] = {
+    PrettyName = "Online",
+    Style = "Led",
+    Position = {5, 5},
+    Size = {16, 16},
+    Color = {0, 255, 0}
+  }
+
+  return layout, graphics
+end
+
+
+DebugPrintErrors = false
+DebugPrintInfo = false
+
+if Controls then
+
+  function debug_info(s)
+    if (DebugPrintInfo) then
+      print(s)    
+    end
+  end
+
+  function debug_error(s)
+    if (DebugPrintErrors) then
+      print(s)    
+    end   
+  end
+
+  DeviceName = Properties["Model"].Value
+  IPAddress = Properties["IP Address"].Value
+  TcpPort = 8374
+  if Properties["Model"].Value== FOHHN_DEVICES[3] then
+    TcpPort = 8375
+  end
+  DeviceCount = Properties["Device count"].Value  
+
+  DebugPrint = Properties["Debug Print"].Value
+  if DebugPrint == "Errors" then
+    DebugPrintErrors = true
+  elseif DebugPrint == "All" then
+    DebugPrintInfo = true
+    DebugPrintErrors = true
+  end
+
+  debug_info("IP Adress: " .. IPAddress .. " Port:" .. TcpPort)
+
+  delayed = false
+  wait = false
+  currentSerialPort = 1
+
+  fohhnNet = {}
+
+  for i = 1,DeviceCount do
+    fohhnNet[i] = {
+      port = SerialServerPorts[i],
+      command = "",
+      update = false,
+    }
+  end
+
+  Tcp = TcpSocket.New()
+  Tcp.ReadTimeout = 0
+  Tcp.WriteTimeout = 2
+  Tcp.ReconnectTimeout = 5
+
+  function TcpConnect()
+    Tcp:Connect(IPAddress, TcpPort)  
+  end
+
+  Tcp.Connected = function()
+    debug_info("tcp connected")
+    wait = false
+    delayed = false
+    Controls.Online.Value = true
+    debug_info("device (" .. DeviceName .. ", IP " .. IPAddress .. ") is online")
+    Log.Message("device (" .. DeviceName .. ", IP " .. IPAddress .. ") is online")
+  end
+
+  Tcp.Closed = function()
+    debug_info("tcp closed")
+    Controls.Online.Value = false
+  end
+
+  Tcp.Error = function()
+    debug_error("tcp error")
+    Log.Error("device is offline")
+    Controls.Online.Value = false
+  end
+
+  Tcp.Timeout = function()
+    debug_info("tcp timeout")
+    Controls.Online.Value = false
+  end
+
+  Tcp.Data = function()
+    local rx = Tcp:ReadLine(TcpSocket.EOL.CrLf)
+    debug_info("RECV: " .. rx)
+    fohhnNet[currentSerialPort].port:Write(rx .. "\r\n")
+    fohhnNet[currentSerialPort].update = false
+    wait = false
+
+    pend = false
+    for i = 1,DeviceCount do
+      if fohhnNet[i].update then
+	pend = true
+      end	
+    end	
+    if pend then
+      tcpSend()
+    end
+  end
+
+  function tcpSend()
+    if not delayed then
+      tcpSendTimed()
+    end
+  end
+
+  function tcpSendTimed()
+    if not Tcp.IsConnected then
+      delayed = false
+      wait = false
+      debug_error("tcp not connected")		
+      return
+    end
+
+    if wait then
+      delayed = true
+      Timer.CallAfter(tcpSendTimed, 0.1)
+      return
+    end
+
+    delayed = false
+
+    local i = currentSerialPort
+    while true 
+      do
+	i = i + 1	  
+	if i > DeviceCount then
+	  i = 1		
+	end
+
+	if fohhnNet[i].update then
+	  currentSerialPort = i		 
+	  wait = true
+	  debug_info("SEND: " .. fohhnNet[i].command)
+	  Tcp:Write(fohhnNet[i].command .. "\r\n")
+	  break		 
+	end	
+
+	if i == currentSerialPort then
+	  break
+	end	  	  	  
+      end	
+
+    end
+
+    for i = 1,DeviceCount do
+      fohhnNet[i].port.OnOpen = function( baudrate, dataBits, reqparity )      
+	fohhnNet[i].port:Event(SerialPorts.Events.Connected)
+      end
+
+      fohhnNet[i].port.Data = function()      
+	fohhnNet[i].command = fohhnNet[i].port:ReadLine(SerialPorts.EOL.CrLf )
+	fohhnNet[i].update = true	  
+	tcpSend()
+      end
+    end
+
+
+    TcpConnect()
+  end
